@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ المحقق العلمي - قضية لغز الغليان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(55, 65, 81, 0.5);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .pulse-effect {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+        @keyframes float-bubble {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+        }
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float-bubble 4s infinite linear;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white relative">
+
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
+        <div class="absolute top-10 left-10 w-96 h-96 bg-cyan-600 rounded-full filter blur-[120px]"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-indigo-600 rounded-full filter blur-[120px]"></div>
+    </div>
+
+    <!-- Main Container -->
+    <main id="app-container" class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 max-w-5xl mx-auto w-full">
+        <!-- Rendered dynamically via JavaScript -->
+    </main>
+
+    <!-- Footer / Credits -->
+    <footer class="relative z-10 text-center py-3 text-xs text-gray-500 border-t border-gray-800/60 bg-gray-950/40">
+        مشروع تعليمي تفاعلي للصف الخامس الابتدائي • وحدة حالات المادة: درس الغليان
+    </footer>
+
+    <script>
+        // --- STREAMING_CHUNK:Initializing Sound Engine (Web Audio API) ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+            playBeep(freq = 440, type = 'sine', duration = 0.1) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) { console.error(e); }
+            }
+            clue() {
+                this.playBeep(523.25, 'triangle', 0.15);
+                setTimeout(() => this.playBeep(659.25, 'triangle', 0.2), 150);
+            }
+            success() {
+                this.playBeep(440, 'sine', 0.1);
+                setTimeout(() => this.playBeep(554.37, 'sine', 0.1), 100);
+                setTimeout(() => this.playBeep(659.25, 'sine', 0.25), 200);
+            }
+            error() {
+                this.playBeep(220, 'sawtooth', 0.2);
+                setTimeout(() => this.playBeep(185, 'sawtooth', 0.3), 150);
+            }
+            victory() {
+                const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.50];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playBeep(n, 'sine', 0.2), i * 100);
+                });
+            }
+        }
+        const sounds = new SoundEngine();
+
+        // --- STREAMING_CHUNK:Defining Question Bank (10 Questions strictly on Boiling Lesson) ---
+        const originalQuestions = [
+            {
+                id: 1,
+                title: "🕵️‍♂️ الدليل الأول",
+                type: "mcq",
+                question: "أثناء تسخين الماء بدأت قطرات البخار تتصاعد، ثم ظهرت فقاعات داخل الماء. ما الذي يدل عليه ظهور الفقاعات مع تصاعد البخار؟",
+                options: [
+                    { id: 'a', text: "تجمد الماء" },
+                    { id: 'b', text: "حدوث الغليان" },
+                    { id: 'c', text: "تكاثف الماء" },
+                    { id: 'd', text: "توقف التسخين" }
+                ],
+                correctOptionId: 'b',
+                explanation: "عند تسخين الماء لدرجة كافية يحدث الغليان، ومن أهم أدلته تصاعد قطرات البخار وتشكل الفقاعات داخل السائل.",
+                visualType: 'heating-pot'
+            },
+            {
+                id: 2,
+                title: "🔬 تحليل صورة",
+                type: "image-analysis",
+                question: "انظر إلى الدليل المصور في المختبر. ما العلامتان اللتان تساعدان المحقق على استنتاج أن الماء يغلي؟",
+                options: [
+                    { id: 'a', text: "الفقاعات والبخار المتصاعد" },
+                    { id: 'b', text: "انخفاض مستوى الماء فقط" },
+                    { id: 'c', text: "تغير شكل الوعاء" },
+                    { id: 'd', text: "اختفاء مصدر الحرارة" }
+                ],
+                correctOptionId: 'a',
+                explanation: "ظهور الفقاعات المتصاعدة وتكاثف قطرات البخار دليل حاسم مرئي على وصول الماء لحالة الغليان.",
+                visualType: 'boiling-evidence'
+            },
+            {
+                id: 3,
+                title: "🌡️ لغز الجزيئات",
+                type: "particles",
+                question: "أي رسم يمثل الجزيئات بعد اكتسابها طاقة حرارية أثناء التسخين في المختبر؟",
+                options: [
+                    { id: 'a', text: "الرسم الأول (متقاربة وتتحرك ببطء)" },
+                    { id: 'b', text: "كلاهما بنفس الطريقة تمامًا" },
+                    { id: 'c', text: "الرسم الثاني (متباعدة وتتحرك بسرعة أكبر)" },
+                    { id: 'd', text: "لا يمكن معرفة ذلك علمياً" }
+                ],
+                correctOptionId: 'c',
+                explanation: "عندما تكتسب الجزيئات طاقة حرارية فإنها تتحرك بسرعة أكبر وتبتعد عن بعضها البعض.",
+                visualType: 'particle-comparison'
+            },
+            {
+                id: 4,
+                title: "📊 ملف البيانات",
+                type: "table",
+                question: "اعرض الجدول بصريًا: الزمن (0د: 22°C | 5د: 43°C | 10د: 77°C | 15د: 100°C | 20د: 100°C). ما الاستنتاج الصحيح من البيانات؟",
+                options: [
+                    { id: 'a', text: "درجة الحرارة تستمر في الارتفاع بلا توقف بعد 100°C" },
+                    { id: 'b', text: "تصل درجة الحرارة إلى 100°C ثم تبقى ثابتة أثناء استمرار الغليان" },
+                    { id: 'c', text: "تنخفض درجة الحرارة بعد 15 دقيقة بشكل مفاجئ" },
+                    { id: 'd', text: "لا علاقة نهائية بين الزمن ودرجة حرارة الماء" }
+                ],
+                correctOptionId: 'b',
+                explanation: "بناءً على بيانات الدرس، أثناء استمرار غليان الماء النقي تبقى درجة حرارته ثابتة عند 100°C.",
+                visualType: 'data-table'
+            },
+            {
+                id: 5,
+                title: "📈 المحقق والرسوم البيانية",
+                type: "graph-choice",
+                question: "أي رسم بياني يمثل نتائج تجربة تسخين الماء النقي حتى الغليان بشكل صحيح (من 22°C إلى 100°C وثبات)؟",
+                options: [
+                    { id: 'a', text: "خط مستقيم هابط نحو الأسفل" },
+                    { id: 'b', text: "خط يرتفع تدريجيًا حتى 100°C ثم يصبح أفقيًا وثابتًا" },
+                    { id: 'c', text: "خط متعرج صاعد هاوٍ باستمرار" },
+                    { id: 'd', text: "خط أفقي ثابت من الدقيقة الأولى للأخيرة" }
+                ],
+                correctOptionId: 'b',
+                explanation: "أفضل تمثيل للبيانات هو الرسم البياني الخطي الذي يرتفع مع الوقت ثم يثبت أفقياً عند 100°C عند وصوله للغليان.",
+                visualType: 'graphs-grid'
+            },
+            {
+                id: 6,
+                title: "⏱️ مقارنة التجربتين",
+                type: "exp-comparison",
+                question: "في التجربة (أ) يبدأ الماء عند 40°C ويصل للغليان عند الدقيقة 8. وفي التجربة (ب) يبدأ عند 30°C ويصل للغليان عند الدقيقة 12. أيهما وصلت أولًا؟",
+                options: [
+                    { id: 'a', text: "التجربة أ وصلت للغليان أولًا في وقت أقصر (الدقيقة 8)" },
+                    { id: 'b', text: "التجربة ب وصلت أولًا" },
+                    { id: 'c', text: "وصلتا إلى الغليان في الوقت نفسه تمامًا" },
+                    { id: 'd', text: "لا يمكن تحديد ذلك علمياً" }
+                ],
+                correctOptionId: 'a',
+                explanation: "التجربة (أ) وصلت للغليان عند الدقيقة 8 بينما التجربة (ب) عند الدقيقة 12، فالأولى أسرع لوصولها في وقت أقصر.",
+                visualType: 'two-experiments'
+            },
+            {
+                id: 7,
+                title: "🧩 ترتيب الأدلة",
+                type: "ordering",
+                question: "رتب الأحداث ترتيبًا منطقيًا من بداية تسخين الماء حتى حدوث الغليان:",
+                items: [
+                    "اكتساب الماء طاقة حرارية من المصدر",
+                    "ترتفع درجة حرارة الماء تدريجيًا",
+                    "يصل الماء إلى درجة الغليان (100°C)",
+                    "تتشكل الفقاعات ويتصاعد بخار الماء"
+                ],
+                correctOrder: [0, 1, 2, 3],
+                explanation: "التسخين يكسب الماء طاقة فترتفع حرارته حتى يغلي، وعندها تتشكل الفقاعات ويتصاعد البخار.",
+                visualType: 'order-steps'
+            },
+            {
+                id: 8,
+                title: "🔗 مطابقة الأدلة",
+                type: "matching",
+                question: "طابق المفاهيم العلمية الصحيحة من القائمة لفك خيوط لغز الغليان:",
+                pairs: [
+                    { left: "درجة غليان الماء النقي", right: "100°C" },
+                    { left: "عند الغليان", right: "تتشكل الفقاعات ويتصاعد البخار" },
+                    { left: "الجزيئات بعد اكتساب طاقة حرارية", right: "تتحرك أسرع وتبتعد عن بعضها" },
+                    { left: "أفضل تمثيل للبيانات الزمنية والحرارية", right: "الرسم البياني الخطي" }
+                ],
+                explanation: "الربط العلمي السليم يوضح خواص الغليان وتغيرات الجزيئات وتمثيلها البياني بدقة.",
+                visualType: 'matching-grid'
+            },
+            {
+                id: 9,
+                title: "🔎 قضية زمن الغليان",
+                type: "scenario",
+                question: "لماذا وصلت التجربة (أ) إلى الغليان في الدقيقة 8 بينما تأخرت التجربة (ب) إلى الدقيقة 12؟",
+                options: [
+                    { id: 'a', text: "لأن الماء في التجربة (أ) لم يتعرض لحرارة كافية" },
+                    { id: 'b', text: "لانختلاف كمية الماء أو الطاقة الحرارية؛ فالتجربة الأسرع يصل ماؤها للغليان في وقت أقصر" },
+                    { id: 'c', text: "لانخفاض درجة غليان الماء النقي في أ عن 100°C" },
+                    { id: 'd', text: "لأن الغليان عملية عشوائية لا تحتاج لطاقة حرارية" }
+                ],
+                correctOptionId: 'b',
+                explanation: "الاختلاف في سرعة الوصول للغليان يعود لكمية الماء المستخدمة أو قوة الطاقة الحرارية المزودة.",
+                visualType: 'scenarios-visual'
+            },
+            {
+                id: 10,
+                title: "🕵️‍♂️ القضية النهائية",
+                type: "final-case",
+                question: "المحقق العلمي وصل للمحطة الأخيرة: وعاء يغلي وميزان حرارة يشير لـ 100°C مع ثبات الخط. ما الاستنتاج الأقوى لحل القضية؟",
+                options: [
+                    { id: 'a', text: "الماء بدأ بالتجمد وتحول لثلج" },
+                    { id: 'b', text: "الماء يغلي، وقد وصلت درجة حرارته إلى 100°C وتبقى ثابتة أثناء استمرار الغليان" },
+                    { id: 'c', text: "الماء يفقد كل طاقته الحرارية فجأة" },
+                    { id: 'd', text: "درجة حرارة الماء تستمر بالارتفاع إلى ما لا نهاية" }
+                ],
+                correctOptionId: 'b',
+                explanation: "هذا هو الاستنتاج النهائي الحاسِم: عند غليان الماء النقي تصل حرارته لـ 100°C وتثبت تماماً رغم استمرار التسخين.",
+                visualType: 'final-conclusion'
+            }
+        ];
+
+        // --- STREAMING_CHUNK:Initializing Application Global State ---
+        let gameState = {
+            screen: 'START',
+            mode: 'solo',
+            playerName: '',
+            teams: [],
+            currentTeamIndex: 0,
+            currentQuestionIndex: 0,
+            score: 0,
+            teamScores: {},
+            correctCount: 0,
+            incorrectCount: 0,
+            cluesFound: 0,
+            userAnswers: [],
+            questions: []
+        };
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initGameRound() {
+            gameState.questions = originalQuestions.map(q => {
+                let cloned = JSON.parse(JSON.stringify(q));
+                if (cloned.options) {
+                    cloned.options = shuffleArray(cloned.options);
+                }
+                if (cloned.pairs) {
+                    let lefts = cloned.pairs.map(p => p.left);
+                    let rights = shuffleArray(cloned.pairs.map(p => p.right));
+                    cloned.shuffledPairs = lefts.map((l, i) => ({ left: l, right: rights[i] }));
+                    cloned.correctPairs = cloned.pairs;
+                }
+                return cloned;
+            });
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.incorrectCount = 0;
+            gameState.cluesFound = 0;
+            gameState.userAnswers = [];
+            if (gameState.mode === 'teams') {
+                gameState.teamScores = {};
+                gameState.teams.forEach(t => gameState.teamScores[t] = 0);
+                gameState.currentTeamIndex = 0;
+            }
+        }
+
+        function render() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = '';
+
+            switch(gameState.screen) {
+                case 'START':
+                    container.innerHTML = renderStartScreen();
+                    break;
+                case 'MODE_SELECTION':
+                    container.innerHTML = renderModeSelectionScreen();
+                    break;
+                case 'PLAYER_SETUP':
+                    container.innerHTML = renderPlayerSetupScreen();
+                    break;
+                case 'TEAM_SETUP':
+                    container.innerHTML = renderTeamSetupScreen();
+                    break;
+                case 'READY':
+                    container.innerHTML = renderReadyScreen();
+                    break;
+                case 'QUESTION':
+                    container.innerHTML = renderQuestionScreen();
+                    break;
+                case 'FEEDBACK':
+                    container.innerHTML = renderFeedbackScreen();
+                    break;
+                case 'FINISHED':
+                    container.innerHTML = renderFinishedScreen();
+                    break;
+                case 'REVIEW':
+                    container.innerHTML = renderReviewScreen();
+                    break;
+            }
+        }
+
+        // --- STREAMING_CHUNK:Rendering Start Screen with Official Identity & Teacher Photo ---
+        function renderStartScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl max-w-2xl w-full text-center border border-cyan-500/35 relative overflow-hidden my-4">
+                    <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/15 rounded-full blur-3xl"></div>
+                    
+                    <!-- Official Header & Omani Khanjar -->
+                    <div class="flex flex-col items-center mb-5">
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="الخنجر العماني" class="w-16 h-16 object-contain mb-2 drop-shadow-md" onerror="this.src='https://placehold.co/100x100/111827/06b6d4?text=Oman'">
+                        <p class="text-xs sm:text-sm font-bold tracking-wide text-cyan-400">سلطنة عمان</p>
+                        <p class="text-xs sm:text-sm text-gray-300">وزارة التعليم</p>
+                        <p class="text-xs sm:text-sm text-gray-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-xs sm:text-sm font-extrabold text-white mt-1">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</p>
+                    </div>
+
+                    <!-- Teacher Photo Card (Proper Aspect Ratio, Full Head/Face/Shoulders visible without cropping) -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 my-4 p-4 bg-gray-900/70 rounded-2xl border border-gray-800 shadow-inner">
+                        <div class="w-32 h-40 sm:w-36 sm:h-44 rounded-2xl overflow-hidden border-2 border-cyan-400 shadow-lg bg-gray-950 flex items-center justify-center">
+                            <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top" onerror="this.src='https://placehold.co/150x200/111827/ffffff?text=Teacher'">
+                        </div>
+                        <div class="text-center sm:text-right">
+                            <h3 class="font-black text-base sm:text-lg text-cyan-300">أ. فيصل الشبلي</h3>
+                            <p class="text-xs text-gray-300">هاتف: 99812126</p>
+                            <p class="text-xs text-cyan-400 font-semibold mt-0.5">Instagram: faalll8</p>
+                            <div class="mt-2 pt-2 border-t border-gray-800/80">
+                                <span class="text-xs text-gray-400">مدير المدرسة:</span>
+                                <span class="text-xs text-white font-bold block">أ. سعود الشيزاوي</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title & Game Intro -->
+                    <div class="my-5">
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/15 text-cyan-300 text-xs font-bold mb-2 border border-cyan-500/30">
+                            🔬 وحدة حالات المادة - الدرس السابع
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">
+                            🕵️‍♂️ المحقق العلمي
+                        </h1>
+                        <h2 class="text-lg sm:text-xl font-bold text-cyan-400 mb-3">
+                            قضية: لغز الغليان
+                        </h2>
+                        <p class="text-gray-300 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+                            مختبر غامض بانتظارك! اكتشف أسرار تحول الماء إلى بخار وحرارة الغليان الثابتة عبر حل الأدلة العلمية.
+                        </p>
+                    </div>
+
+                    <button onclick="sounds.init(); goToScreen('MODE_SELECTION');" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-cyan-600/30 transform hover:-translate-y-0.5 transition-all text-base sm:text-lg">
+                        🚀 ابدأ التحقيق الآن
+                    </button>
+                </div>
+            `;
+        }
+
+        // --- STREAMING_CHUNK:Rendering Mode Selection Screen ---
+        function renderModeSelectionScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl border border-cyan-500/30">
+                    <h2 class="text-2xl font-bold text-white mb-2">اختر وضع التحقيق</h2>
+                    <p class="text-gray-400 text-sm mb-8">هل ستعمل وحدك أم تشكل فريق محققين؟</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <button onclick="selectMode('solo')" class="glass-card p-6 rounded-2xl hover:border-cyan-400 transition-all text-center group cursor-pointer">
+                            <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">👤</div>
+                            <h3 class="font-bold text-lg text-white mb-1">وضع فردي</h3>
+                            <p class="text-xs text-gray-400">تحقيق مستقل باسمك الخاص</p>
+                        </button>
+                        <button onclick="selectMode('teams')" class="glass-card p-6 rounded-2xl hover:border-cyan-400 transition-all text-center group cursor-pointer">
+                            <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">👥</div>
+                            <h3 class="font-bold text-lg text-white mb-1">وضع جماعي</h3>
+                            <p class="text-xs text-gray-400">تناوب الأدوار بين 2 إلى 4 فرق</p>
+                        </button>
+                    </div>
+
+                    <button onclick="goToScreen('START')" class="text-gray-400 hover:text-white text-sm">
+                        ← عودة للقائمة الرئيسية
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectMode(mode) {
+            sounds.playBeep(600, 'sine', 0.1);
+            gameState.mode = mode;
+            if (mode === 'solo') {
+                goToScreen('PLAYER_SETUP');
+            } else {
+                goToScreen('TEAM_SETUP');
+            }
+        }
+
+        // --- STREAMING_CHUNK:Rendering Player Setup Screen ---
+        function renderPlayerSetupScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-cyan-500/30">
+                    <h2 class="text-2xl font-bold text-white mb-2">اسم المحقق</h2>
+                    <p class="text-gray-400 text-sm mb-6">أدخل اسمك لتدوين تقرير التحقيق العلمي</p>
+                    
+                    <input type="text" id="player-name-input" placeholder="مثال: المحقق راشد" value="${gameState.playerName}" class="w-full px-4 py-3 bg-gray-900/80 border border-gray-700 rounded-xl text-white text-center focus:outline-none focus:border-cyan-400 mb-6 text-lg">
+                    
+                    <div class="flex gap-3">
+                        <button onclick="goToScreen('MODE_SELECTION')" class="w-1/2 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl transition-all">
+                            السابق
+                        </button>
+                        <button onclick="savePlayerAndProceed()" class="w-1/2 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30">
+                            متابعة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function savePlayerAndProceed() {
+            const input = document.getElementById('player-name-input');
+            const name = input.value.trim();
+            if (!name) {
+                sounds.error();
+                input.classList.add('border-red-500');
+                return;
+            }
+            sounds.playBeep(700, 'sine', 0.1);
+            gameState.playerName = name;
+            initGameRound();
+            goToScreen('READY');
+        }
+
+        // --- STREAMING_CHUNK:Rendering Team Setup Screen ---
+        function renderTeamSetupScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-cyan-500/30">
+                    <h2 class="text-2xl font-bold text-white mb-2">إعداد فرق التحقيق</h2>
+                    <p class="text-gray-400 text-sm mb-6">اختر عدد الفرق (من 2 إلى 4 فرق)</p>
+                    
+                    <div class="flex justify-center gap-3 mb-6">
+                        <button onclick="setTeamCount(2)" class="px-4 py-2 rounded-xl font-bold ${gameState.teams.length === 2 ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-300'} transition-all">2 فرق</button>
+                        <button onclick="setTeamCount(3)" class="px-4 py-2 rounded-xl font-bold ${gameState.teams.length === 3 ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-300'} transition-all">3 فرق</button>
+                        <button onclick="setTeamCount(4)" class="px-4 py-2 rounded-xl font-bold ${gameState.teams.length === 4 ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-300'} transition-all">4 فرق</button>
+                    </div>
+
+                    <div id="team-inputs-container" class="space-y-3 mb-6 text-right">
+                        ${gameState.teams.map((t, idx) => `
+                            <div>
+                                <label class="text-xs text-gray-400 block mb-1">اسم الفريق ${idx + 1}</label>
+                                <input type="text" id="team-input-${idx}" value="${t}" class="w-full px-4 py-2.5 bg-gray-900/80 border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-400">
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="goToScreen('MODE_SELECTION')" class="w-1/2 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl transition-all">
+                            السابق
+                        </button>
+                        <button onclick="saveTeamsAndProceed()" class="w-1/2 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30">
+                            متابعة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setTeamCount(count) {
+            sounds.playBeep(500, 'sine', 0.08);
+            gameState.teams = [];
+            for(let i=0; i<count; i++) {
+                gameState.teams.push(`فريق المحققين ${i+1}`);
+            }
+            render();
+        }
+
+        if(gameState.teams.length === 0) setTeamCount(2);
+
+        function saveTeamsAndProceed() {
+            let valid = true;
+            for(let i=0; i<gameState.teams.length; i++) {
+                const input = document.getElementById(`team-input-${i}`);
+                if(input && input.value.trim()) {
+                    gameState.teams[i] = input.value.trim();
+                } else {
+                    valid = false;
+                }
+            }
+            if(!valid) {
+                sounds.error();
+                return;
+            }
+            sounds.playBeep(700, 'sine', 0.1);
+            initGameRound();
+            goToScreen('READY');
+        }
+
+        // --- STREAMING_CHUNK:Rendering Ready Screen ---
+        function renderReadyScreen() {
+            const investigatorName = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[0];
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-xl w-full text-center shadow-2xl border border-cyan-500/30 relative overflow-hidden">
+                    <div class="absolute -top-16 -left-16 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+                    
+                    <div class="text-5xl mb-4">🕵️‍♂️🧪</div>
+                    <h2 class="text-2xl font-bold text-white mb-2">تم تجهيز المختبر العلمي</h2>
+                    <p class="text-cyan-400 font-semibold text-lg mb-4">المحقق المسؤول: ${investigatorName}</p>
+                    
+                    <div class="glass-card rounded-2xl p-5 text-right text-sm text-gray-300 space-y-2 mb-6 border border-gray-700">
+                        <p>📌 <strong>طبيعة القضية:</strong> لماذا يغلي الماء؟ وماذا يحدث لدرجة حرارته أثناء الغليان؟</p>
+                        <p>📌 <strong>عدد الأدلة:</strong> 10 أسئلة علمية استنتاجية.</p>
+                        <p>📌 <strong>الدرجات:</strong> 100 نقطة لكل سؤال صحيح (المجموع 1000 نقطة).</p>
+                    </div>
+
+                    <button onclick="sounds.playBeep(800,'sine',0.15); startGameLoop();" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-cyan-600/30 text-lg">
+                        بدء التحقيق والبحث عن الأدلة 🔍
+                    </button>
+                </div>
+            `;
+        }
+
+        function startGameLoop() {
+            gameState.screen = 'QUESTION';
+            gameState.currentQuestionIndex = 0;
+            render();
+        }
+
+        // --- STREAMING_CHUNK:Rendering Question & Lab Workspace Screen ---
+        function renderQuestionScreen() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            const currentInvestigator = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[gameState.currentTeamIndex];
+            
+            return `
+                <div class="w-full max-w-4xl flex flex-col gap-4">
+                    <!-- Top Status Bar -->
+                    <div class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 border border-cyan-500/20">
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-lg text-xs font-bold border border-cyan-500/30">
+                                السؤال ${gameState.currentQuestionIndex + 1} / 10
+                            </span>
+                            <span class="text-sm font-bold text-white">🕵️‍♂️ ${currentInvestigator}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-xs text-gray-300">
+                                ⭐ النقاط: <strong class="text-cyan-400">${gameState.score}</strong> / 1000
+                            </div>
+                            <div class="text-xs text-gray-300">
+                                🔎 الأدلة: <strong class="text-emerald-400">${gameState.cluesFound}</strong> / 10
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Laboratory Workspace -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        <div class="lg:col-span-5 glass-panel rounded-2xl p-5 flex flex-col items-center justify-center min-h-[260px] relative overflow-hidden border border-gray-700">
+                            <div class="absolute top-2 left-3 text-xs text-cyan-400 font-semibold tracking-wider">🔬 شاشة أدلة المختبر</div>
+                            ${renderVisualEvidence(q)}
+                        </div>
+
+                        <div class="lg:col-span-7 glass-panel rounded-2xl p-6 flex flex-col justify-between border border-gray-700">
+                            <div>
+                                <h3 class="text-cyan-400 font-bold text-sm mb-1">${q.title}</h3>
+                                <h4 class="text-white text-base sm:text-lg font-bold leading-relaxed mb-6">
+                                    ${q.question}
+                                </h4>
+                            </div>
+
+                            <div id="options-container" class="space-y-3 mb-4">
+                                ${renderQuestionOptions(q)}
+                            </div>
+
+                            <div id="action-btn-container" class="mt-2">
+                                ${renderActionButtonsIfNeeded(q)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVisualEvidence(q) {
+            switch(q.visualType) {
+                case 'heating-pot':
+                case 'boiling-evidence':
+                    return `
+                        <div class="relative w-full h-48 flex items-center justify-center">
+                            <svg class="w-40 h-40" viewBox="0 0 200 200">
+                                <path d="M60 120 C 60 150, 140 150, 140 120 L 130 80 C 130 75, 70 75, 70 80 Z" fill="#374151" stroke="#4b5563" stroke-width="4"/>
+                                <path d="M50 80 L 150 80" stroke="#9ca3af" stroke-width="4" stroke-linecap="round"/>
+                                <path d="M63 90 C 63 90, 100 100, 137 90 L 135 125 C 135 145, 65 145, 63 125 Z" fill="#0ea5e9" opacity="0.6"/>
+                                <circle cx="90" cy="115" r="6" fill="#ffffff" opacity="0.8"/>
+                                <circle cx="115" cy="105" r="8" fill="#ffffff" opacity="0.9"/>
+                                <circle cx="100" cy="130" r="5" fill="#ffffff" opacity="0.7"/>
+                                <path d="M90 70 Q 85 50, 95 30" stroke="#e0f2fe" stroke-width="3" fill="none" stroke-linecap="round" class="pulse-effect"/>
+                                <path d="M110 75 Q 115 55, 105 35" stroke="#e0f2fe" stroke-width="3" fill="none" stroke-linecap="round" class="pulse-effect"/>
+                                <rect x="95" y="40" width="10" height="70" rx="5" fill="#1f2937" stroke="#9ca3af" stroke-width="2"/>
+                                <circle cx="100" cy="105" r="7" fill="#ef4444"/>
+                                <rect x="98" y="55" width="4" height="48" fill="#ef4444" rx="2"/>
+                            </svg>
+                            <span class="absolute bottom-1 text-[11px] text-cyan-300 bg-gray-900/80 px-2 py-0.5 rounded">درجة الحرارة: 100°C (غليان)</span>
+                        </div>
+                    `;
+                case 'particle-comparison':
+                    return `
+                        <div class="w-full h-48 flex flex-col items-center justify-around">
+                            <div class="text-center">
+                                <span class="text-xs text-gray-400 block mb-1">الحالة الأولى (متقاربة)</span>
+                                <div class="flex gap-2 bg-gray-900/50 p-2 rounded-xl border border-gray-800">
+                                    <div class="w-6 h-6 rounded-full bg-blue-500 animate-pulse"></div>
+                                    <div class="w-6 h-6 rounded-full bg-blue-500 animate-pulse"></div>
+                                    <div class="w-6 h-6 rounded-full bg-blue-500 animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-xs text-cyan-300 block mb-1">الحالة الثانية (متباعدة وتتحرك بسرعة)</span>
+                                <div class="flex gap-6 bg-gray-900/50 p-2 rounded-xl border border-cyan-500/30">
+                                    <div class="w-6 h-6 rounded-full bg-red-500 transform -translate-x-2"></div>
+                                    <div class="w-6 h-6 rounded-full bg-red-500 transform translate-x-2"></div>
+                                    <div class="w-6 h-6 rounded-full bg-red-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'data-table':
+                    return `
+                        <div class="w-full h-48 flex flex-col items-center justify-center">
+                            <table class="w-full text-center text-xs border-collapse">
+                                <tr class="bg-gray-800 text-cyan-300">
+                                    <th class="p-1.5 border border-gray-700">الزمن (د)</th>
+                                    <th class="p-1.5 border border-gray-700">0</th>
+                                    <th class="p-1.5 border border-gray-700">5</th>
+                                    <th class="p-1.5 border border-gray-700">10</th>
+                                    <th class="p-1.5 border border-gray-700">15</th>
+                                    <th class="p-1.5 border border-gray-700">20</th>
+                                </tr>
+                                <tr class="text-gray-200">
+                                    <td class="p-1.5 border border-gray-700 bg-gray-800/50 font-bold">°C</td>
+                                    <td class="p-1.5 border border-gray-700">22</td>
+                                    <td class="p-1.5 border border-gray-700">43</td>
+                                    <td class="p-1.5 border border-gray-700">77</td>
+                                    <td class="p-1.5 border border-gray-700 text-cyan-400 font-bold">100</td>
+                                    <td class="p-1.5 border border-gray-700 text-cyan-400 font-bold">100</td>
+                                </tr>
+                            </table>
+                            <span class="text-[11px] text-gray-400 mt-3">📊 جدول تغير حرارة الماء مع الزمن</span>
+                        </div>
+                    `;
+                default:
+                    return `
+                        <div class="w-full h-48 flex flex-col items-center justify-center relative">
+                            <svg class="w-48 h-36 bg-gray-900/60 rounded-xl p-2 border border-cyan-500/20" viewBox="0 0 200 120">
+                                <line x1="20" y1="100" x2="180" y2="100" stroke="#4b5563" stroke-width="2"/>
+                                <line x1="20" y1="100" x2="20" y2="10" stroke="#4b5563" stroke-width="2"/>
+                                <path d="M20 90 L 70 70 L 110 40 L 150 20 L 180 20" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round"/>
+                                <circle cx="150" cy="20" r="4" fill="#ef4444"/>
+                                <text x="125" y="15" fill="#e2e8f0" font-size="9">100°C ثابت</text>
+                            </svg>
+                            <span class="text-[11px] text-cyan-300 mt-2">📈 مخطط تحليل البيانات والحرارة</span>
+                        </div>
+                    `;
+            }
+        }
+
+        function renderQuestionOptions(q) {
+            if (q.type === 'ordering') {
+                return renderOrderingInterface(q);
+            } else if (q.type === 'matching') {
+                return renderMatchingInterface(q);
+            } else {
+                return q.options.map((opt, i) => `
+                    <button onclick="handleOptionSelect('${opt.id}', '${q.correctOptionId}')" class="w-full text-right p-3.5 rounded-xl glass-card hover:bg-cyan-500/20 hover:border-cyan-400 transition-all text-sm font-semibold flex items-center justify-between group cursor-pointer border border-gray-700/80">
+                        <span class="text-gray-200 group-hover:text-white">${opt.text}</span>
+                        <span class="w-7 h-7 rounded-lg bg-gray-800 text-cyan-400 text-xs flex items-center justify-center font-bold border border-gray-700 group-hover:bg-cyan-500 group-hover:text-white transition-colors">${['أ','ب','ج','د'][i]}</span>
+                    </button>
+                `).join('');
+            }
+        }
+
+        function renderActionButtonsIfNeeded(q) {
+            if (q.type === 'ordering') {
+                return `
+                    <button onclick="submitOrderingAnswer()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30 text-sm">
+                        تأكيد ترتيب الأحداث 📋
+                    </button>
+                `;
+            } else if (q.type === 'matching') {
+                return `
+                    <button onclick="submitMatchingAnswer()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30 text-sm">
+                        تأكيد المطابقة العلمية 🔗
+                    </button>
+                `;
+            }
+            return '';
+        }
+
+        let userOrderSequence = [];
+        function renderOrderingInterface(q) {
+            return `
+                <div class="space-y-2 mb-3">
+                    <p class="text-xs text-gray-400 mb-2">اضغط على البطاقات بالترتيب الصحيح (من 1 إلى 4):</p>
+                    ${q.items.map((item, itemIdx) => {
+                        let selectedRank = userOrderSequence.indexOf(itemIdx);
+                        return `
+                            <div onclick="toggleOrderItem(${itemIdx})" class="p-3 rounded-xl glass-card cursor-pointer flex items-center justify-between border ${selectedRank !== -1 ? 'border-cyan-400 bg-cyan-500/20' : 'border-gray-700'} hover:border-cyan-400 transition-all">
+                                <span class="text-xs text-white font-medium">${item}</span>
+                                <span class="w-6 h-6 rounded-full ${selectedRank !== -1 ? 'bg-cyan-500 text-white' : 'bg-gray-800 text-gray-400'} text-xs font-bold flex items-center justify-center">
+                                    ${selectedRank !== -1 ? selectedRank + 1 : '•'}
+                                </span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function toggleOrderItem(itemIdx) {
+            sounds.playBeep(500, 'sine', 0.05);
+            let idxInSeq = userOrderSequence.indexOf(itemIdx);
+            if (idxInSeq !== -1) {
+                userOrderSequence.splice(idxInSeq, 1);
+            } else {
+                if (userOrderSequence.length < 4) {
+                    userOrderSequence.push(itemIdx);
+                }
+            }
+            render();
+        }
+
+        function submitOrderingAnswer() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            if (userOrderSequence.length < 4) {
+                sounds.error();
+                return;
+            }
+            let isCorrect = true;
+            for (let i = 0; i < 4; i++) {
+                if (userOrderSequence[i] !== q.correctOrder[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            recordAnswerResult(isCorrect, userOrderSequence, q.correctOrder);
+        }
+
+        // --- STREAMING_CHUNK:Matching Question Interactive Logic ---
+        let userMatches = {};
+        let selectedLeftIdx = null;
+
+        function renderMatchingInterface(q) {
+            return `
+                <div class="space-y-3 mb-3">
+                    <p class="text-xs text-gray-400 mb-1">انقر على المفاهيم في اليسار ثم انقر على ما يناسبها في اليمين للمطابقة:</p>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="space-y-2">
+                            <p class="text-cyan-400 font-bold mb-1">المفاهيم:</p>
+                            ${q.shuffledPairs.map((pair, lIdx) => {
+                                let isConnected = userMatches[lIdx] !== undefined;
+                                return `
+                                    <div onclick="selectLeftMatch(${lIdx})" class="p-3 rounded-xl glass-card cursor-pointer border ${selectedLeftIdx === lIdx ? 'border-cyan-400 bg-cyan-500/20 shadow-md' : isConnected ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-gray-700'} hover:border-cyan-400 transition-all font-medium text-gray-200 flex items-center justify-between">
+                                        <span>${pair.left}</span>
+                                        ${isConnected ? '<span class="text-emerald-400 text-xs font-bold">✓ موصول</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-cyan-400 font-bold mb-1">النتائج:</p>
+                            ${q.shuffledPairs.map((pair) => {
+                                let matchedLeftKey = Object.keys(userMatches).find(k => userMatches[k] === pair.right);
+                                let isConnected = matchedLeftKey !== undefined;
+                                return `
+                                    <div onclick="selectRightMatch('${pair.right}')" class="p-3 rounded-xl glass-card cursor-pointer border ${isConnected ? 'border-emerald-500 bg-emerald-500/20 shadow-md' : 'border-gray-700'} hover:border-emerald-400 transition-all font-medium text-gray-200 flex items-center justify-between">
+                                        <span>${pair.right}</span>
+                                        ${isConnected ? '<span class="text-emerald-400 text-xs font-bold">● موصول</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Display Active Connections with Cancel option -->
+                    ${Object.keys(userMatches).length > 0 ? `
+                        <div class="mt-3 p-3 bg-gray-900/80 rounded-xl border border-gray-700 text-xs">
+                            <p class="text-cyan-300 font-bold mb-2">🔗 الاتصالات الحالية (اضغط إلغاء لتعديل الاتصال):</p>
+                            <div class="space-y-1.5">
+                                ${Object.keys(userMatches).map(lIdx => {
+                                    let lText = q.shuffledPairs[lIdx].left;
+                                    let rText = userMatches[lIdx];
+                                    return `
+                                        <div class="flex items-center justify-between bg-gray-800/60 px-3 py-1.5 rounded-lg border border-gray-700/60">
+                                            <span class="text-gray-200">${lText} ⟵⟼ ${rText}</span>
+                                            <button onclick="cancelMatch(${lIdx})" class="text-red-400 hover:text-red-300 font-bold text-xs px-2 py-0.5 bg-red-500/10 rounded border border-red-500/20">إلغاء</button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function selectLeftMatch(lIdx) {
+            sounds.playBeep(400, 'sine', 0.05);
+            selectedLeftIdx = lIdx;
+            render();
+        }
+
+        function selectRightMatch(rightText) {
+            if (selectedLeftIdx === null) {
+                sounds.error();
+                return;
+            }
+            sounds.playBeep(600, 'sine', 0.08);
+            userMatches[selectedLeftIdx] = rightText;
+            selectedLeftIdx = null;
+            render();
+        }
+
+        function cancelMatch(lIdx) {
+            sounds.playBeep(350, 'sine', 0.06);
+            delete userMatches[lIdx];
+            render();
+        }
+
+        function submitMatchingAnswer() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            if (Object.keys(userMatches).length < q.shuffledPairs.length) {
+                sounds.error();
+                return;
+            }
+            let isCorrect = true;
+            q.shuffledPairs.forEach((pair, lIdx) => {
+                let chosenRight = userMatches[lIdx];
+                let originalPair = q.correctPairs.find(p => p.left === pair.left);
+                if (!originalPair || originalPair.right !== chosenRight) {
+                    isCorrect = false;
+                }
+            });
+            recordAnswerResult(isCorrect, userMatches, q.correctPairs);
+        }
+
+        function handleOptionSelect(selectedId, correctId) {
+            const isCorrect = selectedId === correctId;
+            recordAnswerResult(isCorrect, selectedId, correctId);
+        }
+
+        function recordAnswerResult(isCorrect, userAnswer, correctAnswer) {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            
+            gameState.userAnswers.push({
+                question: q.question,
+                isCorrect: isCorrect,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                explanation: q.explanation
+            });
+
+            if (isCorrect) {
+                sounds.success();
+                gameState.score += 100;
+                gameState.correctCount++;
+                gameState.cluesFound++;
+                if (gameState.mode === 'teams') {
+                    const currentTeam = gameState.teams[gameState.currentTeamIndex];
+                    gameState.teamScores[currentTeam] = (gameState.teamScores[currentTeam] || 0) + 100;
+                }
+            } else {
+                sounds.error();
+                gameState.incorrectCount++;
+            }
+
+            gameState.screen = 'FEEDBACK';
+            gameState.lastAnswerCorrect = isCorrect;
+            render();
+        }
+
+        // --- STREAMING_CHUNK:Rendering Feedback Screen ---
+        function renderFeedbackScreen() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            const isCorrect = gameState.lastAnswerCorrect;
+
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl border ${isCorrect ? 'border-emerald-500/40 bg-gray-900/90' : 'border-amber-500/40 bg-gray-900/90'}">
+                    <div class="text-5xl mb-3">${isCorrect ? '🎉' : '🔎'}</div>
+                    <h2 class="text-2xl font-bold ${isCorrect ? 'text-emerald-400' : 'text-amber-400'} mb-2">
+                        ${isCorrect ? 'دليل صحيح!' : 'الدليل لم يكتمل بعد'}
+                    </h2>
+                    
+                    ${isCorrect ? '<p class="text-cyan-400 font-bold mb-4">+100 نقطة مكتسبة</p>' : ''}
+
+                    <div class="glass-card rounded-2xl p-5 text-right mb-6 border border-gray-700/80">
+                        <h4 class="text-xs font-bold text-cyan-400 mb-1">🔬 لماذا؟ (التفسير العلمي):</h4>
+                        <p class="text-gray-200 text-sm leading-relaxed">${q.explanation}</p>
+                    </div>
+
+                    <button onclick="proceedToNextQuestion()" class="w-full py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30 text-base">
+                        متابعة التحقيق ➔
+                    </button>
+                </div>
+            `;
+        }
+
+        function proceedToNextQuestion() {
+            sounds.playBeep(500, 'sine', 0.08);
+            userOrderSequence = [];
+            userMatches = {};
+            selectedLeftIdx = null;
+
+            gameState.currentQuestionIndex++;
+            if (gameState.mode === 'teams') {
+                gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            }
+
+            if (gameState.currentQuestionIndex >= gameState.questions.length) {
+                gameState.screen = 'FINISHED';
+                sounds.victory();
+            } else {
+                gameState.screen = 'QUESTION';
+            }
+            render();
+        }
+
+        // --- STREAMING_CHUNK:Rendering Finished & Review Screens ---
+        function renderFinishedScreen() {
+            const totalQ = gameState.questions.length;
+            const percentage = Math.round((gameState.correctCount / totalQ) * 100);
+            
+            let rankTitle = "";
+            let rankIcon = "";
+            if (percentage >= 90) { rankTitle = "عبقري العلوم"; rankIcon = "🧠"; }
+            else if (percentage >= 80) { rankTitle = "خبير علمي"; rankIcon = "🔬"; }
+            else if (percentage >= 70) { rankTitle = "محقق علمي متميز"; rankIcon = "🕵️‍♂️"; }
+            else if (percentage >= 60) { rankTitle = "مستكشف المعرفة"; rankIcon = "🔎"; }
+            else { rankTitle = "محقق تحت التدريب"; rankIcon = "🌟"; }
+
+            let teamResultsHtml = '';
+            if (gameState.mode === 'teams') {
+                let sortedTeams = [...gameState.teams].sort((a,b) => gameState.teamScores[b] - gameState.teamScores[a]);
+                teamResultsHtml = `
+                    <div class="my-4 p-4 glass-card rounded-2xl border border-gray-700 text-right">
+                        <h4 class="text-xs font-bold text-cyan-400 mb-2">🏆 نتائج الفرق المتنافسة:</h4>
+                        ${sortedTeams.map((t, idx) => `
+                            <div class="flex justify-between items-center text-sm py-1 border-b border-gray-800 last:border-0">
+                                <span class="text-white">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '🎖️'} ${t}</span>
+                                <span class="font-bold text-cyan-400">${gameState.teamScores[t]} نقطة</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="glass-panel rounded-3xl p-8 max-w-xl w-full text-center shadow-2xl border border-cyan-500/30 relative overflow-hidden">
+                    <div class="absolute -top-16 -right-16 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
+                    
+                    <div class="text-5xl mb-2">🔓</div>
+                    <h2 class="text-3xl font-black text-white mb-1">القضية حُلّت بنجاح!</h2>
+                    <p class="text-gray-400 text-sm mb-6">تقرير التحقيق النهائي لدرس الغليان</p>
+
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 rounded-2xl border border-cyan-500/30 mb-6">
+                        <span class="text-2xl">${rankIcon}</span>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-400 block">رتبة المحقق:</span>
+                            <span class="font-bold text-cyan-300 text-base">${rankTitle}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 text-right">
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">المحقق / الفريق</span>
+                            <span class="font-bold text-white text-sm">${gameState.mode === 'solo' ? gameState.playerName : gameState.teams[0]}</span>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">إجمالي النقاط</span>
+                            <span class="font-bold text-cyan-400 text-sm">${gameState.score} / 1000</span>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">نسبة النجاح</span>
+                            <span class="font-bold text-emerald-400 text-sm">${percentage}%</span>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">إجابات صحيحة</span>
+                            <span class="font-bold text-emerald-400 text-sm">${gameState.correctCount}</span>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">إجابات خاطئة</span>
+                            <span class="font-bold text-red-400 text-sm">${gameState.incorrectCount}</span>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border border-gray-700">
+                            <span class="text-xs text-gray-400 block">الأدلة المكتشفة</span>
+                            <span class="font-bold text-cyan-400 text-sm">${gameState.cluesFound} / 10</span>
+                        </div>
+                    </div>
+
+                    ${teamResultsHtml}
+
+                    <p class="text-xs text-gray-400 mb-6">يمكنك إعادة التحقيق ومحاولة اكتشاف الأدلة كلها بشكل كامل!</p>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button onclick="goToScreen('REVIEW')" class="w-full sm:w-1/2 py-3.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold rounded-xl transition-all border border-gray-700">
+                            🔍 مراجعة التحقيق
+                        </button>
+                        <button onclick="restartGame()" class="w-full sm:w-1/2 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-600/30">
+                            🔄 العب من جديد
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-cyan-500/30 my-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">🔍 سجل مراجعة التحقيق والأدلة</h2>
+                        <button onclick="goToScreen('FINISHED')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold">
+                            ← العودة للنتائج
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        ${gameState.userAnswers.map((item, idx) => `
+                            <div class="glass-card p-4 rounded-2xl border ${item.isCorrect ? 'border-emerald-500/30' : 'border-red-500/30'} text-right">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-cyan-400 font-bold">السؤال ${idx + 1}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${item.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                                        ${item.isCorrect ? '✓ صحيح' : '✗ غير صحيح'}
+                                    </span>
+                                </div>
+                                <h3 class="text-sm font-bold text-white mb-2">${item.question}</h3>
+                                <div class="text-xs text-gray-300 bg-gray-900/60 p-3 rounded-xl border border-gray-800">
+                                    <p class="text-cyan-300 font-semibold mb-1">💡 التفسير العلمي والدليل:</p>
+                                    <p>${item.explanation}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button onclick="restartGame()" class="w-full mt-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-xl shadow-lg">
+                        🔄 العب من جديد
+                    </button>
+                </div>
+            `;
+        }
+
+        function goToScreen(screenName) {
+            gameState.screen = screenName;
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restartGame() {
+            sounds.playBeep(600, 'sine', 0.1);
+            gameState.screen = 'START';
+            gameState.playerName = '';
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.incorrectCount = 0;
+            gameState.cluesFound = 0;
+            userOrderSequence = [];
+            userMatches = {};
+            selectedLeftIdx = null;
+            render();
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>

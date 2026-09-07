@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تحدي شحن الهاتف – لماذا يحتوي النبات على أزهار؟</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --neon-blue: #00f2fe;
+            --neon-green: #00ff87;
+            --neon-pink: #ff007f;
+            --neon-yellow: #ffd000;
+            --cyber-dark: #070b14;
+            --cyber-card: rgba(13, 22, 41, 0.85);
+            --border-glow: rgba(0, 242, 254, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--cyber-dark);
+            font-family: 'Cairo', sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(0, 255, 135, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 127, 0.05) 0%, transparent 55%),
+                linear-gradient(180deg, #050811 0%, #0a1122 100%);
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--cyber-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.15), inset 0 0 15px rgba(0, 242, 254, 0.05);
+            border-radius: 28px;
+        }
+
+        /* Ambient animated grid */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Button Glow & Bounce */
+        .cyber-btn {
+            position: relative;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #050811;
+            font-weight: 800;
+            border-radius: 20px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+
+        .cyber-btn:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.7);
+        }
+
+        .cyber-btn:active:not(:disabled) {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .cyber-btn-outline {
+            background: rgba(0, 242, 254, 0.07);
+            border: 2px solid var(--neon-blue);
+            color: #fff;
+            transition: all 0.25s ease;
+        }
+
+        .cyber-btn-outline:hover {
+            background: rgba(0, 242, 254, 0.2);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.35);
+        }
+
+        /* Digital LCD Font */
+        .font-orbitron {
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Battery Glow Animations */
+        .battery-glow {
+            box-shadow: 0 0 15px var(--neon-green), inset 0 0 10px var(--neon-green);
+        }
+
+        @keyframes chargePulse {
+            0% { filter: drop-shadow(0 0 4px #00ff87); }
+            50% { filter: drop-shadow(0 0 20px #00ff87); }
+            100% { filter: drop-shadow(0 0 4px #00ff87); }
+        }
+
+        .charging-active {
+            animation: chargePulse 1.2s infinite ease-in-out;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(5, 8, 17, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f2fe;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen w-full flex flex-col justify-center items-center p-2 sm:p-4 text-slate-100">
+
+    <!-- Cyber Background Grid -->
+    <div class="cyber-grid"></div>
+
+    <!-- Top Floating Toolbar (Sound & Fullscreen) -->
+    <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-50 flex items-center gap-2">
+        <button id="sound-btn" onclick="toggleSound()" title="كتم / تشغيل الصوت" class="w-11 h-11 rounded-2xl glass-panel flex items-center justify-center text-cyan-400 hover:text-cyan-200 hover:scale-110 transition shadow-lg border border-cyan-500/40">
+            <i class="fas fa-volume-up text-lg" id="sound-icon"></i>
+        </button>
+        <button id="fullscreen-btn" onclick="toggleFullscreen()" title="ملء الشاشة" class="w-11 h-11 rounded-2xl glass-panel flex items-center justify-center text-cyan-400 hover:text-cyan-200 hover:scale-110 transition shadow-lg border border-cyan-500/40">
+            <i class="fas fa-expand text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Main Game Container Wrapper (1280x720 aspect scaled) -->
+    <main class="relative z-10 w-full max-w-5xl min-h-[640px] flex flex-col justify-center my-auto">
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 1: SPLASH SCREEN (OFFICIAL OMAN IDENTITY) -->
+        <!-- ======================================================== -->
+        <section id="screen-splash" class="w-full glass-panel p-6 sm:p-8 flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-500">
+            <!-- Background Floral & Energy Accents -->
+            <div class="absolute -top-20 -right-20 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-20 -left-20 w-56 h-56 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Top Center: Official Logo & School Header -->
+            <div class="flex flex-col items-center justify-center space-y-2 mb-4">
+                <div class="w-24 h-24 p-2 rounded-2xl bg-white/5 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/10 mb-2">
+                    <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" 
+                         alt="شعار الخنجر العُماني" 
+                         class="max-w-full max-h-full object-contain filter drop-shadow"
+                         onerror="this.src='https://placehold.co/100x100/0c182b/00f2fe?text=عُمان'">
+                </div>
+                <h2 class="text-sm sm:text-base font-semibold text-cyan-300 leading-tight">سلطنة عُمان</h2>
+                <h3 class="text-xs sm:text-sm font-medium text-slate-300">وزارة التعليم</h3>
+                <h3 class="text-xs sm:text-sm font-medium text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</h3>
+                <h1 class="text-sm sm:text-base font-bold text-amber-300">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</h1>
+            </div>
+
+            <!-- Teacher Official Photo & Profile -->
+            <div class="flex flex-col items-center my-3 bg-gradient-to-b from-white/5 to-white/0 p-4 rounded-3xl border border-cyan-400/20 max-w-md w-full shadow-inner">
+                <div class="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full p-1 bg-gradient-to-tr from-cyan-400 via-emerald-400 to-amber-300 shadow-xl shadow-cyan-500/20 mb-3">
+                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" 
+                         alt="أ. فيصل الشبلي" 
+                         class="w-full h-full rounded-full object-cover object-top border-4 border-[#070b14]"
+                         onerror="this.src='https://placehold.co/200x200/0c182b/00f2fe?text=أ.+فيصل+الشبلي'">
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-white tracking-wide">أ. فيصل الشبلي</h2>
+                <div class="flex items-center gap-4 text-xs sm:text-sm text-cyan-200 mt-1 font-semibold">
+                    <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-emerald-400"></i> 99812126</span>
+                    <span class="flex items-center gap-1.5"><i class="fab fa-instagram text-pink-400"></i> faalll8</span>
+                </div>
+                <div class="mt-2 text-xs sm:text-sm text-amber-200 font-bold bg-amber-400/10 px-4 py-1 rounded-full border border-amber-400/20">
+                    مدير المدرسة: أ. سعود الشيزاوي
+                </div>
+            </div>
+
+            <!-- Game Banner & Source Identity -->
+            <div class="my-2 max-w-lg">
+                <span class="inline-block px-3 py-1 rounded-lg bg-pink-500/20 border border-pink-500/40 text-pink-300 text-xs font-bold mb-2">
+                    <i class="fas fa-leaf ml-1"></i> العلوم • الصف الخامس • الوحدة الثانية (صفحة 2)
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-yellow-300">
+                    تحدي شحن الهاتف: لماذا يحتوي النبات على أزهار؟ ⚡🌸
+                </h1>
+            </div>
+
+            <!-- Start Button -->
+            <button onclick="goToModeSelection()" class="cyber-btn text-lg sm:text-xl py-4 px-10 mt-3 flex items-center gap-3">
+                <i class="fas fa-bolt text-yellow-300"></i>
+                <span>دخول محطة الشحن العلمي</span>
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 2: MODE SELECTION (SOLO / TEAMS & TIMER) -->
+        <!-- ======================================================== -->
+        <section id="screen-mode" class="hidden w-full glass-panel p-6 sm:p-8 flex flex-col items-center text-center transition-all duration-500">
+            <h2 class="text-2xl sm:text-3xl font-black text-cyan-400 mb-1">
+                <i class="fas fa-gamepad ml-2"></i>اختر نظام التحدي
+            </h2>
+            <p class="text-slate-300 text-sm mb-6">حدد هل تلعب بمفردك أم تتنافس الفرق في شحن هواتفها بالطاقة العلمية</p>
+
+            <!-- Mode Switch Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl mb-6">
+                <!-- Solo Mode -->
+                <div id="mode-card-solo" onclick="selectPlayMode('solo')" class="p-5 rounded-3xl border-2 border-cyan-400 bg-cyan-500/10 cursor-pointer hover:bg-cyan-500/20 transition-all flex flex-col items-center relative group">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-400/20 flex items-center justify-center text-cyan-300 text-3xl mb-3 group-hover:scale-110 transition">
+                        <i class="fas fa-user-astronaut"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-1">تحدي فردي (بطل واحد)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">اشحن هاتفك الشخصي واكتشف أسرار أزهار النباتات</p>
+                    <span class="absolute top-3 left-3 text-cyan-400 text-sm font-bold mode-indicator-solo"><i class="fas fa-check-circle"></i></span>
+                </div>
+
+                <!-- Teams Mode -->
+                <div id="mode-card-team" onclick="selectPlayMode('team')" class="p-5 rounded-3xl border-2 border-slate-700 bg-slate-800/40 cursor-pointer hover:bg-slate-800/80 transition-all flex flex-col items-center relative group">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-400/20 flex items-center justify-center text-emerald-300 text-3xl mb-3 group-hover:scale-110 transition">
+                        <i class="fas fa-users-gear"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-1">تحدي الفرق المتنافسة</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">تناوب مع زملائك كفرق شحن في الصف الدراسي</p>
+                    <span class="absolute top-3 left-3 text-emerald-400 text-sm font-bold mode-indicator-team hidden"><i class="fas fa-check-circle"></i></span>
+                </div>
+            </div>
+
+            <!-- Dynamic Config Box based on Mode -->
+            <!-- Solo Player Name Input -->
+            <div id="solo-config-box" class="w-full max-w-md bg-white/5 border border-cyan-400/30 p-4 rounded-2xl mb-6">
+                <label class="block text-right text-xs font-bold text-cyan-300 mb-2">اسم العالم الصغير / الطالبة:</label>
+                <div class="relative">
+                    <i class="fas fa-id-badge absolute right-4 top-3.5 text-cyan-400"></i>
+                    <input id="player-name-input" type="text" value="بطل العلوم" maxlength="25" class="w-full pr-11 pl-4 py-2.5 rounded-xl bg-slate-900/90 border border-cyan-500/40 text-white font-bold focus:outline-none focus:border-cyan-300 text-center">
+                </div>
+            </div>
+
+            <!-- Team Config Box (Hidden initially) -->
+            <div id="team-config-box" class="hidden w-full max-w-lg bg-white/5 border border-emerald-400/30 p-5 rounded-2xl mb-6">
+                <label class="block text-right text-xs font-bold text-emerald-300 mb-2">اختر عدد الفرق المشاركة:</label>
+                <div class="flex justify-center gap-3 mb-4">
+                    <button onclick="setTeamCount(2)" id="btn-team-count-2" class="px-5 py-2 rounded-xl font-black bg-emerald-500 text-slate-900 border border-emerald-400">فريقان (2)</button>
+                    <button onclick="setTeamCount(3)" id="btn-team-count-3" class="px-5 py-2 rounded-xl font-black bg-slate-800 text-white border border-slate-700">3 فرق</button>
+                    <button onclick="setTeamCount(4)" id="btn-team-count-4" class="px-5 py-2 rounded-xl font-black bg-slate-800 text-white border border-slate-700">4 فرق</button>
+                </div>
+                <div id="teams-input-list" class="space-y-2">
+                    <!-- Dynamic team input fields -->
+                </div>
+            </div>
+
+            <!-- Timer Mode Toggle -->
+            <div class="w-full max-w-md bg-white/5 border border-slate-700 p-4 rounded-2xl mb-6 flex flex-col items-center">
+                <span class="text-xs font-bold text-yellow-300 mb-3"><i class="fas fa-stopwatch ml-1"></i>نظام وقت الإجابة:</span>
+                <div class="grid grid-cols-2 gap-3 w-full">
+                    <button id="timer-btn-challenge" onclick="setTimerSetting(true)" class="py-2.5 px-3 rounded-xl border-2 border-yellow-400 bg-yellow-400/20 text-yellow-200 font-bold text-xs flex items-center justify-center gap-2">
+                        <i class="fas fa-bolt"></i> وضع التحدي (مؤقت ذكي)
+                    </button>
+                    <button id="timer-btn-practice" onclick="setTimerSetting(false)" class="py-2.5 px-3 rounded-xl border-2 border-slate-700 bg-slate-800/60 text-slate-300 font-bold text-xs flex items-center justify-center gap-2">
+                        <i class="fas fa-mug-hot"></i> وضع التدريب (بدون وقت)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button onclick="goToScreen('screen-splash')" class="cyber-btn-outline px-6 py-3 rounded-2xl font-bold text-sm">
+                    <i class="fas fa-arrow-right ml-1"></i> رجوع
+                </button>
+                <button onclick="startMainGame()" class="cyber-btn px-10 py-3 text-lg font-black flex items-center gap-2">
+                    <i class="fas fa-play"></i> ابدأ التحدي الآن
+                </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 3: ACTIVE GAMEPLAY STATION -->
+        <!-- ======================================================== -->
+        <section id="screen-game" class="hidden w-full flex flex-col items-center relative">
+            
+            <!-- Top HUD Bar -->
+            <div class="w-full glass-panel p-3 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3 border-cyan-500/40">
+                <!-- Team/Player Display -->
+                <div class="flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-2xl border border-cyan-500/30">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-400/20 flex items-center justify-center text-cyan-300">
+                        <i class="fas fa-bolt" id="current-player-icon"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-cyan-300 font-bold" id="current-player-label">الدور الحالي:</div>
+                        <div class="text-sm font-black text-white" id="current-player-name">بطل العلوم</div>
+                    </div>
+                </div>
+
+                <!-- Futuristic Phone Battery Charger Meter -->
+                <div class="flex-1 min-w-[240px] max-w-sm flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-2xl border border-emerald-500/30 shadow-inner">
+                    <i class="fas fa-mobile-screen text-xl text-emerald-400"></i>
+                    <!-- Battery Shape Outer -->
+                    <div class="flex-1 h-6 bg-slate-950 rounded-lg p-1 border-2 border-emerald-400/80 relative flex items-center">
+                        <div id="battery-fill-bar" class="h-full rounded bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-300 transition-all duration-700 battery-glow" style="width: 0%;"></div>
+                        <!-- Terminal Nib -->
+                        <div class="absolute -left-2 top-1.5 w-1.5 h-3 bg-emerald-400 rounded-l-sm"></div>
+                    </div>
+                    <span id="battery-pct-text" class="font-orbitron font-extrabold text-sm text-emerald-300 min-w-[45px] text-left">0%</span>
+                </div>
+
+                <!-- Score & Timer -->
+                <div class="flex items-center gap-3">
+                    <!-- Score -->
+                    <div class="bg-slate-900/80 px-3.5 py-2 rounded-2xl border border-amber-500/30 flex items-center gap-2">
+                        <i class="fas fa-star text-amber-400"></i>
+                        <span id="score-text" class="font-orbitron font-extrabold text-amber-300 text-sm sm:text-base">0</span>
+                        <span class="text-[10px] text-slate-400">نقطة</span>
+                    </div>
+
+                    <!-- Timer Widget -->
+                    <div id="timer-badge" class="bg-slate-900/80 px-3.5 py-2 rounded-2xl border border-rose-500/40 flex items-center gap-2 min-w-[70px] justify-center">
+                        <i class="fas fa-clock text-rose-400 animate-spin" style="animation-duration: 4s;"></i>
+                        <span id="timer-sec-text" class="font-orbitron font-black text-rose-300 text-sm sm:text-base">30</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card Area -->
+            <div class="w-full glass-panel p-5 sm:p-7 flex flex-col items-center relative min-h-[460px] justify-between">
+                
+                <!-- Question Header & Tag -->
+                <div class="w-full flex items-center justify-between border-b border-cyan-500/20 pb-3 mb-4">
+                    <span id="question-index-tag" class="text-xs font-black px-3 py-1 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
+                        السؤال 1 من 10
+                    </span>
+                    <span id="question-type-tag" class="text-xs font-semibold text-slate-300 flex items-center gap-1">
+                        <i class="fas fa-lightbulb text-yellow-300"></i>
+                        اختيار من متعدد
+                    </span>
+                </div>
+
+                <!-- Question Prompt -->
+                <h3 id="question-text-content" class="text-lg sm:text-2xl font-black text-center text-white leading-relaxed mb-4 max-w-3xl">
+                    جاري تحميل محتوى السؤال...
+                </h3>
+
+                <!-- Question Interactive Dynamic Canvas/Options -->
+                <div id="interactive-content-slot" class="w-full flex flex-col items-center justify-center flex-grow mb-4">
+                    <!-- Dynamically populated per question -->
+                </div>
+
+                <!-- Confirm / Action Button for match & order questions -->
+                <div id="action-btn-wrapper" class="w-full flex justify-center mt-2 hidden">
+                    <button id="confirm-interactive-btn" onclick="submitInteractiveAnswer()" class="cyber-btn px-8 py-3 text-base font-black flex items-center gap-2">
+                        <i class="fas fa-check-double"></i>
+                        <span>تأكيد الإجابة</span>
+                    </button>
+                </div>
+
+                <!-- Mascot Robot (Bottom Corner) -->
+                <div class="absolute bottom-2 left-3 hidden sm:flex items-center gap-2 pointer-events-none opacity-80">
+                    <svg class="w-14 h-14" viewBox="0 0 100 100">
+                        <!-- Robot Head -->
+                        <rect x="25" y="30" width="50" height="42" rx="12" fill="#11192e" stroke="#00f2fe" stroke-width="3"/>
+                        <!-- Antenna -->
+                        <line x1="50" y1="30" x2="50" y2="12" stroke="#00f2fe" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="50" cy="12" r="5" fill="#ffd000" class="animate-ping"/>
+                        <!-- Screen Eyes -->
+                        <circle id="robot-eye-left" cx="40" cy="48" r="6" fill="#00ff87"/>
+                        <circle id="robot-eye-right" cx="60" cy="48" r="6" fill="#00ff87"/>
+                        <!-- Mouth expression -->
+                        <line id="robot-mouth" x1="42" y1="62" x2="58" y2="62" stroke="#00f2fe" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-[10px] text-cyan-300 font-bold bg-slate-900/80 px-2 py-1 rounded-md border border-cyan-400/30">روبوت الشحن 🤖</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- MODAL: FEEDBACK & SCIENTIFIC EXPLANATION (💡 لماذا؟) -->
+        <!-- ======================================================== -->
+        <div id="modal-feedback" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div class="glass-panel max-w-xl w-full p-6 sm:p-8 flex flex-col items-center text-center relative border-2 animate-scaleUp">
+                
+                <!-- Feedback Icon Badge -->
+                <div id="feedback-icon-box" class="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-xl">
+                    <i id="feedback-icon" class="fas fa-check"></i>
+                </div>
+
+                <h3 id="feedback-title" class="text-2xl sm:text-3xl font-black mb-1 text-white">إجابة صحيحة!</h3>
+                <div id="feedback-reward-badge" class="flex items-center gap-3 text-sm font-black mb-4">
+                    <span class="text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
+                        <i class="fas fa-bolt"></i> +10% شحن
+                    </span>
+                    <span class="text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+                        <i class="fas fa-star"></i> +100 نقطة
+                    </span>
+                </div>
+
+                <!-- Explanation Box "💡 لماذا؟" -->
+                <div class="w-full bg-slate-900/90 border-r-4 border-cyan-400 p-4 rounded-xl text-right mb-6 shadow-inner">
+                    <div class="flex items-center gap-2 text-cyan-300 font-bold text-base mb-1">
+                        <i class="fas fa-lightbulb text-yellow-300"></i>
+                        <span>💡 لماذا؟ (التفسير العلمي):</span>
+                    </div>
+                    <p id="feedback-explanation-text" class="text-sm sm:text-base text-slate-200 leading-relaxed font-semibold">
+                        التفسير العلمي يظهر هنا.
+                    </p>
+                </div>
+
+                <!-- Next Button -->
+                <button onclick="proceedToNextQuestion()" class="cyber-btn px-10 py-3.5 text-base font-black flex items-center gap-2">
+                    <span>▶ متابعة الشحن</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 4: FINAL RESULTS & CEREMONY -->
+        <!-- ======================================================== -->
+        <section id="screen-results" class="hidden w-full glass-panel p-6 sm:p-8 flex flex-col items-center text-center">
+            
+            <div class="w-20 h-20 rounded-3xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 text-4xl mb-3 shadow-lg shadow-amber-500/20">
+                <i class="fas fa-trophy"></i>
+            </div>
+
+            <h2 id="final-rank-title" class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-cyan-300 mb-2">
+                عبقري العلوم! ⚡
+            </h2>
+            <p id="final-greeting" class="text-slate-300 text-sm mb-6 font-semibold">
+                أحسنت صنعاً! لقد أتممت جميع أسئلة محطة شحن الطاقة الزهرية.
+            </p>
+
+            <!-- Key Metric Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mb-6">
+                <!-- Battery -->
+                <div class="bg-slate-900/80 border border-emerald-500/40 p-4 rounded-2xl flex flex-col items-center">
+                    <i class="fas fa-battery-full text-emerald-400 text-xl mb-1"></i>
+                    <span id="final-battery-val" class="font-orbitron text-2xl font-black text-emerald-300">100%</span>
+                    <span class="text-xs text-slate-400 font-bold">نسبة الشحن</span>
+                </div>
+
+                <!-- Points -->
+                <div class="bg-slate-900/80 border border-amber-500/40 p-4 rounded-2xl flex flex-col items-center">
+                    <i class="fas fa-star text-amber-400 text-xl mb-1"></i>
+                    <span id="final-score-val" class="font-orbitron text-2xl font-black text-amber-300">1000</span>
+                    <span class="text-xs text-slate-400 font-bold">مجموع النقاط</span>
+                </div>
+
+                <!-- Correct Answers -->
+                <div class="bg-slate-900/80 border border-cyan-500/40 p-4 rounded-2xl flex flex-col items-center">
+                    <i class="fas fa-circle-check text-cyan-400 text-xl mb-1"></i>
+                    <span id="final-correct-val" class="font-orbitron text-2xl font-black text-cyan-300">10/10</span>
+                    <span class="text-xs text-slate-400 font-bold">إجابة صحيحة</span>
+                </div>
+
+                <!-- Time Spent -->
+                <div class="bg-slate-900/80 border border-purple-500/40 p-4 rounded-2xl flex flex-col items-center">
+                    <i class="fas fa-stopwatch text-purple-400 text-xl mb-1"></i>
+                    <span id="final-time-val" class="font-orbitron text-2xl font-black text-purple-300">01:45</span>
+                    <span class="text-xs text-slate-400 font-bold">الزمن المستغرق</span>
+                </div>
+            </div>
+
+            <!-- Team scoreboard if in team mode -->
+            <div id="final-teams-breakdown" class="w-full max-w-xl mb-6 hidden">
+                <h4 class="text-sm font-bold text-cyan-300 mb-2 text-right">نتائج الفرق المتنافسة:</h4>
+                <div id="teams-results-cards" class="space-y-2"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="openReviewModal()" class="cyber-btn-outline px-6 py-3.5 rounded-2xl text-sm font-bold flex items-center gap-2">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>📋 مراجعة الإجابات والتفسير</span>
+                </button>
+                <button onclick="restartGame()" class="cyber-btn px-8 py-3.5 text-base font-black flex items-center gap-2">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>🔄 إعادة اللعبة من البداية</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SCREEN 5: REVIEW MODAL (ALL 10 QUESTIONS) -->
+        <!-- ======================================================== -->
+        <div id="modal-review" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+            <div class="glass-panel w-full max-w-3xl max-h-[90vh] flex flex-col p-5 sm:p-7 relative border-cyan-400/40">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
+                    <h3 class="text-lg sm:text-xl font-black text-cyan-300 flex items-center gap-2">
+                        <i class="fas fa-book-open text-amber-300"></i>
+                        <span>مراجعة إجابات الدرس (الصفحة 2)</span>
+                    </h3>
+                    <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white text-xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Scrollable Review List -->
+                <div id="review-cards-scroll" class="overflow-y-auto space-y-4 pr-1 pl-2 text-right">
+                    <!-- Injected by JavaScript -->
+                </div>
+
+                <!-- Footer Summary of Concepts to Review -->
+                <div class="mt-4 pt-3 border-t border-cyan-500/20 text-center">
+                    <button onclick="closeReviewModal()" class="cyber-btn px-8 py-2.5 text-sm font-bold">
+                        إغلاق المراجعة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* ======================================================== */
+        /* 1. SOUND SYNTHESIZER (WEB AUDIO API - NO EXTERNAL FILES) */
+        /* ======================================================== */
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up text-lg';
+                playCorrectTone();
+            } else {
+                icon.className = 'fas fa-volume-mute text-lg text-rose-400';
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Web Audio Synthesizer Beeps
+        function playTone(freq, type = 'sine', duration = 0.15, startTime = 0) {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime + startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + startTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + startTime);
+                osc.stop(audioCtx.currentTime + startTime + duration);
+            } catch (e) {}
+        }
+
+        function playCorrectTone() {
+            playTone(523.25, 'triangle', 0.1, 0);     // C5
+            playTone(659.25, 'triangle', 0.15, 0.08); // E5
+            playTone(783.99, 'triangle', 0.25, 0.16); // G5
+        }
+
+        function playWrongTone() {
+            playTone(220, 'sawtooth', 0.2, 0);       // A3
+            playTone(185, 'sawtooth', 0.28, 0.15);   // F#3
+        }
+
+        function playClickTone() {
+            playTone(800, 'sine', 0.05, 0);
+        }
+
+        function playCelebrationTone() {
+            if (!soundEnabled) return;
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((freq, idx) => {
+                playTone(freq, 'triangle', 0.3, idx * 0.12);
+            });
+        }
+
+        /* ======================================================== */
+        /* 2. THE 10 STRICT QUESTIONS ACCORDING TO PAGE 2           */
+        /* ======================================================== */
+        const QUESTIONS = [
+            {
+                id: 1,
+                type: 'mcq',
+                typeName: 'اختيار من متعدد',
+                timeAllowed: 30,
+                text: 'ما الوظيفة الأساسية للأزهار؟',
+                correctKey: 'A',
+                options: [
+                    { key: 'A', text: 'أ) التكاثر' },
+                    { key: 'B', text: 'ب) إنتاج الماء' },
+                    { key: 'C', text: 'ج) منع تكوين البذور' },
+                    { key: 'D', text: 'د) منع نمو النبات' }
+                ],
+                explanation: 'تؤدي الأزهار في النبات الوظيفة الأساسية نفسها دائمًا وهي التكاثر.'
+            },
+            {
+                id: 2,
+                type: 'true_false',
+                typeName: 'صح أم خطأ',
+                timeAllowed: 30,
+                text: 'جميع النباتات تحتوي على أزهار.',
+                correctKey: 'F', // False
+                options: [
+                    { key: 'T', text: '✔ عبارة صحيحة' },
+                    { key: 'F', text: '✖ عبارة خاطئة' }
+                ],
+                explanation: 'ليست جميع النباتات تحتوي على أزهار كما ورد صراحة في الصفحة 2 من الملخص.'
+            },
+            {
+                id: 3,
+                type: 'graph_mcq',
+                typeName: 'تحليل الرسم البياني 📊',
+                timeAllowed: 40,
+                text: 'أي لون من الأزهار كان الأكثر انتشارًا في حديقة ليلى وفق الرسم البياني؟',
+                correctKey: 'C',
+                options: [
+                    { key: 'A', text: 'أ) الأصفر' },
+                    { key: 'B', text: 'ب) الوردي' },
+                    { key: 'C', text: 'ج) الأبيض' },
+                    { key: 'D', text: 'د) الأزرق' }
+                ],
+                showGraph: true,
+                explanation: 'يوضح الرسم البياني أن عدد الأزهار البيضاء هو الأكبر بين جميع الألوان، وعددها 8 أزهار.'
+            },
+            {
+                id: 4,
+                type: 'graph_mcq',
+                typeName: 'قراءة الرسم البياني 📊',
+                timeAllowed: 40,
+                text: 'كم زهرة صفراء جمعت ليلى من الحديقة؟',
+                correctKey: 'D',
+                options: [
+                    { key: 'A', text: 'أ) 8 أزهار' },
+                    { key: 'B', text: 'ب) 5 أزهار' },
+                    { key: 'C', text: 'ج) زهرتان (2)' },
+                    { key: 'D', text: 'د) 7 أزهار' }
+                ],
+                showGraph: true,
+                explanation: 'عند قراءة قيمة عمود الأزهار الصفراء على الرسم البياني نجد أنها 7 زهرات.'
+            },
+            {
+                id: 5,
+                type: 'match',
+                typeName: 'توصيل بالنقر 🧩',
+                timeAllowed: 40,
+                text: 'وصل كل لون من أزهار حديقة ليلى بعددها الصحيح وفق الرسم البياني:',
+                showGraph: true,
+                pairs: [
+                    { id: 'p1', left: 'الأبيض', right: '8' },
+                    { id: 'p2', left: 'الأصفر', right: '7' },
+                    { id: 'p3', left: 'الوردي', right: '2' },
+                    { id: 'p4', left: 'الأزرق', right: '1' }
+                ],
+                explanation: 'وفق بيانات الرسم البياني بالصفحة 2: الأبيض = 8، الأصفر = 7، الوردي = 2، الأزرق = 1.'
+            },
+            {
+                id: 6,
+                type: 'order',
+                typeName: 'ترتيب المراحل 🔄',
+                timeAllowed: 40,
+                text: 'رتب مراحل تكوين نبات جديد بالترتيب الصحيح الوارد في الدرس (انقر لاختيار الترتيب):',
+                correctOrder: ['الزهرة', 'الثمرة', 'البذور', 'نبات جديد'],
+                items: [
+                    { name: '🌱 البذور', key: 'البذور' },
+                    { name: '🌸 الزهرة', key: 'الزهرة' },
+                    { name: '🍎 الثمرة', key: 'الثمرة' },
+                    { name: '🌿 نبات جديد', key: 'نبات جديد' }
+                ],
+                explanation: 'تسلسل تكوين نبات جديد: الزهرة تتحول إلى ثمرة، وبداخلها البذور، ثم تنمو البذور وتتحول إلى نبات جديد.'
+            },
+            {
+                id: 7,
+                type: 'mcq',
+                typeName: 'موقف علمي واقعي 🧐',
+                timeAllowed: 30,
+                text: 'قال طالب: «إذا كانت الزهرة كبيرة وذات ألوان زاهية ورائحة جميلة، فإن وظيفتها تختلف عن زهرة صغيرة بلا رائحة.» هل كلامه صحيح؟',
+                correctKey: 'D',
+                options: [
+                    { key: 'A', text: 'أ) نعم، لأن حجم الزهرة يحدد وظيفتها' },
+                    { key: 'B', text: 'ب) نعم، لأن الرائحة تحدد وظيفة الزهرة' },
+                    { key: 'C', text: 'ج) نعم، لأن اللون يحدد وظيفة الزهرة' },
+                    { key: 'D', text: 'د) لا، فالأزهار تؤدي الوظيفة نفسها وهي التكاثر' }
+                ],
+                explanation: 'مهما كانت الزهرة صغيرة أو كبيرة، زاهية أو بدون ألوان زاهية، برائحة أو بدون رائحة؛ فإنها تؤدي جميعًا نفس الوظيفة وهي التكاثر.'
+            },
+            {
+                id: 8,
+                type: 'graph_mcq',
+                typeName: 'سؤال بصري مقارن 📊',
+                timeAllowed: 40,
+                text: 'بالنظر إلى أعمدة الرسم البياني، أي عمود يمثل أقل عدد من الأزهار؟',
+                correctKey: 'B',
+                options: [
+                    { key: 'A', text: 'أ) الأزهار البيضاء' },
+                    { key: 'B', text: 'ب) الأزهار الزرقاء' },
+                    { key: 'C', text: 'ج) الأزهار الصفراء' },
+                    { key: 'D', text: 'د) الأزهار الوردية' }
+                ],
+                showGraph: true,
+                explanation: 'الأزهار الزرقاء هي الأقل انتشارًا في الحديقة ويمثلها أقصر عمود وعددها زهرة واحدة (1).'
+            },
+            {
+                id: 9,
+                type: 'mcq',
+                typeName: 'استنتاج علمي 🌿',
+                timeAllowed: 30,
+                text: 'تخيل أن ليلى قامت بقطع جميع أزهار الحديقة، ماذا تتوقع أن يحدث؟',
+                correctKey: 'C',
+                options: [
+                    { key: 'A', text: 'أ) يتم إنتاج عدد أكبر من الثمار' },
+                    { key: 'B', text: 'ب) تتكون البذور مباشرة دون الحاجة لعملية التكاثر' },
+                    { key: 'C', text: 'ج) لن تتم عملية التكاثر ولن يتم إنتاج الثمار' },
+                    { key: 'D', text: 'د) تتحول جميع الأوراق الخضراء إلى أزهار' }
+                ],
+                explanation: 'لأن الأزهار هي المسؤولة عن التكاثر وتكوين الثمار، فإن قطعها يعني أنه لن تتم عملية التكاثر ولن يتم إنتاج الثمار.'
+            },
+            {
+                id: 10,
+                type: 'final_challenge',
+                typeName: 'التحدي النهائي الشامل 🏆',
+                timeAllowed: 40,
+                text: 'تأمل المخطط التفاعلي لدورة الأزهار، ثم اختر العبارة التي تلخص فكرة الدرس بدقة علمية:',
+                correctKey: 'C',
+                options: [
+                    { key: 'A', text: 'أ) وظيفة الأزهار هي إنتاج الماء فقط للنبات' },
+                    { key: 'B', text: 'ب) جميع النباتات في الطبيعة تحتوي دائمًا على أزهار' },
+                    { key: 'C', text: 'ج) تساعد الأزهار النباتات على التكاثر وتكوين نبات جديد من خلال تكوين الثمار والبذور' },
+                    { key: 'D', text: 'د) لا توجد أي علاقة بين الأزهار وبين تكوين البذور' }
+                ],
+                explanation: 'الملخص الشامل للدرس: تؤدي الأزهار وظيفة التكاثر حيث تتحول إلى ثمار بداخلها بذور تنمو لنبات جديد يكون أزهارًا بدوره.'
+            }
+        ];
+
+        /* ======================================================== */
+        /* 3. GAME STATE MANAGEMENT                                 */
+        /* ======================================================== */
+        const GameState = {
+            currentScreen: 'screen-splash',
+            playMode: 'solo', // 'solo' or 'team'
+            teamCount: 2,
+            teams: [
+                { name: 'فريق الأبطال', score: 0, battery: 0, correct: 0 },
+                { name: 'فريق الرواد', score: 0, battery: 0, correct: 0 }
+            ],
+            currentTeamIndex: 0,
+            playerName: 'بطل العلوم',
+            isTimerEnabled: true,
+            currentQuestionIndex: 0,
+            score: 0,
+            batteryPercent: 0,
+            timerRemaining: 30,
+            timerInterval: null,
+            timerPaused: false,
+            userAnswersLog: [], // Store results for review
+            startTime: null,
+            totalSecondsElapsed: 0,
+            // Interactive helpers
+            selectedLeftMatch: null,
+            matchesFormed: {}, // { leftId: rightVal }
+            orderedKeysList: []
+        };
+
+        function goToScreen(screenId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.remove('hidden');
+                GameState.currentScreen = screenId;
+            }
+        }
+
+        function goToModeSelection() {
+            playClickTone();
+            renderTeamInputs();
+            goToScreen('screen-mode');
+        }
+
+        function selectPlayMode(mode) {
+            playClickTone();
+            GameState.playMode = mode;
+            const soloCard = document.getElementById('mode-card-solo');
+            const teamCard = document.getElementById('mode-card-team');
+            const soloBox = document.getElementById('solo-config-box');
+            const teamBox = document.getElementById('team-config-box');
+            const soloInd = document.querySelector('.mode-indicator-solo');
+            const teamInd = document.querySelector('.mode-indicator-team');
+
+            if (mode === 'solo') {
+                soloCard.className = "p-5 rounded-3xl border-2 border-cyan-400 bg-cyan-500/10 cursor-pointer hover:bg-cyan-500/20 transition-all flex flex-col items-center relative group";
+                teamCard.className = "p-5 rounded-3xl border-2 border-slate-700 bg-slate-800/40 cursor-pointer hover:bg-slate-800/80 transition-all flex flex-col items-center relative group";
+                soloBox.classList.remove('hidden');
+                teamBox.classList.add('hidden');
+                soloInd.classList.remove('hidden');
+                teamInd.classList.add('hidden');
+            } else {
+                teamCard.className = "p-5 rounded-3xl border-2 border-emerald-400 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 transition-all flex flex-col items-center relative group";
+                soloCard.className = "p-5 rounded-3xl border-2 border-slate-700 bg-slate-800/40 cursor-pointer hover:bg-slate-800/80 transition-all flex flex-col items-center relative group";
+                soloBox.classList.add('hidden');
+                teamBox.classList.remove('hidden');
+                soloInd.classList.add('hidden');
+                teamInd.classList.remove('hidden');
+                renderTeamInputs();
+            }
+        }
+
+        function setTeamCount(count) {
+            playClickTone();
+            GameState.teamCount = count;
+            [2, 3, 4].forEach(n => {
+                const btn = document.getElementById(`btn-team-count-${n}`);
+                if (btn) {
+                    if (n === count) {
+                        btn.className = "px-5 py-2 rounded-xl font-black bg-emerald-500 text-slate-900 border border-emerald-400";
+                    } else {
+                        btn.className = "px-5 py-2 rounded-xl font-black bg-slate-800 text-white border border-slate-700";
+                    }
+                }
+            });
+            renderTeamInputs();
+        }
+
+        function renderTeamInputs() {
+            const list = document.getElementById('teams-input-list');
+            list.innerHTML = '';
+            const defaultNames = ['فريق الزهور 🌸', 'فريق البذور 🌱', 'فريق الثمار 🍎', 'فريق الطاقة ⚡'];
+            
+            GameState.teams = [];
+            for (let i = 0; i < GameState.teamCount; i++) {
+                const defName = defaultNames[i] || `الفريق ${i+1}`;
+                GameState.teams.push({ name: defName, score: 0, battery: 0, correct: 0 });
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2";
+                div.innerHTML = `
+                    <span class="text-xs text-emerald-300 font-bold w-16 text-right">فريق ${i+1}:</span>
+                    <input type="text" id="team-name-input-${i}" value="${defName}" maxlength="20" class="flex-1 py-1.5 px-3 rounded-lg bg-slate-900 border border-emerald-500/40 text-white text-sm font-bold focus:border-emerald-300">
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        function setTimerSetting(enabled) {
+            playClickTone();
+            GameState.isTimerEnabled = enabled;
+            const chalBtn = document.getElementById('timer-btn-challenge');
+            const pracBtn = document.getElementById('timer-btn-practice');
+            if (enabled) {
+                chalBtn.className = "py-2.5 px-3 rounded-xl border-2 border-yellow-400 bg-yellow-400/20 text-yellow-200 font-bold text-xs flex items-center justify-center gap-2";
+                pracBtn.className = "py-2.5 px-3 rounded-xl border-2 border-slate-700 bg-slate-800/60 text-slate-300 font-bold text-xs flex items-center justify-center gap-2";
+            } else {
+                pracBtn.className = "py-2.5 px-3 rounded-xl border-2 border-yellow-400 bg-yellow-400/20 text-yellow-200 font-bold text-xs flex items-center justify-center gap-2";
+                chalBtn.className = "py-2.5 px-3 rounded-xl border-2 border-slate-700 bg-slate-800/60 text-slate-300 font-bold text-xs flex items-center justify-center gap-2";
+            }
+        }
+
+        /* ======================================================== */
+        /* 4. GAME INITIALIZATION & RUNNER                          */
+        /* ======================================================== */
+        function startMainGame() {
+            playClickTone();
+            // Read inputs
+            if (GameState.playMode === 'solo') {
+                const nameInput = document.getElementById('player-name-input');
+                GameState.playerName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'بطل العلوم';
+            } else {
+                for (let i = 0; i < GameState.teamCount; i++) {
+                    const inp = document.getElementById(`team-name-input-${i}`);
+                    if (inp && inp.value.trim()) {
+                        GameState.teams[i].name = inp.value.trim();
+                    }
+                }
+            }
+
+            // Reset scores & logs
+            GameState.currentQuestionIndex = 0;
+            GameState.score = 0;
+            GameState.batteryPercent = 0;
+            GameState.currentTeamIndex = 0;
+            GameState.userAnswersLog = [];
+            GameState.startTime = Date.now();
+
+            updateHUD();
+            goToScreen('screen-game');
+            loadQuestion(0);
+        }
+
+        function updateHUD() {
+            // Player / Team Label
+            const pNameElem = document.getElementById('current-player-name');
+            const pLabelElem = document.getElementById('current-player-label');
+            const pIconElem = document.getElementById('current-player-icon');
+
+            if (GameState.playMode === 'solo') {
+                pNameElem.textContent = GameState.playerName;
+                pLabelElem.textContent = 'الباحث العلمي:';
+                pIconElem.className = 'fas fa-user-astronaut';
+            } else {
+                const curTeam = GameState.teams[GameState.currentTeamIndex];
+                pNameElem.textContent = curTeam.name;
+                pLabelElem.textContent = `فريق الشحن (${GameState.currentTeamIndex + 1}/${GameState.teamCount}):`;
+                pIconElem.className = 'fas fa-users';
+            }
+
+            // Battery Bar & Percentage
+            const fill = document.getElementById('battery-fill-bar');
+            const text = document.getElementById('battery-pct-text');
+            fill.style.width = `${GameState.batteryPercent}%`;
+            text.textContent = `${GameState.batteryPercent}%`;
+
+            if (GameState.batteryPercent > 0) {
+                fill.classList.add('charging-active');
+            } else {
+                fill.classList.remove('charging-active');
+            }
+
+            // Score
+            document.getElementById('score-text').textContent = GameState.score;
+
+            // Timer display badge
+            const timerBadge = document.getElementById('timer-badge');
+            if (GameState.isTimerEnabled) {
+                timerBadge.classList.remove('hidden');
+            } else {
+                timerBadge.classList.add('hidden');
+            }
+        }
+
+        function loadQuestion(index) {
+            clearInterval(GameState.timerInterval);
+            GameState.timerPaused = false;
+
+            const q = QUESTIONS[index];
+            document.getElementById('question-index-tag').textContent = `السؤال ${index + 1} من 10`;
+            document.getElementById('question-type-tag').innerHTML = `<i class="fas fa-microchip text-cyan-400"></i> ${q.typeName}`;
+            document.getElementById('question-text-content').textContent = q.text;
+
+            // Mascot thinking expression
+            setRobotMouth('thinking');
+
+            // Reset action confirm button
+            const actionBtnWrapper = document.getElementById('action-btn-wrapper');
+            actionBtnWrapper.classList.add('hidden');
+
+            // Timer setup
+            if (GameState.isTimerEnabled) {
+                GameState.timerRemaining = q.timeAllowed || 30;
+                document.getElementById('timer-sec-text').textContent = GameState.timerRemaining;
+                startQuestionTimer();
+            }
+
+            // Render interactive section based on type
+            const slot = document.getElementById('interactive-content-slot');
+            slot.innerHTML = '';
+
+            if (q.type === 'mcq' || q.type === 'true_false' || q.type === 'graph_mcq' || q.type === 'final_challenge') {
+                renderStandardMCQ(q, slot);
+            } else if (q.type === 'match') {
+                renderMatchingQuestion(q, slot);
+            } else if (q.type === 'order') {
+                renderOrderingQuestion(q, slot);
+            }
+        }
+
+        function startQuestionTimer() {
+            GameState.timerInterval = setInterval(() => {
+                if (GameState.timerPaused) return;
+
+                GameState.timerRemaining--;
+                document.getElementById('timer-sec-text').textContent = GameState.timerRemaining;
+
+                if (GameState.timerRemaining <= 5 && GameState.timerRemaining > 0) {
+                    playTone(400, 'sine', 0.05);
+                }
+
+                if (GameState.timerRemaining <= 0) {
+                    clearInterval(GameState.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            playWrongTone();
+            const q = QUESTIONS[GameState.currentQuestionIndex];
+            recordAnswer(false, 'انتهى الوقت (بدون إجابة)', q.correctKey || 'الإجابة المطلوبة');
+            showFeedbackModal(false, 'انتهى الوقت المحدد للسؤال!', q.explanation);
+        }
+
+        function createGraphHTML() {
+            // Data according to page 2: الأبيض=8, الأصفر=7, الوردي=2, الأزرق=1
+            return `
+                <div class="w-full max-w-lg bg-slate-900/90 border border-cyan-500/40 rounded-2xl p-4 mb-4 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-cyan-500/20 pb-2 mb-3">
+                        <span class="text-xs font-bold text-cyan-300"><i class="fas fa-chart-column ml-1"></i> أزهار حديقة ليلى (الصفحة 2)</span>
+                        <span class="text-[10px] text-slate-400">المحور الرأسي = عدد الأزهار</span>
+                    </div>
+                    <!-- Chart Graphic with clear values and names -->
+                    <div class="h-44 flex items-end justify-around gap-2 px-2 pt-6 border-b-2 border-slate-600 relative">
+                        <!-- Scale indicator lines -->
+                        <div class="absolute inset-x-0 top-6 border-b border-dashed border-slate-700/60 pointer-events-none"></div>
+                        <div class="absolute inset-x-0 top-20 border-b border-dashed border-slate-700/60 pointer-events-none"></div>
+                        
+                        <!-- Bar 1: White (8) -->
+                        <div class="flex flex-col items-center flex-1 h-full justify-end group">
+                            <span class="text-xs font-black text-white mb-1 font-orbitron bg-slate-800 px-2 py-0.5 rounded border border-white/40">8</span>
+                            <div class="w-full max-w-[50px] bg-gradient-to-t from-slate-300 to-white rounded-t-lg shadow-lg border border-white transition-all group-hover:scale-105" style="height: 100%;"></div>
+                            <span class="text-xs font-black text-white mt-2">الأبيض</span>
+                        </div>
+
+                        <!-- Bar 2: Yellow (7) -->
+                        <div class="flex flex-col items-center flex-1 h-full justify-end group">
+                            <span class="text-xs font-black text-yellow-300 mb-1 font-orbitron bg-slate-800 px-2 py-0.5 rounded border border-yellow-400/40">7</span>
+                            <div class="w-full max-w-[50px] bg-gradient-to-t from-amber-500 to-yellow-300 rounded-t-lg shadow-lg border border-yellow-400 transition-all group-hover:scale-105" style="height: 87.5%;"></div>
+                            <span class="text-xs font-black text-yellow-300 mt-2">الأصفر</span>
+                        </div>
+
+                        <!-- Bar 3: Pink (2) -->
+                        <div class="flex flex-col items-center flex-1 h-full justify-end group">
+                            <span class="text-xs font-black text-pink-300 mb-1 font-orbitron bg-slate-800 px-2 py-0.5 rounded border border-pink-400/40">2</span>
+                            <div class="w-full max-w-[50px] bg-gradient-to-t from-pink-600 to-pink-400 rounded-t-lg shadow-lg border border-pink-400 transition-all group-hover:scale-105" style="height: 25%;"></div>
+                            <span class="text-xs font-black text-pink-300 mt-2">الوردي</span>
+                        </div>
+
+                        <!-- Bar 4: Blue (1) -->
+                        <div class="flex flex-col items-center flex-1 h-full justify-end group">
+                            <span class="text-xs font-black text-cyan-300 mb-1 font-orbitron bg-slate-800 px-2 py-0.5 rounded border border-cyan-400/40">1</span>
+                            <div class="w-full max-w-[50px] bg-gradient-to-t from-blue-700 to-cyan-400 rounded-t-lg shadow-lg border border-cyan-400 transition-all group-hover:scale-105" style="height: 12.5%;"></div>
+                            <span class="text-xs font-black text-cyan-300 mt-2">الأزرق</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStandardMCQ(q, container) {
+            // Optional Graph on top
+            if (q.showGraph) {
+                container.innerHTML += createGraphHTML();
+            }
+
+            // Optional Interactive Plant Cycle Diagram for Q10
+            if (q.type === 'final_challenge') {
+                container.innerHTML += `
+                    <div class="w-full max-w-xl bg-slate-900/90 border border-pink-500/40 rounded-2xl p-3 mb-4 shadow-lg flex items-center justify-between overflow-x-auto text-xs sm:text-sm font-bold gap-1 text-slate-200">
+                        <span class="px-2 py-1 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40">🌸 الزهرة</span>
+                        <i class="fas fa-arrow-left text-cyan-400"></i>
+                        <span class="px-2 py-1 rounded bg-red-500/20 text-red-300 border border-red-500/40">🍎 الثمرة</span>
+                        <i class="fas fa-arrow-left text-cyan-400"></i>
+                        <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">🌱 البذور</span>
+                        <i class="fas fa-arrow-left text-cyan-400"></i>
+                        <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">🌿 نبات جديد</span>
+                    </div>
+                `;
+            }
+
+            // Options Grid
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full max-w-2xl";
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 rounded-2xl border-2 border-cyan-500/30 bg-slate-900/80 text-white font-bold text-sm sm:text-base hover:border-cyan-300 hover:bg-cyan-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all text-right flex items-center gap-3 shadow-md";
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl bg-cyan-400/20 flex items-center justify-center text-cyan-300 font-orbitron font-extrabold text-xs shrink-0">${opt.key}</span>
+                    <span class="leading-snug">${opt.text}</span>
+                `;
+                btn.onclick = () => selectMCQAnswer(opt.key, opt.text);
+                grid.appendChild(btn);
+            });
+
+            container.appendChild(grid);
+        }
+
+        function selectMCQAnswer(selectedKey, selectedText) {
+            playClickTone();
+            clearInterval(GameState.timerInterval);
+            GameState.timerPaused = true;
+
+            const q = QUESTIONS[GameState.currentQuestionIndex];
+            const isCorrect = (selectedKey === q.correctKey);
+
+            recordAnswer(isCorrect, selectedText, q.options.find(o => o.key === q.correctKey)?.text || q.correctKey);
+
+            if (isCorrect) {
+                handleSuccessAnswer(q.explanation);
+            } else {
+                handleWrongAnswer(q.explanation);
+            }
+        }
+
+        /* ======================================================== */
+        /* 5. MATCH QUESTION (CLICK ITEM 1 THEN CLICK MATCH)        */
+        /* ======================================================== */
+        function renderMatchingQuestion(q, container) {
+            GameState.selectedLeftMatch = null;
+            GameState.matchesFormed = {};
+
+            // Render graph if question requires it
+            if (q.showGraph) {
+                container.innerHTML += createGraphHTML();
+            }
+
+            // Render matching table/columns
+            const wrapper = document.createElement('div');
+            wrapper.className = "w-full max-w-xl flex flex-col items-center";
+
+            wrapper.innerHTML = `
+                <div class="text-xs text-cyan-300 mb-3 bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-400/30">
+                    <i class="fas fa-hand-pointer ml-1"></i> اضغط على اللون أولاً، ثم اضغط على العدد المطابق له
+                </div>
+                <div class="grid grid-cols-2 gap-4 w-full mb-4">
+                    <!-- Left Column: Flower Colors -->
+                    <div class="flex flex-col gap-2.5" id="match-col-left"></div>
+                    <!-- Right Column: Flower Numbers -->
+                    <div class="flex flex-col gap-2.5" id="match-col-right"></div>
+                </div>
+                <div id="match-status-summary" class="text-xs text-slate-300 font-semibold mb-2">
+                    تم توصيل: 0 من 4
+                </div>
+            `;
+
+            container.appendChild(wrapper);
+
+            const leftCol = wrapper.querySelector('#match-col-left');
+            const rightCol = wrapper.querySelector('#match-col-right');
+
+            // Left Items (Colors)
+            q.pairs.forEach(pair => {
+                const btn = document.createElement('button');
+                btn.id = `match-left-${pair.id}`;
+                btn.className = "p-3 rounded-xl border-2 border-slate-700 bg-slate-900 text-white font-bold text-sm text-center transition-all hover:border-cyan-400";
+                btn.textContent = pair.left;
+                btn.onclick = () => onSelectLeftMatch(pair.id, pair.left);
+                leftCol.appendChild(btn);
+            });
+
+            // Right Items (Numbers) - Shuffled visually
+            const shuffledRights = [...q.pairs].sort((a, b) => a.right - b.right);
+            shuffledRights.forEach(pair => {
+                const btn = document.createElement('button');
+                btn.id = `match-right-${pair.right}`;
+                btn.className = "p-3 rounded-xl border-2 border-slate-700 bg-slate-900 text-cyan-300 font-orbitron font-extrabold text-lg text-center transition-all hover:border-amber-400";
+                btn.textContent = pair.right;
+                btn.onclick = () => onSelectRightMatch(pair.right);
+                rightCol.appendChild(btn);
+            });
+
+            // Show confirmation button
+            const actionBtnWrapper = document.getElementById('action-btn-wrapper');
+            actionBtnWrapper.classList.remove('hidden');
+        }
+
+        function onSelectLeftMatch(pairId, pairLabel) {
+            playClickTone();
+            GameState.selectedLeftMatch = pairId;
+
+            // Highlight chosen left button
+            document.querySelectorAll('#match-col-left button').forEach(b => {
+                b.classList.remove('border-cyan-400', 'bg-cyan-500/30', 'scale-105');
+            });
+            const chosen = document.getElementById(`match-left-${pairId}`);
+            if (chosen) {
+                chosen.classList.add('border-cyan-400', 'bg-cyan-500/30', 'scale-105');
+            }
+        }
+
+        function onSelectRightMatch(val) {
+            if (!GameState.selectedLeftMatch) {
+                playWrongTone();
+                return;
+            }
+            playClickTone();
+            // Assign match
+            GameState.matchesFormed[GameState.selectedLeftMatch] = val;
+
+            // Reset left active selection
+            document.querySelectorAll('#match-col-left button').forEach(b => {
+                b.classList.remove('border-cyan-400', 'bg-cyan-500/30', 'scale-105');
+            });
+
+            // Visually reflect connection
+            const leftBtn = document.getElementById(`match-left-${GameState.selectedLeftMatch}`);
+            const rightBtn = document.getElementById(`match-right-${val}`);
+
+            if (leftBtn) {
+                leftBtn.classList.add('border-emerald-400', 'bg-emerald-500/20');
+                leftBtn.innerHTML = `${leftBtn.textContent.split(' ')[0]} ➔ <span class="text-amber-300 font-orbitron">${val}</span>`;
+            }
+
+            GameState.selectedLeftMatch = null;
+            const connectedCount = Object.keys(GameState.matchesFormed).length;
+            const summary = document.getElementById('match-status-summary');
+            if (summary) {
+                summary.textContent = `تم توصيل: ${connectedCount} من 4`;
+            }
+        }
+
+        /* ======================================================== */
+        /* 6. ORDER QUESTION (CLICK TO REORDER STEPS)              */
+        /* ======================================================== */
+        function renderOrderingQuestion(q, container) {
+            GameState.orderedKeysList = [];
+
+            const wrapper = document.createElement('div');
+            wrapper.className = "w-full max-w-xl flex flex-col items-center";
+
+            wrapper.innerHTML = `
+                <div class="text-xs text-amber-300 mb-3 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-400/30">
+                    <i class="fas fa-arrow-down-1-9 ml-1"></i> انقر على البطاقات بالترتيب العلمي السليم من البداية للنهاية
+                </div>
+                <!-- Selection Pool -->
+                <div class="w-full mb-3">
+                    <span class="text-xs font-bold text-slate-300 block text-right mb-2">البطاقات المتاحة:</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="order-pool-grid"></div>
+                </div>
+                <!-- Current Selected Order -->
+                <div class="w-full bg-slate-900/90 border border-slate-700 p-3 rounded-2xl">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-cyan-300">ترتيبك الحالي:</span>
+                        <button onclick="resetOrderSelection()" class="text-[11px] text-rose-400 hover:text-rose-200 font-bold">
+                            <i class="fas fa-undo ml-1"></i>إعادة ضبط
+                        </button>
+                    </div>
+                    <div id="order-result-box" class="flex flex-wrap items-center justify-center gap-2 min-h-[46px] border border-dashed border-slate-700 rounded-xl p-2">
+                        <span class="text-xs text-slate-500">انقر على البطاقات أعلاه لترتيبها هنا...</span>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(wrapper);
+
+            const poolGrid = wrapper.querySelector('#order-pool-grid');
+            q.items.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `order-item-${item.key}`;
+                btn.className = "p-3 rounded-xl border-2 border-slate-700 bg-slate-900 text-white font-bold text-xs sm:text-sm hover:border-cyan-400 hover:scale-105 transition-all text-center";
+                btn.textContent = item.name;
+                btn.onclick = () => onPickOrderItem(item);
+                poolGrid.appendChild(btn);
+            });
+
+            // Show confirm button
+            const actionBtnWrapper = document.getElementById('action-btn-wrapper');
+            actionBtnWrapper.classList.remove('hidden');
+        }
+
+        function onPickOrderItem(item) {
+            playClickTone();
+            if (GameState.orderedKeysList.includes(item.key)) return;
+
+            GameState.orderedKeysList.push(item.key);
+
+            // Disable pool button
+            const poolBtn = document.getElementById(`order-item-${item.key}`);
+            if (poolBtn) {
+                poolBtn.classList.add('opacity-40', 'pointer-events-none');
+            }
+
+            updateOrderResultDisplay();
+        }
+
+        function resetOrderSelection() {
+            playClickTone();
+            GameState.orderedKeysList = [];
+            const q = QUESTIONS[GameState.currentQuestionIndex];
+            q.items.forEach(item => {
+                const poolBtn = document.getElementById(`order-item-${item.key}`);
+                if (poolBtn) {
+                    poolBtn.classList.remove('opacity-40', 'pointer-events-none');
+                }
+            });
+            updateOrderResultDisplay();
+        }
+
+        function updateOrderResultDisplay() {
+            const box = document.getElementById('order-result-box');
+            if (GameState.orderedKeysList.length === 0) {
+                box.innerHTML = `<span class="text-xs text-slate-500">انقر على البطاقات أعلاه لترتيبها هنا...</span>`;
+                return;
+            }
+            box.innerHTML = '';
+            GameState.orderedKeysList.forEach((key, idx) => {
+                const badge = document.createElement('div');
+                badge.className = "bg-cyan-500/20 border border-cyan-400 text-white px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow";
+                badge.innerHTML = `<span class="w-4 h-4 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center font-orbitron text-[10px] font-black">${idx+1}</span> ${key}`;
+                box.appendChild(badge);
+
+                if (idx < GameState.orderedKeysList.length - 1) {
+                    const arr = document.createElement('span');
+                    arr.className = "text-cyan-400 text-xs";
+                    arr.innerHTML = '<i class="fas fa-arrow-left"></i>';
+                    box.appendChild(arr);
+                }
+            });
+        }
+
+        function submitInteractiveAnswer() {
+            playClickTone();
+            clearInterval(GameState.timerInterval);
+            GameState.timerPaused = true;
+
+            const q = QUESTIONS[GameState.currentQuestionIndex];
+
+            if (q.type === 'match') {
+                // Check all 4 pairs: p1->8, p2->7, p3->2, p4->1
+                const p1 = GameState.matchesFormed['p1'] === '8';
+                const p2 = GameState.matchesFormed['p2'] === '7';
+                const p3 = GameState.matchesFormed['p3'] === '2';
+                const p4 = GameState.matchesFormed['p4'] === '1';
+
+                const isAllCorrect = p1 && p2 && p3 && p4;
+                const formattedUserAns = Object.entries(GameState.matchesFormed).length 
+                    ? Object.entries(GameState.matchesFormed).map(([k, v]) => `${k}:${v}`).join(', ')
+                    : 'توصيل غير مكتمل';
+
+                recordAnswer(isAllCorrect, formattedUserAns, 'الأبيض:8، الأصفر:7، الوردي:2، الأزرق:1');
+
+                if (isAllCorrect) {
+                    handleSuccessAnswer(q.explanation);
+                } else {
+                    handleWrongAnswer(q.explanation);
+                }
+            } else if (q.type === 'order') {
+                const userOrder = GameState.orderedKeysList;
+                const isAllCorrect = (
+                    userOrder.length === 4 &&
+                    userOrder[0] === 'الزهرة' &&
+                    userOrder[1] === 'الثمرة' &&
+                    userOrder[2] === 'البذور' &&
+                    userOrder[3] === 'نبات جديد'
+                );
+
+                recordAnswer(isAllCorrect, userOrder.join(' ➔ ') || 'غير مكتمل', 'الزهرة ➔ الثمرة ➔ البذور ➔ نبات جديد');
+
+                if (isAllCorrect) {
+                    handleSuccessAnswer(q.explanation);
+                } else {
+                    handleWrongAnswer(q.explanation);
+                }
+            }
+        }
+
+        function handleSuccessAnswer(explanation) {
+            playCorrectTone();
+            setRobotMouth('celebrate');
+
+            // Add points & battery
+            GameState.score += 100;
+            GameState.batteryPercent = Math.min(100, GameState.batteryPercent + 10);
+
+            // If in team mode, add to current team
+            if (GameState.playMode === 'team') {
+                const t = GameState.teams[GameState.currentTeamIndex];
+                t.score += 100;
+                t.battery = Math.min(100, t.battery + 10);
+                t.correct += 1;
+            }
+
+            updateHUD();
+            showFeedbackModal(true, 'إجابة صحيحة وممتازة! 🎉', explanation);
+        }
+
+        function handleWrongAnswer(explanation) {
+            playWrongTone();
+            setRobotMouth('neutral');
+            // Battery does not decrease
+            showFeedbackModal(false, 'إجابة غير صحيحة ❌', explanation);
+        }
+
+        function recordAnswer(isCorrect, userAns, correctAns) {
+            const q = QUESTIONS[GameState.currentQuestionIndex];
+            GameState.userAnswersLog.push({
+                questionId: q.id,
+                title: q.text,
+                typeName: q.typeName,
+                isCorrect: isCorrect,
+                userAnswer: userAns,
+                correctAnswer: correctAns,
+                explanation: q.explanation,
+                showGraph: q.showGraph
+            });
+        }
+
+        function showFeedbackModal(isCorrect, titleText, explanation) {
+            const modal = document.getElementById('modal-feedback');
+            const iconBox = document.getElementById('feedback-icon-box');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const rewardBadge = document.getElementById('feedback-reward-badge');
+            const expText = document.getElementById('feedback-explanation-text');
+
+            title.textContent = titleText;
+            expText.textContent = explanation;
+
+            if (isCorrect) {
+                iconBox.className = "w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-xl bg-emerald-500/20 text-emerald-300 border-2 border-emerald-400";
+                icon.className = "fas fa-check";
+                rewardBadge.classList.remove('hidden');
+            } else {
+                iconBox.className = "w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-xl bg-rose-500/20 text-rose-300 border-2 border-rose-400";
+                icon.className = "fas fa-times";
+                rewardBadge.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function proceedToNextQuestion() {
+            playClickTone();
+            document.getElementById('modal-feedback').classList.add('hidden');
+
+            // Rotate team turn if in team mode
+            if (GameState.playMode === 'team') {
+                GameState.currentTeamIndex = (GameState.currentTeamIndex + 1) % GameState.teamCount;
+            }
+
+            GameState.currentQuestionIndex++;
+
+            if (GameState.currentQuestionIndex < QUESTIONS.length) {
+                updateHUD();
+                loadQuestion(GameState.currentQuestionIndex);
+            } else {
+                finishGame();
+            }
+        }
+
+        function setRobotMouth(state) {
+            const mouth = document.getElementById('robot-mouth');
+            const eyeL = document.getElementById('robot-eye-left');
+            const eyeR = document.getElementById('robot-eye-right');
+            if (!mouth) return;
+
+            if (state === 'celebrate') {
+                mouth.setAttribute('d', 'M 40 58 Q 50 68 60 58');
+                eyeL.setAttribute('fill', '#ffd000');
+                eyeR.setAttribute('fill', '#ffd000');
+            } else if (state === 'thinking') {
+                mouth.setAttribute('x1', '44');
+                mouth.setAttribute('x2', '56');
+                mouth.setAttribute('y1', '62');
+                mouth.setAttribute('y2', '60');
+                eyeL.setAttribute('fill', '#00f2fe');
+                eyeR.setAttribute('fill', '#00f2fe');
+            } else {
+                mouth.setAttribute('x1', '42');
+                mouth.setAttribute('x2', '58');
+                mouth.setAttribute('y1', '62');
+                mouth.setAttribute('y2', '62');
+                eyeL.setAttribute('fill', '#00ff87');
+                eyeR.setAttribute('fill', '#00ff87');
+            }
+        }
+
+        /* ======================================================== */
+        /* 7. GAME COMPLETION & COMPREHENSIVE REVIEW                */
+        /* ======================================================== */
+        function finishGame() {
+            playCelebrationTone();
+            clearInterval(GameState.timerInterval);
+
+            // Compute elapsed time
+            const totalSec = Math.floor((Date.now() - GameState.startTime) / 1000);
+            const mins = String(Math.floor(totalSec / 60)).padStart(2, '0');
+            const secs = String(totalSec % 60).padStart(2, '0');
+            const formattedTime = `${mins}:${secs}`;
+
+            // Metrics
+            const totalCorrect = GameState.userAnswersLog.filter(x => x.isCorrect).length;
+            const pct = GameState.batteryPercent;
+
+            // Ranks calculation strictly from prompt
+            let rankText = 'واصل الشحن والمعرفة! 🚀';
+            if (pct >= 90) {
+                rankText = 'عبقري العلوم! ⚡';
+            } else if (pct >= 80) {
+                rankText = 'خبير الشحن العلمي 🔋';
+            } else if (pct >= 70) {
+                rankText = 'مستكشف الأزهار 🌸';
+            } else if (pct >= 60) {
+                rankText = 'باحث واعد 🌱';
+            }
+
+            document.getElementById('final-rank-title').textContent = rankText;
+            document.getElementById('final-battery-val').textContent = `${pct}%`;
+            document.getElementById('final-score-val').textContent = GameState.score;
+            document.getElementById('final-correct-val').textContent = `${totalCorrect}/10`;
+            document.getElementById('final-time-val').textContent = formattedTime;
+
+            // Team breakdown
+            const teamsSection = document.getElementById('final-teams-breakdown');
+            const teamsCards = document.getElementById('teams-results-cards');
+            if (GameState.playMode === 'team') {
+                teamsSection.classList.remove('hidden');
+                teamsCards.innerHTML = '';
+                GameState.teams.forEach((t, i) => {
+                    const row = document.createElement('div');
+                    row.className = "flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-cyan-500/30 text-sm font-bold";
+                    row.innerHTML = `
+                        <span class="text-white">${i+1}. ${t.name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-amber-300 font-orbitron">${t.score} نقطة</span>
+                            <span class="text-emerald-300 font-orbitron">${t.battery}% شحن</span>
+                        </div>
+                    `;
+                    teamsCards.appendChild(row);
+                });
+            } else {
+                teamsSection.classList.add('hidden');
+            }
+
+            goToScreen('screen-results');
+        }
+
+        function openReviewModal() {
+            playClickTone();
+            const modal = document.getElementById('modal-review');
+            const scroll = document.getElementById('review-cards-scroll');
+            scroll.innerHTML = '';
+
+            GameState.userAnswersLog.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border ${item.isCorrect ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-rose-500/40 bg-rose-950/20'} relative`;
+                
+                const graphSnippet = item.showGraph ? createGraphHTML() : '';
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-cyan-300">السؤال ${idx+1}: ${item.typeName}</span>
+                        <span class="text-xs font-black px-2.5 py-0.5 rounded-full ${item.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                            ${item.isCorrect ? '✔ إجابة صحيحة' : '✖ إجابة غير صحيحة'}
+                        </span>
+                    </div>
+                    <h4 class="text-sm font-bold text-white mb-2 leading-relaxed">${item.title}</h4>
+                    ${graphSnippet}
+                    <div class="text-xs space-y-1 mb-3 text-slate-300">
+                        <div><strong class="text-slate-400">إجابتك:</strong> <span class="${item.isCorrect ? 'text-emerald-300' : 'text-rose-300'} font-semibold">${item.userAnswer}</span></div>
+                        ${!item.isCorrect ? `<div><strong class="text-slate-400">الإجابة الصحيحة:</strong> <span class="text-emerald-300 font-semibold">${item.correctAnswer}</span></div>` : ''}
+                    </div>
+
+                    <div class="text-xs bg-slate-900/80 p-2.5 rounded-xl border border-cyan-500/20 text-slate-200">
+                        <strong class="text-cyan-300">💡 لماذا؟:</strong> ${item.explanation}
+                    </div>
+                `;
+                scroll.appendChild(card);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            playClickTone();
+            document.getElementById('modal-review').classList.add('hidden');
+        }
+
+        function restartGame() {
+            playClickTone();
+            goToScreen('screen-splash');
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            goToScreen('screen-splash');
+        };
+    </script>
+</body>
+</html>

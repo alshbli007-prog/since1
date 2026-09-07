@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 تحدي المليون العلمي | درس: التكثيف</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: radial-gradient(circle at center, #090d16 0%, #020617 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        /* Studio Glassmorphism & Neon Shadows */
+        .studio-glass {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 35px rgba(14, 165, 233, 0.15);
+        }
+        .studio-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+        .prize-step {
+            transition: all 0.3s ease;
+        }
+        .prize-step.active {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            color: #000;
+            font-weight: 900;
+            transform: scale(1.03);
+            box-shadow: 0 0 20px #f59e0b;
+        }
+        .prize-step.passed {
+            background: rgba(16, 185, 129, 0.25);
+            border-color: #10b981;
+            color: #34d399;
+        }
+        .prize-step.safe {
+            border: 2px dashed #38bdf8;
+        }
+        @keyframes studioPulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
+            100% { opacity: 0.3; transform: scale(1); }
+        }
+        .studio-glow {
+            animation: studioPulse 4s infinite ease-in-out;
+        }
+        @keyframes riseSteam {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            50% { opacity: 0.7; }
+            100% { transform: translateY(-50px) scale(1.3); opacity: 0; }
+        }
+        .steam-particle {
+            animation: riseSteam 2.5s infinite linear;
+        }
+        @keyframes fallDrop {
+            0% { transform: translateY(-15px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(15px); opacity: 0; }
+        }
+        .drop-particle {
+            animation: fallDrop 1.8s infinite ease-in;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 relative selection:bg-sky-500 selection:text-white">
+
+    <!-- Background Ambient Studio Glows -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none studio-glow"></div>
+    <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none studio-glow" style="animation-delay: 2s;"></div>
+
+    <!-- Application Root Container -->
+    <div id="app" class="flex-1 flex flex-col z-10 w-full max-w-7xl mx-auto p-2 sm:p-4"></div>
+
+    <script>
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            playTone(freq, type, duration, gainVal = 0.1) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) { console.error(e); }
+            }
+            click() { this.playTone(600, 'sine', 0.08, 0.05); }
+            confirm() { 
+                this.playTone(440, 'triangle', 0.15, 0.1);
+                setTimeout(() => this.playTone(554.37, 'triangle', 0.15, 0.1), 100);
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.3, 0.1), 200);
+            }
+            correct() {
+                this.playTone(523.25, 'sine', 0.15, 0.15);
+                setTimeout(() => this.playTone(659.25, 'sine', 0.15, 0.15), 150);
+                setTimeout(() => this.playTone(783.99, 'sine', 0.3, 0.2), 300);
+                setTimeout(() => this.playTone(1046.50, 'sine', 0.5, 0.25), 450);
+            }
+            wrong() {
+                this.playTone(180, 'sawtooth', 0.3, 0.2);
+                setTimeout(() => this.playTone(130, 'sawtooth', 0.4, 0.2), 200);
+            }
+            lifeline() {
+                this.playTone(880, 'sine', 0.2, 0.15);
+                setTimeout(() => this.playTone(1174.66, 'sine', 0.3, 0.15), 150);
+            }
+            victory() {
+                const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.50];
+                notes.forEach((n, idx) => {
+                    setTimeout(() => this.playTone(n, 'triangle', 0.25, 0.15), idx * 120);
+                });
+            }
+        }
+        const sfx = new SoundFX();
+
+        const questionBank = [
+            {
+                id: 'condensation_definition',
+                type: 'image_analysis',
+                title: 'مفهوم التكثيف الأساسي',
+                question: 'اعرض نموذجًا لوعاء ماء ساخن يتصاعد منه البخار ليلامس سطحًا باردًا فيتجمع على شكل قطرات. ماذا تسمى عملية تحول بخار الماء إلى سائل عند ملامسته سطحًا باردًا؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-sky-500/30 p-2">
+                        <div class="absolute bottom-2 w-24 h-10 bg-red-600/40 rounded-b-xl border border-red-400 flex items-center justify-center text-[11px] text-red-200">ماء ساخن 🔥</div>
+                        <div class="absolute bottom-14 flex flex-col items-center">
+                            <div class="w-3 h-3 bg-sky-300/80 rounded-full steam-particle"></div>
+                            <div class="w-2 h-2 bg-sky-300/60 rounded-full steam-particle" style="animation-delay: 1s;"></div>
+                        </div>
+                        <div class="absolute top-3 w-32 h-4 bg-cyan-400/30 rounded-md border border-cyan-300 flex items-center justify-center text-[10px] text-cyan-100">سطح بارد ❄️</div>
+                        <div class="absolute top-8 flex gap-2">
+                            <span class="w-2 h-3 bg-sky-400 rounded-full drop-particle"></span>
+                            <span class="w-2 h-3 bg-sky-400 rounded-full drop-particle" style="animation-delay: 0.7s;"></span>
+                        </div>
+                        <span class="absolute bottom-1 right-2 text-[9px] text-slate-400">تجربة البخار والسطح البارد</span>
+                    </div>
+                `,
+                options: [
+                    { id: 'condensation', text: 'التكثيف' },
+                    { id: 'evaporation', text: 'التبخر' },
+                    { id: 'melting', text: 'الانصهار' },
+                    { id: 'freezing', text: 'التجمد' }
+                ],
+                correctId: 'condensation',
+                why: 'التكثيف هو تحول المادة من الحالة الغازية (بخار الماء) إلى الحالة السائلة (قطرات ماء) عندما تلامس سطحًا باردًا وتفقد طاقة.',
+                concept: 'التكثيف: غاز ← سائل بالتبريد.'
+            },
+            {
+                id: 'ice_cover_exp',
+                type: 'experiment_visual',
+                title: 'تجربة الغطاء والثلج',
+                question: 'أي من التجربتين التاليتين تساعد على تكثيف بخار الماء بشكل أسرع وأوضح؟',
+                imageHTML: `
+                    <div class="grid grid-cols-2 gap-2 h-36 sm:h-44">
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-700 flex flex-col items-center justify-center text-center">
+                            <div class="text-xs font-bold text-amber-300 mb-1">تجربة أ</div>
+                            <div class="w-16 h-8 bg-slate-700 rounded-md flex items-center justify-center text-[10px] text-slate-200">غطاء عادي</div>
+                            <div class="text-[9px] text-slate-400 mt-1">بخار ماء ساخن</div>
+                        </div>
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-cyan-500/50 flex flex-col items-center justify-center text-center bg-cyan-950/20">
+                            <div class="text-xs font-bold text-cyan-300 mb-1">تجربة ب ⭐</div>
+                            <div class="w-16 h-8 bg-cyan-700/80 rounded-md flex items-center justify-center text-[10px] text-white">غطاء + ثلج ❄️</div>
+                            <div class="text-[9px] text-cyan-200 mt-1">تبريد أسرع للسطح</div>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'exp_b', text: 'التجربة (ب) بوجود الثلج' },
+                    { id: 'exp_a', text: 'التجربة (أ) بالغطاء العادي' },
+                    { id: 'both_same', text: 'كلاهما يتكثف بنفس السرعة تمامًا' },
+                    { id: 'none', text: 'لا يتكثف البخار في أي منهما' }
+                ],
+                correctId: 'exp_b',
+                why: 'كلما كان السطح الملامس لبخار الماء أبرد (مثل وضع قطع الثلج على الغطاء)، كلما فقد البخار طاقته بشكل أسرع وتحول إلى قطرات ماء بكثافة أكبر.',
+                concept: 'تسريع التكثيف يتطلب سطحًا أبرد.'
+            },
+            {
+                id: 'salty_water_distillation',
+                type: 'deduction',
+                title: 'المحلول الملحي والماء النقي',
+                question: 'عند تسخين محلول ملحي في وعاء وتكثف بخار الماء المتصاعد على غطاء زجاجي بارد، هل سيكون الماء المتجمع على الغطاء مالحًا أم عذبًا نقيًا؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl p-3 flex flex-col items-center justify-center border border-amber-500/30">
+                        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-200 mb-2">
+                            <span class="px-2 py-1 bg-amber-500/20 rounded border border-amber-400/40">ماء + ملح 🧂</span>
+                            <i class="fa-solid fa-arrow-right text-cyan-400"></i>
+                            <span class="px-2 py-1 bg-sky-500/20 rounded border border-sky-400/40">تسخين ← تكثف 💧</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 text-center">الذي يتصاعد ويتكثف هو بخار الماء فقط، ويبقى الملح في الوعاء.</p>
+                    </div>
+                `,
+                options: [
+                    { id: 'pure_water', text: 'ماء عذب نقي غير مالح' },
+                    { id: 'salty_water', text: 'ماء مالح تمامًا مثل الوعاء' },
+                    { id: 'mixed_salt', text: 'ماء يحتوي على حبيبات ملح صلبة' },
+                    { id: 'colored_liquid', text: 'سائل ذو لون أصفر داكن' }
+                ],
+                correctId: 'pure_water',
+                why: 'عند حدوث التبخر ثم التكثيف، فإن بخار الماء المتصاعد لا يحمل معه الأملاح والمواد المذابة، ولذلك يكون الماء الناتج عذبًا نقيًا.',
+                concept: 'الماء المتكثف من المحاليل الملحيّة هو ماء عذب.'
+            },
+            {
+                id: 'particles_motion',
+                type: 'particles',
+                title: 'حركة الجزيئات أثناء التكثيف',
+                question: 'أي من الوصفين التاليين يمثل سلوك وحركة جزيئات المادة بَدءًا من الحالة الغازية وصولاً إلى حدوث التكثيف؟',
+                imageHTML: `
+                    <div class="grid grid-cols-2 gap-2 h-36 sm:h-44">
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-red-500/30 flex flex-col items-center justify-center text-center">
+                            <span class="text-xs font-bold text-red-300 mb-1">قبل التكثيف (غاز)</span>
+                            <div class="text-[10px] text-slate-300">جزيئات متباعدة وتتحرك بسرعة 💨</div>
+                        </div>
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-sky-500/50 flex flex-col items-center justify-center text-center bg-sky-950/20">
+                            <span class="text-xs font-bold text-cyan-300 mb-1">بعد التكثيف (سائل) ⭐</span>
+                            <div class="text-[10px] text-sky-200">جزيئات تتقارب وتتحرك ببطء 💧</div>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'slow_closer', text: 'تفقد طاقة وتتقارب وتتحرك ببطء (تصبح سائلًا)' },
+                    { id: 'fast_further', text: 'تكتسب طاقة وتبتعد عن بعضها بسرعة أكبر' },
+                    { id: 'fixed_rigid', text: 'تتثبت في مكانها تمامًا وتصبح مادة صلبة' },
+                    { id: 'random_explode', text: 'تتحلل جزيئاتها وتتلاشى تمامًا في الهواء' }
+                ],
+                correctId: 'slow_closer',
+                why: 'في التكثيف تفقد جزيئات الغاز طاقة حرارية، فتقل سرعتها وتقترب مسافاتها البينية لتتحول إلى حالة سائلة.',
+                concept: 'الطاقة والحركة في التكثيف: تبريد، فقدان طاقة، تقارب الجزيئات.'
+            },
+            {
+                id: 'true_false_window',
+                type: 'true_false',
+                title: 'صح وخطأ بصري',
+                question: '«تحول بخار الماء الموجود في الهواء إلى قطرات سائلة عند ملامسته لسطح زجاج نافذة باردة في الشتاء يسمى التكثيف.» هل هذه العبارة صحيحة؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl flex items-center justify-center border border-sky-500/30 p-3">
+                        <div class="text-center">
+                            <i class="fa-solid fa-cloud-rain text-3xl text-sky-400 mb-2"></i>
+                            <p class="text-xs text-slate-300">زجاج بارد في الشتاء + بخار الماء الداخلي = قطرات ماء</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'true', text: 'صحيح (نعم يسمى تكثيفًا)' },
+                    { id: 'false', text: 'خطأ (يسمى تبخرًا)' }
+                ],
+                correctId: 'true',
+                why: 'هذه الظاهرة الشائعة على نوافذ السيارات أو المنازل الباردة هي مثال حي ومباشر على التكثيف الناتج عن تلامس الهواء الرطب الساخن بسطح بارد.',
+                concept: 'التكثيف في الطبيعة والحياة اليومية.'
+            },
+            {
+                id: 'comparison_evap_cond',
+                type: 'comparison',
+                title: 'مقارنة بين التبخر والتكثيف',
+                question: 'أي من العبارات الآتية تعتبر صحيحة علميًا وتميز عملية التكثيف عن عملية التبخر؟',
+                imageHTML: `
+                    <div class="grid grid-cols-2 gap-2 h-36 sm:h-44">
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-amber-500/30 flex flex-col justify-center">
+                            <span class="text-xs font-bold text-amber-300">التبخر ☀️</span>
+                            <p class="text-[10px] text-slate-300 mt-1">سائل ← غاز (بالتسخين)</p>
+                        </div>
+                        <div class="bg-slate-900/80 rounded-xl p-2 border border-sky-500/30 flex flex-col justify-center">
+                            <span class="text-xs font-bold text-cyan-300">التكثيف ❄️</span>
+                            <p class="text-[10px] text-slate-300 mt-1">غاز ← سائل (بالتبريد)</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'comp_correct', text: 'التكثيف هو عكس التبخر تمامًا (تحول من غاز إلى سائل بالتبريد)' },
+                    { id: 'comp_wrong1', text: 'التكثيف يحدث دائمًا عند تسخين السوائل لدرجة الغليان' },
+                    { id: 'comp_wrong2', text: 'التبخر والتكثيف هما نفس العملية بلا أي اختلاف' },
+                    { id: 'comp_wrong3', text: 'التكثيف يحول المادة الصلبة مباشرة إلى غاز' }
+                ],
+                correctId: 'comp_correct',
+                why: 'التكثيف هو العملية العكسية للتبخر؛ فالتبخر يحول السائل إلى غاز بالتسخين، بينما التكثيف يحول الغاز إلى سائل بالتبريد.',
+                concept: 'التكثيف والتبخر عمليتان متعاكستان.'
+            },
+            {
+                id: 'coffee_mug_test',
+                type: 'coffee_mug',
+                title: 'تطبيق إبريق القهوة الساخنة',
+                question: 'عندما يتصاعد البخار من إبريق قهوة ساخنة ويلامس غطاء معدني بارد فتتكون قطرات ماء تحته، لماذا لا تظهر طعم أو رائحة القهوة في تلك القطرات المتاحة على الغطاء؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl p-3 flex flex-col items-center justify-center border border-amber-600/30">
+                        <div class="text-center">
+                            <i class="fa-solid fa-mug-hot text-3xl text-amber-400 mb-2"></i>
+                            <p class="text-xs text-slate-300">بخار الماء الصاعد يتكثف على الغطاء البارد</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'vapor_only', text: 'لأن الذي تصاعد وتكثف هو بخار الماء فقط وليس السائل الأصلي للقهوة' },
+                    { id: 'coffee_heavy', text: 'لأن جزيئات القهوة أثقل بكثير ولا تتحرك أبدًا مع الحرارة' },
+                    { id: 'metal_filter', text: 'لأن الغطاء المعدني يقوم بفلترة طعم القهوة آليًا' },
+                    { id: 'temperature_kill', text: 'لأن درجة الحرارة قضت على نكهة القهوة بالكامل' }
+                ],
+                correctId: 'vapor_only',
+                why: 'عملية التبخر والتكثيف تفصل الماء عن المواد الذائبة والمكونات الأخرى، فالذي يتبخر ويتكثف هو ماء نقي فقط.',
+                concept: 'فصل المكونات عبر التبخر والتكثيف.'
+            },
+            {
+                id: 'find_correct_exp',
+                type: 'find_error',
+                title: 'اكتشف التجربة الصحيحة',
+                question: 'أمامك 3 وصفات لتجارب علمية. أي منها يمثل حدوث "التكثيف" بطريقة صحيحة ودقيقة؟',
+                imageHTML: `
+                    <div class="grid grid-cols-3 gap-1 h-36 sm:h-44">
+                        <div class="bg-red-950/20 border border-red-500/40 rounded-lg p-1 text-center flex flex-col justify-center">
+                            <span class="text-[9px] font-bold text-red-300">تجربة 1 ❌</span>
+                            <p class="text-[8px] text-slate-400">ثلج + تسخين ← غاز صلب</p>
+                        </div>
+                        <div class="bg-cyan-950/40 border border-cyan-400 rounded-lg p-1 text-center flex flex-col justify-center shadow-lg shadow-cyan-500/10">
+                            <span class="text-[9px] font-bold text-cyan-300">تجربة 2 ⭐</span>
+                            <p class="text-[8px] text-cyan-100">بخار + سطح بارد ← قطرات ماء</p>
+                        </div>
+                        <div class="bg-amber-950/20 border border-amber-500/40 rounded-lg p-1 text-center flex flex-col justify-center">
+                            <span class="text-[9px] font-bold text-amber-300">تجربة 3 ❌</span>
+                            <p class="text-[8px] text-slate-400">ماء بارد + تبريد ← بخار</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'exp2_correct', text: 'التجربة 2: بخار ماء + ملامسة سطح بارد ← قطرات ماء' },
+                    { id: 'exp1_correct', text: 'التجربة 1: ثلج + تسخين شديد' },
+                    { id: 'exp3_correct', text: 'التجربة 3: ماء بارد + تبريد في الثلاجة' },
+                    { id: 'all_wrong', text: 'جميع التجارب خاطئة تمامًا' }
+                ],
+                correctId: 'exp2_correct',
+                why: 'التكثيف يتطلب حصريًا وجود غاز (بخار ماء) يلامس سطحًا باردًا ليتحول إلى حالة سائلة (قطرات ماء).',
+                concept: 'الشروط الأساسية لحدوث التكثيف.'
+            },
+            {
+                id: 'energy_change_cond',
+                type: 'energy_question',
+                title: 'طاقة المادة وتغيراتها',
+                question: 'عندما يتحول بخار الماء إلى قطرات سائلة (التكثيف)، ماذا يحدث لطاقة المادة الحرارية؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl p-3 flex flex-col items-center justify-center border border-sky-500/30">
+                        <div class="text-center">
+                            <i class="fa-solid fa-snowflake text-3xl text-cyan-400 mb-2"></i>
+                            <p class="text-xs text-slate-300">تبريد السطح واستخلاص الطاقة الحرارية من البخار</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'lose_energy', text: 'تفقد المادة طاقة (تبريد)' },
+                    { id: 'gain_energy', text: 'تكتسب المادة طاقة إضافية كبيرة (تسخين)' },
+                    { id: 'no_change', text: 'لا تتغير طاقة المادة نهائيًا' },
+                    { id: 'convert_mass', text: 'تتحول الكتلة بأكملها إلى طاقة كهربائية' }
+                ],
+                correctId: 'lose_energy',
+                why: 'عملية التكثيف تتم بالتبريد؛ مما يعني أن جزيئات البخار تفقد جزءًا من طاقتها الحرارية للوسط المحيط أو السطح البارد.',
+                concept: 'فقدان الطاقة أثناء التكثيف.'
+            },
+            {
+                id: 'nature_clouds_rain',
+                type: 'nature_clouds',
+                title: 'سحب المطر وتكوين السحب',
+                question: 'في الطبيعة، عندما يرتفع بخار الماء الساخن الخفيف إلى طبقات الجو العليا الباردة، فإنه يتكثف مشكلاً الغيوم والسحب. ما هي الحالة الفيزيائية للغيوم في السماء؟',
+                imageHTML: `
+                    <div class="relative h-36 sm:h-44 bg-slate-900/80 rounded-xl p-3 flex flex-col items-center justify-center border border-sky-500/30">
+                        <div class="text-center">
+                            <i class="fa-solid fa-cloud text-3xl text-cyan-300 mb-2"></i>
+                            <p class="text-xs text-slate-300">ارتفاع البخار للأعلى وتبريده في طبقات الجو الباردة</p>
+                        </div>
+                    </div>
+                `,
+                options: [
+                    { id: 'tiny_liquid_drops', text: 'قطرات ماء دقيقة سائلة (أو بلورات ثلجية صغيرة)' },
+                    { id: 'pure_gas', text: 'غاز غير مرئي بالكامل' },
+                    { id: 'solid_ice_rocks', text: 'قطع صلبة من الجليد الثقيل' },
+                    { id: 'fire_plasma', text: 'بلازما متوهجة مضيئة' }
+                ],
+                correctId: 'tiny_liquid_drops',
+                why: 'السحب والغيوم في السماء تتكون نتيجة تكثف بخار الماء العائم عندما يرتفع ويقابل طبقات الهواء الباردة في الأعلى.',
+                concept: 'دورة الماء في الطبيعة وظاهرة التكثيف السحابي.'
+            },
+            {
+                id: 'sorting_order_exp',
+                type: 'ordering',
+                title: 'ترتيب مراحل التكثيف',
+                question: 'رتب الخطوات التالية بالتسلسل الصحيح لحدوث ظاهرة التكثيف ابتداءً من تسخين الماء:',
+                imageHTML: `<div class="h-20 bg-slate-900/80 rounded-xl flex items-center justify-center p-2 text-xs text-cyan-300">اسحب أو رتب الخطوات تصاعدياً</div>`,
+                isInteractiveOrdering: true,
+                steps: [
+                    { id: 'step_heat', text: 'تسخين الماء' },
+                    { id: 'step_rise', text: 'تصاعد البخار الساخن' },
+                    { id: 'step_touch', text: 'ملامسة سطح بارد' },
+                    { id: 'step_drops', text: 'تشكل القطرات السائلة' }
+                ],
+                correctOrder: ['step_heat', 'step_rise', 'step_touch', 'step_drops'],
+                options: [
+                    { id: 'correct_order_choice', text: 'الترتيب: تسخين ← تصاعد ← ملامسة سطح بارد ← تشكل القطرات' }
+                ],
+                correctId: 'correct_order_choice',
+                why: 'يبدأ التكثيف بتسخين الماء ليتبخر، ثم يصعد البخار ويلامس سطحًا باردًا فيفقد طاقته وتتجمع القطرات.',
+                concept: 'التسلسل المنطقي لعملية التكثيف.'
+            },
+            {
+                id: 'matching_states_exp',
+                type: 'matching',
+                title: 'توصيل العمليات الفيزيائية',
+                question: 'طابق كل عملية تحول في المادة بما يناسبها علمياً:',
+                imageHTML: `<div class="h-20 bg-slate-900/80 rounded-xl flex items-center justify-center p-2 text-xs text-cyan-300">اختر العملية وما يناسبها لتأكيد الإجابة</div>`,
+                isInteractiveMatching: true,
+                pairs: [
+                    { left: 'التبخر', right: 'سائل ← غاز' },
+                    { left: 'التكثيف', right: 'غاز ← سائل' },
+                    { left: 'التجمد', right: 'سائل ← صلب' },
+                    { left: 'الانصهار', right: 'صلب ← سائل' }
+                ],
+                options: [
+                    { id: 'matching_all_correct', text: 'التوصيل الصحيح لكافة حالات تحول المواد' }
+                ],
+                correctId: 'matching_all_correct',
+                why: 'عمليات تحولات المادة مرتبطة باكتساب أو فقدان الطاقة الحرارية (التكثيف يحول الغاز إلى سائل).',
+                concept: 'حالات المادة والتحولات الفيزيائية.'
+            }
+        ];
+
+        let state = {
+            currentScreen: 'HOME', // HOME, MODE_SELECT, PLAYER_SETUP, GAME, FINISHED, REVIEW
+            gameMode: 'SINGLE', // SINGLE, TEAM
+            playerName: 'البطل العلمي',
+            teams: [{ name: 'فريق الصقور', score: 0 }, { name: 'فريق النجوم', score: 0 }],
+            currentTeamIndex: 0,
+            currentQuestionIndex: 0,
+            questions: [],
+            score: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            unansweredCount: 0,
+            stars: 0,
+            selectedOptionId: null,
+            confirmed: false,
+            isCorrect: false,
+            feedbackShown: false,
+            timer: 30,
+            timerInterval: null,
+            paused: false,
+            lifelines: {
+                fiftyFifty: true,
+                expert: true,
+                hint: true
+            },
+            expertHintActive: false,
+            hintActive: false,
+            removedOptions: [],
+            orderingUserList: [],
+            matchingUserSelections: {},
+            history: []
+        };
+
+        const prizeLadder = [
+            { level: 1, points: 50, safe: false },
+            { level: 2, points: 60, safe: false },
+            { level: 3, points: 70, safe: false },
+            { level: 4, points: 80, safe: false },
+            { level: 5, points: 90, safe: false },
+            { level: 6, points: 100, safe: true, label: 'نقطة الأمان 🛡️' },
+            { level: 7, points: 110, safe: false },
+            { level: 8, points: 120, safe: false },
+            { level: 9, points: 140, safe: false },
+            { level: 10, points: 180, safe: false, label: '🏆 المليون العلمي' }
+        ].reverse();
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startNewGame() {
+            sfx.click();
+            let pool = shuffleArray(questionBank);
+            state.questions = pool.slice(0, 10);
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.correctCount = 0;
+            state.wrongCount = 0;
+            state.unansweredCount = 0;
+            state.stars = 0;
+            state.lifelines = { fiftyFifty: true, expert: true, hint: true };
+            state.history = [];
+            state.teams = state.teams.map(t => ({ ...t, score: 0 }));
+            state.currentTeamIndex = 0;
+            prepareQuestion();
+            state.currentScreen = 'GAME';
+            render();
+        }
+
+        function prepareQuestion() {
+            state.selectedOptionId = null;
+            state.confirmed = false;
+            state.feedbackShown = false;
+            state.expertHintActive = false;
+            state.hintActive = false;
+            state.removedOptions = [];
+            
+            let q = state.questions[state.currentQuestionIndex];
+            if (q.options) {
+                q.shuffledOptions = shuffleArray(q.options);
+            }
+            if (q.isInteractiveOrdering && q.steps) {
+                state.orderingUserList = shuffleArray(q.steps);
+            }
+            state.matchingUserSelections = {};
+
+            let idx = state.currentQuestionIndex;
+            if (idx < 6) state.timer = 30;
+            else if (idx < 8) state.timer = 40;
+            else if (idx === 8) state.timer = 45;
+            else state.timer = 60;
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            state.paused = false;
+            state.timerInterval = setInterval(() => {
+                if (!state.paused && !state.confirmed && state.currentScreen === 'GAME') {
+                    if (state.timer > 0) {
+                        state.timer--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(state.timerInterval);
+                        handleTimeOut();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const el = document.getElementById('timer-count');
+            const bar = document.getElementById('timer-bar');
+            if (el) el.innerText = state.timer;
+            if (bar) {
+                let maxT = state.currentQuestionIndex < 6 ? 30 : (state.currentQuestionIndex < 8 ? 40 : (state.currentQuestionIndex === 8 ? 45 : 60));
+                let pct = (state.timer / maxT) * 100;
+                bar.style.width = pct + '%';
+                if (pct < 30) bar.className = 'h-full bg-red-500 transition-all duration-1000';
+                else bar.className = 'h-full bg-cyan-400 transition-all duration-1000';
+            }
+        }
+
+        function handleTimeOut() {
+            sfx.wrong();
+            state.confirmed = true;
+            state.feedbackShown = true;
+            state.isCorrect = false;
+            state.unansweredCount++;
+            let q = state.questions[state.currentQuestionIndex];
+            state.history.push({
+                question: q.question,
+                userAnswer: 'انتهى الوقت (بدون إجابة)',
+                correctAnswer: q.options && q.options[0] ? q.options[0].text : 'الإجابة النموذجية',
+                isCorrect: false,
+                why: q.why
+            });
+            render();
+        }
+
+        function useFiftyFifty() {
+            if (!state.lifelines.fiftyFifty || state.confirmed) return;
+            sfx.lifeline();
+            state.lifelines.fiftyFifty = false;
+            let q = state.questions[state.currentQuestionIndex];
+            if (q.shuffledOptions && q.shuffledOptions.length > 2) {
+                let wrongOpts = q.shuffledOptions.filter(o => o.id !== q.correctId);
+                wrongOpts = shuffleArray(wrongOpts);
+                if (wrongOpts.length >= 2) {
+                    state.removedOptions = [wrongOpts[0].id, wrongOpts[1].id];
+                }
+            }
+            render();
+        }
+
+        function useExpert() {
+            if (!state.lifelines.expert || state.confirmed) return;
+            sfx.lifeline();
+            state.lifelines.expert = false;
+            state.expertHintActive = true;
+            render();
+        }
+
+        function useHint() {
+            if (!state.lifelines.hint || state.confirmed) return;
+            sfx.lifeline();
+            state.lifelines.hint = false;
+            state.hintActive = true;
+            render();
+        }
+
+        function confirmAnswer() {
+            let q = state.questions[state.currentQuestionIndex];
+            
+            if (q.isInteractiveOrdering) {
+                let userCurrentOrder = state.orderingUserList.map(s => s.id);
+                let isMatch = userCurrentOrder.every((val, index) => val === q.correctOrder[index]);
+                state.selectedOptionId = isMatch ? 'correct_order_choice' : 'wrong_order';
+            } else if (q.isInteractiveMatching) {
+                let allCorrect = q.pairs.every(p => state.matchingUserSelections[p.left] === p.right);
+                state.selectedOptionId = allCorrect ? 'matching_all_correct' : 'wrong_matching';
+            }
+
+            if (!state.selectedOptionId || state.confirmed) return;
+            
+            clearInterval(state.timerInterval);
+            sfx.confirm();
+            state.confirmed = true;
+            state.feedbackShown = true;
+
+            state.isCorrect = (state.selectedOptionId === q.correctId);
+            let earnedPoints = prizeLadder[9 - state.currentQuestionIndex].points;
+
+            if (state.isCorrect) {
+                sfx.correct();
+                state.score += earnedPoints;
+                state.correctCount++;
+                state.stars += 1;
+                if (state.gameMode === 'TEAM') {
+                    state.teams[state.currentTeamIndex].score += earnedPoints;
+                }
+            } else {
+                sfx.wrong();
+                state.wrongCount++;
+            }
+
+            let userOptObj = q.options ? q.options.find(o => o.id === state.selectedOptionId) : null;
+            let correctOptObj = q.options ? q.options.find(o => o.id === q.correctId) : null;
+
+            state.history.push({
+                question: q.question,
+                userAnswer: userOptObj ? userOptObj.text : (state.isCorrect ? 'إجابة صحيحة' : 'إجابة غير دقيقة'),
+                correctAnswer: correctOptObj ? correctOptObj.text : 'الترتيب أو التوصيل السليم',
+                isCorrect: state.isCorrect,
+                why: q.why
+            });
+
+            render();
+        }
+
+        function nextQuestion() {
+            sfx.click();
+            if (state.gameMode === 'TEAM') {
+                state.currentTeamIndex = (state.currentTeamIndex + 1) % state.teams.length;
+            }
+            if (state.currentQuestionIndex < state.questions.length - 1) {
+                state.currentQuestionIndex++;
+                prepareQuestion();
+                render();
+            } else {
+                sfx.victory();
+                state.currentScreen = 'FINISHED';
+                render();
+            }
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            if (!app) return;
+
+            if (state.currentScreen === 'HOME') {
+                app.innerHTML = renderHomeScreen();
+            } else if (state.currentScreen === 'MODE_SELECT') {
+                app.innerHTML = renderModeSelectScreen();
+            } else if (state.currentScreen === 'PLAYER_SETUP') {
+                app.innerHTML = renderPlayerSetupScreen();
+            } else if (state.currentScreen === 'GAME') {
+                app.innerHTML = renderGameScreen();
+                updateTimerDisplay();
+            } else if (state.currentScreen === 'FINISHED') {
+                app.innerHTML = renderFinishedScreen();
+            } else if (state.currentScreen === 'REVIEW') {
+                app.innerHTML = renderReviewScreen();
+            }
+        }
+
+        function renderHomeScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center py-4 px-2 text-center animate-fade">
+                    <!-- Strict Vertical Official Identity Block -->
+                    <div class="studio-glass rounded-2xl p-4 sm:p-5 mb-4 w-full max-w-md flex flex-col items-center gap-1.5 border border-sky-500/30 shadow-2xl">
+                        <!-- Omani Khanjar Logo -->
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار الخنجر العُماني" class="w-14 h-14 object-contain mb-1 drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]" onerror="this.src='https://placehold.co/70x70/0f172a/38bdf8?text=Oman'">
+                        
+                        <h2 class="text-xs sm:text-sm font-bold text-sky-400">سلطنة عمان</h2>
+                        <h3 class="text-xs sm:text-sm font-semibold text-slate-200">وزارة التعليم</h3>
+                        <p class="text-[11px] text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-[11px] font-medium text-cyan-300">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+
+                        <!-- Teacher Close Portrait (Strict Rules Enforced) -->
+                        <div class="mt-3 flex flex-col items-center">
+                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-cyan-400 shadow-[0_0_20px_rgba(56,189,248,0.4)] bg-slate-800">
+                                <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top scale-110" onerror="this.src='https://placehold.co/120x120/0f172a/ffffff?text=Teacher'">
+                            </div>
+                            <h4 class="text-sm sm:text-base font-bold text-amber-300 mt-2">أ. فيصل الشبلي</h4>
+                            <p class="text-[11px] text-slate-300 font-mono mt-0.5" dir="ltr">99812126</p>
+                            <p class="text-[11px] text-sky-400 mt-0.5">Instagram: faalll8</p>
+                            <div class="mt-1.5 text-[11px] text-slate-300 bg-slate-800/80 px-3 py-0.5 rounded-full border border-slate-700">
+                                مدير المدرسة: <span class="text-slate-100 font-semibold">أ. سعود الشيزاوي</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Title & Intro Banner -->
+                    <div class="studio-card rounded-2xl p-5 sm:p-6 w-full max-w-md mb-4 text-center relative overflow-hidden">
+                        <div class="inline-flex items-center justify-center p-2.5 bg-amber-500/20 text-amber-400 rounded-full mb-2 text-xl shadow-inner border border-amber-500/30">
+                            🏆
+                        </div>
+                        <h1 class="text-xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-200 to-amber-300 mb-1.5">
+                            تحدي المليون العلمي
+                        </h1>
+                        <div class="inline-block px-3 py-1 bg-sky-950/80 border border-sky-500/40 rounded-full text-cyan-300 font-bold text-xs mb-3">
+                            💧 درس: التكثيف | مادة العلوم - الصف الخامس
+                        </div>
+                        <p class="text-xs text-slate-300 mb-5 leading-relaxed">
+                            استعد لخوض مسابقة علمية تفاعلية بأسلوب استوديوهات المسابقات! حلل التجارب، استنتج، واصعد في سلم الجوائز نحو القمة.
+                        </p>
+                        
+                        <button onclick="sfx.click(); state.currentScreen='MODE_SELECT'; render();" class="w-full py-3.5 bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-base rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.5)] transform hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play text-amber-300 animate-pulse"></i>
+                            ابدأ التحدي الآن
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModeSelectScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 animate-fade">
+                    <div class="studio-card rounded-2xl p-6 sm:p-8 w-full max-w-md text-center">
+                        <h2 class="text-xl font-black text-cyan-300 mb-2">اختر وضع اللعب</h2>
+                        <p class="text-xs text-slate-300 mb-6">حدد طريقة خوض المسابقة في الاستوديو</p>
+                        
+                        <div class="flex flex-col gap-3">
+                            <button onclick="sfx.click(); state.gameMode='SINGLE'; state.currentScreen='PLAYER_SETUP'; render();" class="p-4 rounded-xl bg-slate-800/90 border border-sky-500/40 hover:border-cyan-400 hover:bg-sky-950/40 transition-all flex items-center gap-4 text-right group">
+                                <div class="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center text-cyan-300 text-lg group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">لعب فردي</h3>
+                                    <p class="text-[11px] text-slate-400">سجل اسمك وخض التحدي بنفسك</p>
+                                </div>
+                            </button>
+
+                            <button onclick="sfx.click(); state.gameMode='TEAM'; state.currentScreen='PLAYER_SETUP'; render();" class="p-4 rounded-xl bg-slate-800/90 border border-amber-500/40 hover:border-amber-400 hover:bg-amber-950/40 transition-all flex items-center gap-4 text-right group">
+                                <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-300 text-lg group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">لعب جماعي (فرق)</h3>
+                                    <p class="text-[11px] text-slate-400">تنافس بين الفرق في الاستوديو</p>
+                                </div>
+                            </button>
+                        </div>
+
+                        <button onclick="sfx.click(); state.currentScreen='HOME'; render();" class="mt-6 text-xs text-slate-400 hover:text-cyan-300 transition-colors flex items-center justify-center gap-1 mx-auto">
+                            <i class="fa-solid fa-arrow-right"></i> العودة للخلف
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPlayerSetupScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 animate-fade">
+                    <div class="studio-card rounded-2xl p-6 sm:p-8 w-full max-w-md text-center">
+                        <h2 class="text-xl font-black text-amber-300 mb-2">
+                            ${state.gameMode === 'SINGLE' ? '👤 تسجيل اسم المتسابق' : '👥 إعداد أسماء الفرق'}
+                        </h2>
+                        <p class="text-xs text-slate-300 mb-6">أدخل البيانات للبدء</p>
+
+                        ${state.gameMode === 'SINGLE' ? `
+                            <div class="mb-6">
+                                <input type="text" id="player-name-input" value="${state.playerName}" class="w-full px-4 py-3 bg-slate-900 border border-sky-500/50 rounded-xl text-center text-white text-base font-bold focus:outline-none focus:border-cyan-400" placeholder="أدخل اسمك هنا...">
+                            </div>
+                        ` : `
+                            <div class="flex flex-col gap-3 mb-6">
+                                <input type="text" id="team1-input" value="${state.teams[0].name}" class="w-full px-4 py-2.5 bg-slate-900 border border-sky-500/40 rounded-xl text-center text-white text-xs font-bold focus:outline-none focus:border-cyan-400" placeholder="اسم الفريق الأول">
+                                <input type="text" id="team2-input" value="${state.teams[1].name}" class="w-full px-4 py-2.5 bg-slate-900 border border-amber-500/40 rounded-xl text-center text-white text-xs font-bold focus:outline-none focus:border-amber-400" placeholder="اسم الفريق الثاني">
+                            </div>
+                        `}
+
+                        <button onclick="saveSetupAndStart();" class="w-full py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-sm rounded-xl shadow-lg transition-all">
+                            🚀 انطلق إلى الاستوديو
+                        </button>
+
+                        <button onclick="sfx.click(); state.currentScreen='MODE_SELECT'; render();" class="mt-4 text-xs text-slate-400 hover:text-cyan-300 transition-colors">
+                            العودة للاختيار
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveSetupAndStart() {
+            sfx.click();
+            if (state.gameMode === 'SINGLE') {
+                const inp = document.getElementById('player-name-input');
+                if (inp && inp.value.trim()) state.playerName = inp.value.trim();
+            } else {
+                const t1 = document.getElementById('team1-input');
+                const t2 = document.getElementById('team2-input');
+                if (t1 && t1.value.trim()) state.teams[0].name = t1.value.trim();
+                if (t2 && t2.value.trim()) state.teams[1].name = t2.value.trim();
+            }
+            startNewGame();
+        }
+
+        function renderGameScreen() {
+            let q = state.questions[state.currentQuestionIndex];
+            let currentPrize = prizeLadder[9 - state.currentQuestionIndex];
+
+            return `
+                <div class="flex-1 flex flex-col justify-between w-full max-w-6xl mx-auto py-1 animate-fade">
+                    <!-- Studio Top Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl studio-glass mb-2 border border-sky-500/20">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 bg-amber-500/20 border border-amber-500/40 rounded-full text-amber-300 text-[11px] font-bold">
+                                🏆 السؤال ${state.currentQuestionIndex + 1} / 10
+                            </span>
+                            <span class="px-2.5 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-cyan-300 text-[11px] font-bold">
+                                ${state.gameMode === 'SINGLE' ? `👤 ${state.playerName}` : `👥 دور: ${state.teams[state.currentTeamIndex].name}`}
+                            </span>
+                        </div>
+
+                        <!-- Timer Widget -->
+                        <div class="flex items-center gap-1.5 bg-slate-900/80 px-2.5 py-0.5 rounded-full border border-sky-500/30">
+                            <i class="fa-solid fa-clock text-cyan-400 animate-pulse text-xs"></i>
+                            <span id="timer-count" class="font-mono font-bold text-xs text-cyan-300">${state.timer}</span>
+                            <span class="text-[9px] text-slate-400">ث</span>
+                            <div class="w-12 h-1 bg-slate-800 rounded-full overflow-hidden ml-1">
+                                <div id="timer-bar" class="h-full bg-cyan-400 transition-all duration-1000" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lifelines & Score -->
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="useFiftyFifty()" title="مساعدة المختبر (حذف إجابتين)" ${!state.lifelines.fiftyFifty || state.confirmed ? 'opacity-40 cursor-not-allowed' : ''} class="w-7 h-7 rounded-lg bg-blue-600/30 border border-blue-400/50 flex items-center justify-center text-blue-200 text-xs hover:bg-blue-600/50 transition-all">
+                                <i class="fa-solid fa-flask"></i>
+                            </button>
+                            <button onclick="useExpert()" title="رأي الخبير" ${!state.lifelines.expert || state.confirmed ? 'opacity-40 cursor-not-allowed' : ''} class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-xs hover:bg-purple-600/50 transition-all">
+                                <i class="fa-solid fa-brain"></i>
+                            </button>
+                            <button onclick="useHint()" title="تلميح العالم" ${!state.lifelines.hint || state.confirmed ? 'opacity-40 cursor-not-allowed' : ''} class="w-7 h-7 rounded-lg bg-amber-600/30 border border-amber-400/50 flex items-center justify-center text-amber-200 text-xs hover:bg-amber-600/50 transition-all">
+                                <i class="fa-solid fa-lightbulb"></i>
+                            </button>
+                            <div class="px-2.5 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-emerald-300 text-[11px] font-bold">
+                                💰 ${state.score} ن
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expert & Hint banners if active -->
+                    ${renderExpertBanner()}
+                    ${renderHintBanner()}
+
+                    <!-- Core Question & Prize Ladder Grid (Strict Side Placement for Desktop & Tablet) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-2.5 flex-1 items-start">
+                        
+                        <!-- Question & Options Area (3 Columns on Desktop) -->
+                        <div class="lg:col-span-3 flex flex-col gap-2.5">
+                            
+                            <!-- Question Title & Visual Container -->
+                            <div class="studio-card rounded-xl p-3 sm:p-4 border border-sky-500/30 relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[11px] font-bold text-cyan-300 px-2 py-0.5 bg-cyan-950/60 rounded border border-cyan-500/30">
+                                        ${q.title}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-amber-300">
+                                        ⭐ قيمة السؤال: ${currentPrize.points} نقطة
+                                    </span>
+                                </div>
+                                <h2 class="text-xs sm:text-sm md:text-base font-bold text-white mb-2 leading-snug">
+                                    ${q.question}
+                                </h2>
+
+                                <!-- Dynamic Experiment / Image / Visual Asset -->
+                                ${q.imageHTML}
+                            </div>
+
+                            <!-- Interactive Special Question Types (Ordering or Matching) or Compact Standard Options Grid -->
+                            ${renderQuestionInputs(q)}
+
+                            <!-- Confirm & Feedback Action Area -->
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                ${!state.confirmed ? `
+                                    <button onclick="confirmAnswer()" ${!state.selectedOptionId && !q.isInteractiveOrdering && !q.isInteractiveMatching ? 'opacity-50 cursor-not-allowed' : ''} class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-check-circle"></i> تأكيد الإجابة
+                                    </button>
+                                ` : `
+                                    <div class="w-full flex flex-col gap-2">
+                                        <div class="p-2.5 rounded-xl ${state.isCorrect ? 'bg-emerald-950/80 border border-emerald-500/60 text-emerald-200' : 'bg-red-950/80 border border-red-500/60 text-red-200'} flex items-center justify-between">
+                                            <span class="font-bold text-xs flex items-center gap-2">
+                                                ${state.isCorrect ? '🎉 إجابة صحيحة! أحسنت!' : '❌ إجابة غير صحيحة'}
+                                            </span>
+                                            <span class="text-[10px] opacity-80">المفهوم: علمي موثوق</span>
+                                        </div>
+                                        
+                                        <!-- Why & Concept Explanation -->
+                                        <div class="p-2.5 rounded-xl bg-slate-900/90 border border-sky-500/40 text-slate-200 text-xs">
+                                            <p class="font-bold text-cyan-300 mb-0.5"><i class="fa-solid fa-circle-question"></i> لماذا؟ والشرح العلمي:</p>
+                                            <p class="leading-relaxed text-[11px]">${q.why}</p>
+                                        </div>
+
+                                        <button onclick="nextQuestion()" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                                            تابع التحدي <i class="fa-solid fa-arrow-left"></i>
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+
+                        </div>
+
+                        <!-- Prize Ladder Column (Strictly on the side, NEVER below options) -->
+                        <div class="studio-card rounded-xl p-2.5 border border-amber-500/30 flex flex-col gap-1 h-full max-h-[480px] overflow-y-auto">
+                            <h3 class="text-center font-bold text-[11px] text-amber-300 mb-1 border-b border-amber-500/20 pb-1">
+                                سلم الجوائز (مليون العلوم)
+                            </h3>
+                            <div class="flex flex-col gap-1">
+                                ${prizeLadder.map((step, idx) => {
+                                    let qIndex = 9 - idx;
+                                    let isActive = (qIndex === state.currentQuestionIndex);
+                                    let isPassed = (qIndex < state.currentQuestionIndex);
+                                    let stepClass = "prize-step p-1 px-2 rounded-md text-[11px] flex items-center justify-between border border-slate-700/50 ";
+                                    
+                                    if (isActive) {
+                                        stepClass += " active bg-amber-500 text-slate-950 font-bold shadow-md";
+                                    } else if (isPassed) {
+                                        stepClass += " passed bg-emerald-950/50 text-emerald-300 border-emerald-500/40";
+                                    } else {
+                                        stepClass += " bg-slate-900/80 text-slate-300";
+                                    }
+                                    if (step.safe) stepClass += " safe border-dashed border-sky-400";
+
+                                    return `
+                                        <div class="${stepClass}">
+                                            <span class="font-mono font-bold">سـ ${step.level}</span>
+                                            <span class="font-black">${step.points} ن</span>
+                                        </div>
+                                    `;
+                                }).reverse().join('')}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuestionInputs(q) {
+            if (q.isInteractiveOrdering) {
+                return `
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-sky-500/30 flex flex-col gap-2">
+                        <p class="text-xs text-slate-300 text-center font-semibold mb-1">اضغط على العناصر لتحريكها وترتيبها تصاعدياً:</p>
+                        <div class="flex flex-col gap-1.5">
+                            ${state.orderingUserList.map((st, i) => `
+                                <div onclick="moveOrderingItem(${i})" class="p-2.5 bg-slate-800 border border-sky-500/40 rounded-lg text-xs text-white font-bold flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-all">
+                                    <span>${i + 1}. ${st.text}</span>
+                                    <i class="fa-solid fa-arrows-up-down text-cyan-400 text-[11px]"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (q.isInteractiveMatching) {
+                return `
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-sky-500/30 flex flex-col gap-2">
+                        <p class="text-xs text-slate-300 text-center font-semibold mb-1">اختر العنصر ثم اختر ما يناسبه من القائمة المقابلة:</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex flex-col gap-2">
+                                ${q.pairs.map(p => `
+                                    <div class="p-2 bg-slate-800 border border-sky-500/30 rounded-lg text-xs text-cyan-300 font-bold text-center">
+                                        ${p.left}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                ${q.pairs.map(p => {
+                                    let currentSel = state.matchingUserSelections[p.left] || '';
+                                    return `
+                                        <select onchange="updateMatchingSelection('${p.left}', this.value)" class="p-2 bg-slate-800 border border-cyan-500/40 rounded-lg text-xs text-white font-medium focus:outline-none">
+                                            <option value="">-- اختر المطابقة --</option>
+                                            ${shuffleArray(q.pairs).map(item => `
+                                                <option value="${item.right}" ${currentSel === item.right ? 'selected' : ''}>${item.right}</option>
+                                            `).join('')}
+                                        </select>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${q.shuffledOptions.map((opt, i) => {
+                            let isRemoved = state.removedOptions.includes(opt.id);
+                            let isSelected = state.selectedOptionId === opt.id;
+                            let btnClass = "studio-card p-2.5 rounded-xl border text-right transition-all flex items-center gap-2.5 relative group ";
+                            
+                            if (isRemoved) {
+                                return `<div class="p-2.5 rounded-xl bg-slate-950/40 border border-slate-800 opacity-25 cursor-not-allowed flex items-center gap-2.5 text-[11px] text-slate-600"><span>(محذوفة)</span></div>`;
+                            }
+
+                            if (state.confirmed) {
+                                if (opt.id === q.correctId) {
+                                    btnClass += " bg-emerald-950/85 border-emerald-500 text-emerald-100 shadow-[0_0_12px_rgba(16,185,129,0.4)]";
+                                } else if (isSelected) {
+                                    btnClass += " bg-red-950/85 border-red-500 text-red-100 shadow-[0_0_12px_rgba(239,68,68,0.4)]";
+                                } else {
+                                    btnClass += " opacity-50 border-slate-700 bg-slate-900/50";
+                                }
+                            } else {
+                                if (isSelected) {
+                                    btnClass += " border-cyan-400 bg-cyan-950/40 shadow-[0_0_12px_rgba(56,189,248,0.3)] scale-[1.01]";
+                                } else {
+                                    btnClass += " border-sky-500/30 hover:border-sky-400 hover:bg-slate-800/80 bg-slate-900/80 text-slate-200";
+                                }
+                            }
+
+                            let letter = ['أ', 'ب', 'ج', 'د'][i];
+
+                            return `
+                                <button onclick="selectOption('${opt.id}')" ${state.confirmed ? 'disabled' : ''} class="${btnClass}">
+                                    <div class="w-6 h-6 rounded-md bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-cyan-300 font-bold text-[11px] shrink-0">
+                                        ${letter}
+                                    </div>
+                                    <div class="text-xs sm:text-[13px] font-semibold leading-snug flex-1">
+                                        ${opt.text}
+                                    </div>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        function moveOrderingItem(idx) {
+            if (state.confirmed) return;
+            sfx.click();
+            if (idx > 0) {
+                let temp = state.orderingUserList[idx];
+                state.orderingUserList[idx] = state.orderingUserList[idx - 1];
+                state.orderingUserList[idx - 1] = temp;
+                render();
+            }
+        }
+
+        function updateMatchingSelection(leftKey, rightVal) {
+            if (state.confirmed) return;
+            sfx.click();
+            state.matchingUserSelections[leftKey] = rightVal;
+        }
+
+        function selectOption(id) {
+            if (state.confirmed) return;
+            sfx.click();
+            state.selectedOptionId = id;
+            render();
+        }
+
+        function renderExpertBanner() {
+            if (!state.expertHintActive) return '';
+            let q = state.questions[state.currentQuestionIndex];
+            let correctOpt = q.options ? q.options.find(o => o.id === q.correctId) : null;
+            return `
+                <div class="p-2.5 bg-purple-950/80 border border-purple-500/60 rounded-xl text-purple-200 text-xs mb-2 flex items-center gap-2.5 animate-fade">
+                    <i class="fa-solid fa-brain text-lg text-purple-400"></i>
+                    <div>
+                        <span class="font-bold">رأي الخبير العلمي:</span> أعتقد بنسبة كبيرة أن الإجابة الصحيحة هي: <strong class="text-white underline">${correctOpt ? correctOpt.text : 'التوصيل أو الترتيب السليم'}</strong>.
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHintBanner() {
+            if (!state.hintActive) return '';
+            return `
+                <div class="p-2.5 bg-amber-950/80 border border-amber-500/60 rounded-xl text-amber-200 text-xs mb-2 flex items-center gap-2.5 animate-fade">
+                    <i class="fa-solid fa-lightbulb text-lg text-amber-400"></i>
+                    <div>
+                        <span class="font-bold">تلميح العالم:</span> تذكر دائمًا أن التكثيف يتطلب غازًا (بخار ماء) يلامس سطحًا باردًا ليفقد حرارته ويتحول إلى سائل!
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFinishedScreen() {
+            let percentage = Math.round((state.correctCount / 10) * 100);
+            let rankTitle = "🚀 متدرب العلوم";
+            if (percentage >= 90) rankTitle = "🏆 عبقري العلوم";
+            else if (percentage >= 80) rankTitle = "🥇 خبير علمي";
+            else if (percentage >= 70) rankTitle = "🔬 عالم واعد";
+            else if (percentage >= 60) rankTitle = "🧠 مستكشف المعرفة";
+
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 animate-fade">
+                    <div class="studio-card rounded-2xl p-6 sm:p-8 w-full max-w-md text-center relative overflow-hidden">
+                        <div class="w-14 h-14 bg-amber-500/20 border border-amber-500/40 rounded-full flex items-center justify-center text-2xl mx-auto mb-3 text-amber-300 shadow-lg">
+                            🏆
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white mb-1">انتهى تحدي المليون العلمي!</h2>
+                        <p class="text-xs text-cyan-300 mb-5">أداء رائع في درس التكثيف - سلطنة عُمان</p>
+
+                        <div class="grid grid-cols-2 gap-2.5 mb-5">
+                            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-sky-500/30">
+                                <span class="text-[11px] text-slate-400 block mb-0.5">النقاط الكلية</span>
+                                <span class="text-lg font-black text-amber-300">${state.score}</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-2.5 rounded-xl border border-sky-500/30">
+                                <span class="text-[11px] text-slate-400 block mb-0.5">الرتبة العلمية</span>
+                                <span class="text-[11px] font-bold text-cyan-200">${rankTitle}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5 mb-5 text-xs text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <div class="flex justify-between"><span>الإجابات الصحيحة:</span><strong class="text-emerald-400">${state.correctCount}</strong></div>
+                            <div class="flex justify-between"><span>الإجابات الخاطئة:</span><strong class="text-red-400">${state.wrongCount}</strong></div>
+                            <div class="flex justify-between"><span>نسبة النجاح:</span><strong class="text-cyan-400">${percentage}%</strong></div>
+                        </div>
+
+                        <div class="flex flex-col gap-2.5">
+                            <button onclick="sfx.click(); state.currentScreen='REVIEW'; render();" class="w-full py-2.5 bg-purple-600/80 hover:bg-purple-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-book-open"></i> مراجعة الإجابات والشرح
+                            </button>
+
+                            <button onclick="startNewGame()" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> العب من جديد (أسئلة وعشوائية جديدة)
+                            </button>
+
+                            <button onclick="sfx.click(); state.currentScreen='HOME'; render();" class="text-[11px] text-slate-400 hover:text-cyan-300 transition-colors mt-1">
+                                العودة للشاشة الرئيسية
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="flex-1 flex flex-col max-w-3xl mx-auto p-3 animate-fade w-full">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-black text-cyan-300 flex items-center gap-2">
+                            <i class="fa-solid fa-book-open"></i> مراجعة إجابات التحدي
+                        </h2>
+                        <button onclick="sfx.click(); state.currentScreen='FINISHED'; render();" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all">
+                            العودة للنتائج
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-2.5 overflow-y-auto max-h-[70vh] pb-3">
+                        ${state.history.map((item, idx) => `
+                            <div class="studio-card p-3 rounded-xl border ${item.isCorrect ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-red-500/40 bg-red-950/10'}">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[11px] font-bold text-slate-300">السؤال ${idx + 1}</span>
+                                    <span class="text-[11px] font-bold ${item.isCorrect ? 'text-emerald-400' : 'text-red-400'}">
+                                        ${item.isCorrect ? '✓ صحيح' : '✗ غير صحيح'}
+                                    </span>
+                                </div>
+                                <h3 class="text-xs sm:text-sm font-bold text-white mb-1.5">${item.question}</h3>
+                                <div class="text-[11px] text-slate-300 flex flex-col gap-1 mb-1.5 bg-slate-900/60 p-2 rounded-lg">
+                                    <div>إجابتك: <strong class="${item.isCorrect ? 'text-emerald-300' : 'text-red-300'}">${item.userAnswer}</strong></div>
+                                    <div>الإجابة الصحيحة: <strong class="text-cyan-300">${item.correctAnswer}</strong></div>
+                                </div>
+                                <div class="text-[11px] text-slate-200 bg-sky-950/30 border border-sky-500/30 p-2 rounded-lg">
+                                    <strong class="text-cyan-300">التفسير العلمي:</strong> ${item.why}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function () {
+            render();
+        };
+    </script>
+</body>
+</html>

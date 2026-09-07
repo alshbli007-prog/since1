@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مختبر عجلة التحدي – درس التلقيح</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neon-glow {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+        }
+        .spin-wheel {
+            transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none">
+
+    <div id="app" class="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl mx-auto w-full">
+        <!-- المحتوى يتغير ديناميكياً عبر الجافاسكريبت -->
+    </div>
+
+    <script>
+        const questionBank = [
+            {
+                id: 1,
+                type: 'drawing',
+                title: 'تحدي الرسم: أجزاء الزهرة',
+                question: 'أي جزء من الزهرة الموضحة في الرسم ينتج حبوب اللقاح؟',
+                svgType: 'flower_anther',
+                options: [
+                    { id: 'a', text: 'المبيض', correct: false },
+                    { id: 'b', text: 'الميسم', correct: false },
+                    { id: 'c', text: 'المتك', correct: true },
+                    { id: 'd', text: 'القلم', correct: false }
+                ],
+                explanation: 'المتك هو الجزء الذكري في الزهرة المسؤول عن إنتاج حبوب اللقاح.'
+            },
+            {
+                id: 2,
+                type: 'path',
+                title: 'تحدي المسار النباتي',
+                question: 'ما اسم عملية انتقال حبوب اللقاح من المتك إلى الميسم؟',
+                svgType: 'pollen_path',
+                options: [
+                    { id: 'a', text: 'الإنبات', correct: false },
+                    { id: 'b', text: 'التلقيح', correct: true },
+                    { id: 'c', text: 'الإخصاب', correct: false },
+                    { id: 'd', text: 'انتشار البذور', correct: false }
+                ],
+                explanation: 'التلقيح هو عملية انتقال حبوب اللقاح من المتك (عضو التذكير) إلى الميسم (عضو التأنيث).'
+            },
+            {
+                id: 3,
+                type: 'thinking',
+                title: 'تحدي التفكير العلمي',
+                question: 'أي عبارة من العبارات الآتية تصف عملية "الإخصاب" بدقة؟',
+                svgType: 'fertilization',
+                options: [
+                    { id: 'a', text: 'إنتاج حبوب اللقاح داخل المتك.', correct: false },
+                    { id: 'b', text: 'انتقال حبوب اللقاح بواسطة الرياح.', correct: false },
+                    { id: 'c', text: 'اتحاد حبوب اللقاح مع البويضات لتكوين البذور.', correct: true },
+                    { id: 'd', text: 'سقوط حبوب اللقاح على ميسم الزهرة.', correct: false }
+                ],
+                explanation: 'الإخصاب يحدث عندما تتحد حبة اللقاح مع البويضة داخل المبيض لتتكون البذرة.'
+            },
+            {
+                id: 4,
+                type: 'matching',
+                title: 'تحدي التوصيل العلمي',
+                question: 'صل كل جزء بوظيفته أو تصنيفه الصحيح بالنقر:',
+                leftItems: ['السداة', 'الكربلة', 'المتك', 'المبيض'],
+                rightItems: ['عضو التأنيث', 'يحتوي على البويضات', 'ينتج حبوب اللقاح', 'عضو التذكير'],
+                correctPairs: {
+                    'السداة': 'عضو التذكير',
+                    'الكربلة': 'عضو التأنيث',
+                    'المتك': 'ينتج حبوب اللقاح',
+                    'المبيض': 'يحتوي على البويضات'
+                },
+                explanation: 'أعضاء التذكير والتأنيث في الزهرة لها أدوار محددة في تكوين البذور.'
+            },
+            {
+                id: 5,
+                type: 'drawing',
+                title: 'تحدي الرسم: الاستقبال',
+                question: 'إلى أي جزء من أعضاء الزهرة تنتقل حبوب اللقاح لتستقر عليه؟',
+                svgType: 'flower_stigma',
+                options: [
+                    { id: 'a', text: 'المبيض', correct: false },
+                    { id: 'b', text: 'الميسم', correct: true },
+                    { id: 'c', text: 'المتك', correct: false },
+                    { id: 'd', text: 'الخيط', correct: false }
+                ],
+                explanation: 'الميسم هو الجزء اللزج في الأعلى الذي يستقبل حبوب اللقاح القادمة.'
+            },
+            {
+                id: 6,
+                type: 'lab',
+                title: 'تحدي المبيض الداخلي',
+                question: 'أين توجد البويضات داخل الزهرة لتتم حمايتها وحدوث الإخصاب؟',
+                svgType: 'ovary_zoom',
+                options: [
+                    { id: 'a', text: 'الميسم', correct: false },
+                    { id: 'b', text: 'المتك', correct: false },
+                    { id: 'c', text: 'المبيض', correct: true },
+                    { id: 'd', text: 'الخيط', correct: false }
+                ],
+                explanation: 'توجد البويضات داخل المبيض في قاعدة الكربلة (عضو التأنيث).'
+            },
+            {
+                id: 7,
+                type: 'insects',
+                title: 'تحدي حشرات التلقيح',
+                question: 'زهرة ذات ألوان زاهية ولها رائحة عطرة وتفرز رحيقًا، ما طريقة تلقيحها الغالبة؟',
+                svgType: 'insect_flower',
+                options: [
+                    { id: 'a', text: 'الرياح', correct: false },
+                    { id: 'b', text: 'الحشرات', correct: true },
+                    { id: 'c', text: 'الماء', correct: false },
+                    { id: 'd', text: 'الجاذبية', correct: false }
+                ],
+                explanation: 'الألوان الزاهية والروائح العطرة والرحيق تجذب الحشرات لتلعب دورًا في نقل اللقاح.'
+            },
+            {
+                id: 8,
+                type: 'wind',
+                title: 'تحدي رياح التلقيح',
+                question: 'زهرة غير زاهية الألوان، بلا رائحة، وتنتج كميات هائلة من حبوب اللقاح الخفيفة، ما طريقتها؟',
+                svgType: 'wind_flower',
+                options: [
+                    { id: 'a', text: 'الحشرات', correct: false },
+                    { id: 'b', text: 'الماء', correct: false },
+                    { id: 'c', text: 'الرياح', correct: true },
+                    { id: 'd', text: 'الطيور', correct: false }
+                ],
+                explanation: 'أزهار الرياح تعتمد على هواء الجو لنقل حبوب اللقاح الخفيفة دون الحاجة لألوان أو روائح.'
+            },
+            {
+                id: 9,
+                type: 'comparison',
+                title: 'تحدي المقارنة المباشرة',
+                question: 'أي المقارنات التالية صحيحة تمامًا بين أزهار الحشرات وأزهار الرياح؟',
+                svgType: 'comparison_draw',
+                options: [
+                    { id: 'a', text: 'كلاهما له نفس الرائحة والألوان الزاهية تمامًا.', correct: false },
+                    { id: 'b', text: 'أزهار الحشرات زاهية ولها رائحة ورحيق، أما أزهار الرياح فباهتة وبلا رائحة ولكنها تنتج لقاحًا وفيرًا.', correct: true },
+                    { id: 'c', text: 'أزهار الرياح تصنع الرحيق لجذب الفراشات.', correct: false },
+                    { id: 'd', text: 'لا توجد أي فروق بين طريقتي التلقيح.', correct: false }
+                ],
+                explanation: 'تختلف خصائص الزهرة بحسب عامل التلقيح (حشرات أو رياح).'
+            },
+            {
+                id: 10,
+                type: 'error',
+                title: 'تحدي اكتشاف الخطأ',
+                question: 'عبارة: "هذه الزهرة باهتة بلا رائحة وتنتج لقاحًا كثيرًا لأنها تعتمد على الحشرات." - ما الخطأ هنا؟',
+                svgType: 'error_flower',
+                options: [
+                    { id: 'a', text: 'الخطأ أن هذه الخصائص تناسب التلقيح بالرياح وليست الحشرات.', correct: true },
+                    { id: 'b', text: 'الخطأ أن الزهرة يجب أن تكون باللون الأزرق فقط.', correct: false },
+                    { id: 'c', text: 'الخطأ في وجود المبيض.', correct: false },
+                    { id: 'd', text: 'العبارة صحيحة ولا يوجد بها أي خطأ علمي.', correct: false }
+                ],
+                explanation: 'الخصائص المذكورة (باهتة، بلا رائحة، لقاح غزير) تتبع التلقيح بالرياح لا الحشرات.'
+            },
+            {
+                id: 11,
+                type: 'ordering',
+                title: 'تحدي الترتيب العلمي',
+                question: 'رتب عناصر ومراحل انتقال حبوب اللقاح تصاعديًا من المصدر إلى العملية:',
+                items: ['المتك', 'حبوب اللقاح', 'الميسم', 'التلقيح'],
+                correctOrder: ['المتك', 'حبوب اللقاح', 'الميسم', 'التلقيح'],
+                explanation: 'تخرج حبوب اللقاح من المتك وتصل إلى الميسم لتتم عملية التلقيح بنجاح.'
+            },
+            {
+                id: 12,
+                type: 'composite',
+                title: 'تحدي الأرقام والأجزاء',
+                question: 'في الزهرة العلمية، أي جزء يمثل الحجرة الداخلية التي تحوي البويضات؟',
+                svgType: 'composite_flower',
+                options: [
+                    { id: 'a', text: 'الميسم', correct: false },
+                    { id: 'b', text: 'المبيض', correct: true },
+                    { id: 'c', text: 'المتك', correct: false },
+                    { id: 'd', text: 'السبلة', correct: false }
+                ],
+                explanation: 'المبيض هو الجزء السفلي المنتفاخ الذي يحمي بداخله البويضات.'
+            },
+            {
+                id: 13,
+                type: 'difference',
+                title: 'تحدي الفرق بين المفهومين',
+                question: 'ما الفرق الجوهري بين عمليتي "التلقيح" و"الإخصاب" في النباتات الزهرية؟',
+                svgType: 'diff_scheme',
+                options: [
+                    { id: 'a', text: 'التلقيح يحدث داخل البذرة فقط.', correct: false },
+                    { id: 'b', text: 'التلقيح هو انتقال حبوب اللقاح، بينما الإخصاب هو اتحاد اللقاح بالبويضة.', correct: true },
+                    { id: 'c', text: 'كلاهما مرادفان تمامًا لمعنى انتشار الثمار.', correct: false },
+                    { id: 'd', text: 'الإخصاب يسبق التلقيح دائماً.', correct: false }
+                ],
+                explanation: 'التلقيح خطوة أولى (وصول اللقاح)، يليها الإخصاب (اتحاد النواة بالبويضة لتكوين البذرة).'
+            },
+            {
+                id: 14,
+                type: 'final_challenge',
+                title: 'التحدي النهائي للمختبر',
+                question: 'انتقلت حبوب اللقاح من المتك إلى الميسم ثم اتحدت مع البويضات، فما العمليتان بالترتيب؟',
+                svgType: 'final_flow',
+                options: [
+                    { id: 'a', text: 'الإخصاب ثم التلقيح', correct: false },
+                    { id: 'b', text: 'انتشار البذور ثم الإخصاب', correct: false },
+                    { id: 'c', text: 'التلقيح ثم الإخصاب', correct: true },
+                    { id: 'd', text: 'الإنبات ثم التلقيح', correct: false }
+                ],
+                explanation: 'الترتيب العلمي الصحيح يبدأ بالتلقيح أولاً ثم يعقبه الإخصاب داخل المبيض.'
+            }
+        ];
+
+        let gameState = {
+            screen: 'START',
+            mode: 'solo',
+            playerName: 'الباحث الصغير',
+            teams: [],
+            currentTeamIndex: 0,
+            roundQuestions: [],
+            currentQuestionIndex: 0,
+            score: 0,
+            energy: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            unansweredCount: 0,
+            timer: 30,
+            timerInterval: null,
+            selectedChallenge: null,
+            wheelAngle: 0,
+            matchingState: {
+                selectedLeft: null,
+                connections: {},
+                confirmed: false
+            },
+            orderingState: {},
+            history: []
+        };
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            let now = audioCtx.currentTime;
+            if (type === 'spin') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.3);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                osc.frequency.setValueAtTime(800, now + 0.15);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initNewGameSession() {
+            let shuffledBank = shuffleArray(questionBank);
+            let selected10 = shuffledBank.slice(0, 10);
+            
+            gameState.roundQuestions = selected10.map(q => {
+                let qCopy = JSON.parse(JSON.stringify(q));
+                if (qCopy.options) {
+                    qCopy.options = shuffleArray(qCopy.options);
+                }
+                if (qCopy.leftItems && qCopy.rightItems) {
+                    qCopy.leftItems = shuffleArray(qCopy.leftItems);
+                    qCopy.rightItems = shuffleArray(qCopy.rightItems);
+                }
+                if (qCopy.items) {
+                    qCopy.items = shuffleArray(qCopy.items);
+                }
+                return qCopy;
+            });
+
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.energy = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.unansweredCount = 0;
+            gameState.history = [];
+            gameState.currentTeamIndex = 0;
+        }
+
+        function renderSvgArt(svgType) {
+            switch(svgType) {
+                case 'flower_anther':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto drop-shadow-xl">
+                            <path d="M100 200 Q 75 160 50 175 Q 75 210 100 200 Z" fill="#15803d" />
+                            <path d="M150 200 Q 175 160 200 175 Q 175 210 150 200 Z" fill="#16a34a" />
+                            <path d="M125 210 L125 150" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+                            <ellipse cx="125" cy="150" rx="25" ry="12" fill="#047857"/>
+                            <path d="M125 150 Q 80 80 50 100 Q 30 130 90 145 Z" fill="#f43f5e" opacity="0.9"/>
+                            <path d="M125 150 Q 170 80 200 100 Q 220 130 160 145 Z" fill="#fb7185" opacity="0.9"/>
+                            <path d="M125 150 Q 125 40 100 65 Q 125 90 150 65 Z" fill="#e11d48" opacity="0.95"/>
+                            <path d="M125 150 L125 90" stroke="#22c55e" stroke-width="4"/>
+                            <circle cx="125" cy="88" r="8" fill="#ec4899"/>
+                            <path d="M105 150 Q 95 110 80 95" stroke="#fef08a" stroke-width="3" fill="none"/>
+                            <ellipse cx="78" cy="92" rx="7" ry="5" fill="#eab308" stroke="#ca8a04" stroke-width="2"/>
+                            <path d="M145 150 Q 155 110 170 95" stroke="#fef08a" stroke-width="3" fill="none"/>
+                            <ellipse cx="172" cy="92" rx="7" ry="5" fill="#eab308" stroke="#ca8a04" stroke-width="2"/>
+                            <text x="80" y="30" fill="#38bdf8" font-size="13" font-weight="bold">مخطط تشريحي للزهرة</text>
+                        </svg>`;
+                case 'pollen_path':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <path d="M70 180 Q 125 80 180 180" stroke="#fbbf24" stroke-dasharray="8" stroke-width="4" fill="none"/>
+                            <circle cx="70" cy="180" r="14" fill="#ca8a04"/>
+                            <circle cx="180" cy="180" r="16" fill="#ec4899"/>
+                            <circle cx="125" cy="115" r="8" fill="#ffffff" class="animate-ping"/>
+                            <text x="75" y="60" fill="#38bdf8" font-size="15" font-weight="bold">مسار الانتقال النباتي</text>
+                        </svg>`;
+                case 'fertilization':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <ellipse cx="125" cy="130" rx="60" ry="70" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="4"/>
+                            <circle cx="105" cy="120" r="12" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                            <circle cx="145" cy="120" r="12" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                            <circle cx="125" cy="155" r="12" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                            <circle cx="125" cy="120" r="6" fill="#ffffff" class="animate-bounce"/>
+                            <text x="75" y="40" fill="#f8fafc" font-size="14" font-weight="bold">التجويف الداخلي للمبيض</text>
+                        </svg>`;
+                case 'flower_stigma':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <path d="M125 210 L125 110" stroke="#16a34a" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M110 110 Q 125 80 140 110 Z" fill="#ec4899"/>
+                            <circle cx="125" cy="80" r="15" fill="#fb7185" stroke="#be123c" stroke-width="3"/>
+                            <text x="80" y="50" fill="#38bdf8" font-size="13" font-weight="bold">المنطقة العلوية للكربلة</text>
+                        </svg>`;
+                case 'ovary_zoom':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <path d="M90 80 Q 60 140 90 200 Q 125 220 160 200 Q 190 140 160 80 Z" fill="none" stroke="#22c55e" stroke-width="5"/>
+                            <circle cx="110" cy="140" r="14" fill="#facc15"/>
+                            <circle cx="140" cy="140" r="14" fill="#facc15"/>
+                            <circle cx="125" cy="175" r="14" fill="#facc15"/>
+                            <text x="70" y="50" font-size="14" font-weight="bold" fill="#facc15">قطاع مكبر في المبيض</text>
+                        </svg>`;
+                case 'insect_flower':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <circle cx="125" cy="130" r="45" fill="#f43f5e" opacity="0.85"/>
+                            <circle cx="125" cy="130" r="16" fill="#facc15"/>
+                            <ellipse cx="180" cy="90" rx="16" ry="10" fill="#1e293b" transform="rotate(-25 180 90)"/>
+                            <path d="M170 85 L190 95 M173 90 L187 82" stroke="#facc15" stroke-width="3"/>
+                            <circle cx="192" cy="82" r="6" fill="#facc15"/>
+                            <path d="M170 75 Q 150 55 145 70" stroke="#38bdf8" stroke-width="2" fill="none"/>
+                            <text x="70" y="210" fill="#38bdf8" font-size="13" font-weight="bold">نموذج تفاعلي نباتي</text>
+                        </svg>`;
+                case 'wind_flower':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <path d="M30 80 Q 100 60 220 80" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5" fill="none"/>
+                            <path d="M20 120 Q 120 100 230 120" stroke="#94a3b8" stroke-width="3" stroke-dasharray="5" fill="none"/>
+                            <line x1="125" y1="200" x2="125" y2="100" stroke="#64748b" stroke-width="6"/>
+                            <circle cx="125" cy="95" r="14" fill="#cbd5e1"/>
+                            <text x="75" y="230" fill="#94a3b8" font-size="13" font-weight="bold">نموذج نباتي قياسي</text>
+                        </svg>`;
+                case 'comparison_draw':
+                case 'error_flower':
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <rect x="25" y="50" width="85" height="130" rx="12" fill="rgba(244,63,94,0.15)" stroke="#f43f5e" stroke-width="3"/>
+                            <text x="40" y="80" fill="#f43f5e" font-size="12" font-weight="bold">نموذج (1)</text>
+                            <circle cx="68" cy="130" r="22" fill="#f43f5e" opacity="0.7"/>
+                            
+                            <rect x="140" y="50" width="85" height="130" rx="12" fill="rgba(148,163,184,0.15)" stroke="#94a3b8" stroke-width="3"/>
+                            <text x="155" y="80" fill="#94a3b8" font-size="12" font-weight="bold">نموذج (2)</text>
+                            <line x1="160" y1="120" x2="205" y2="120" stroke="#e2e8f0" stroke-width="4"/>
+                            <line x1="165" y1="140" x2="200" y2="140" stroke="#e2e8f0" stroke-width="4"/>
+                        </svg>`;
+                case 'composite_flower':
+                case 'final_flow':
+                default:
+                    return `
+                        <svg viewBox="0 0 250 250" class="w-56 h-56 mx-auto">
+                            <path d="M125 210 L125 130" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M125 130 Q 80 70 50 90 Q 30 110 90 130 Z" fill="#ec4899" opacity="0.85"/>
+                            <path d="M125 130 Q 170 70 200 90 Q 220 110 160 130 Z" fill="#f43f5e" opacity="0.85"/>
+                            <circle cx="125" cy="120" r="18" fill="#facc15"/>
+                            <text x="45" y="235" fill="#38bdf8" font-size="13" font-weight="bold">المختبر النباتي المستقبلي المتقدم</text>
+                        </svg>`;
+            }
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (gameState.screen === 'START') {
+                app.innerHTML = `
+                    <div class="glass-panel neon-glow rounded-3xl p-8 max-w-2xl w-full text-center space-y-6 my-auto">
+                        <div class="flex flex-col items-center space-y-3 border-b border-slate-700 pb-6">
+                            <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار سلطنة عمان" class="w-20 h-20 object-contain drop-shadow">
+                            <div class="text-xs text-slate-300 space-y-1">
+                                <p class="font-bold text-sm">سلطنة عمان</p>
+                                <p class="font-bold text-sm">وزارة التعليم</p>
+                                <p>المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                                <p class="text-sky-400 font-semibold">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-700">
+                            <div class="w-32 h-40 rounded-xl overflow-hidden border-2 border-sky-400 shadow-md">
+                                <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top">
+                            </div>
+                            <div class="text-xs space-y-1">
+                                <p class="font-bold text-white text-sm">أ. فيصل الشبلي</p>
+                                <p class="text-slate-400">هاتف: 99812126 | Instagram: faalll8</p>
+                                <p class="text-emerald-400 font-semibold">مدير المدرسة: أ. سعود الشيزاوي</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-400">
+                                🎡 مختبر عجلة التحدي – درس التلقيح
+                            </h1>
+                            <p class="text-slate-400 text-sm">مادة العلوم | الصف الخامس | دورة حياة النباتات الزهرية</p>
+                        </div>
+
+                        <button onclick="goToExplore()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-bold text-lg rounded-2xl shadow-lg transition transform hover:scale-102">
+                            🚀 دخول المختبر والاستكشاف
+                        </button>
+                    </div>
+                `;
+            } 
+            else if (gameState.screen === 'EXPLORE') {
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-3xl w-full space-y-6 my-auto">
+                        <div class="text-center space-y-2">
+                            <span class="text-xs uppercase px-3 py-1 bg-sky-500/20 text-sky-400 rounded-full font-bold">مرحلة تمهيدية</span>
+                            <h2 class="text-2xl md:text-3xl font-black text-emerald-400">🔬 استكشف قبل أن تتحدى</h2>
+                            <p class="text-slate-300 text-sm">تعرف على أجزاء الزهرة ومفاهيم التلقيح والإخصاب الأساسية:</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 space-y-2">
+                                <h3 class="font-bold text-sky-300 text-base">🌸 أجزاء الزهرة الأساسية:</h3>
+                                <ul class="space-y-1 text-slate-300">
+                                    <li><strong class="text-yellow-400">السداة:</strong> عضو التذكير في الزهرة.</li>
+                                    <li><strong class="text-yellow-400">المتك:</strong> الجزء الذي ينتج حبوب اللقاح.</li>
+                                    <li><strong class="text-yellow-400">الخيط:</strong> جزء يحمل المتك ويصقله.</li>
+                                    <li><strong class="text-yellow-400">الكربلة:</strong> عضو التأنيث في الزهرة.</li>
+                                    <li><strong class="text-yellow-400">الميسم:</strong> جزء لزج يستقبل حبوب اللقاح.</li>
+                                    <li><strong class="text-yellow-400">القلم:</strong> جزء يصل الميسم بالمبيض.</li>
+                                    <li><strong class="text-yellow-400">المبيض:</strong> التجويف الذي يحتوي على البويضات.</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 space-y-3">
+                                <h3 class="font-bold text-pink-400 text-base">🧬 مفاهيم علمية رئيسية:</h3>
+                                <div class="space-y-2">
+                                    <div class="p-2 bg-slate-800/80 rounded-lg">
+                                        <p class="font-bold text-emerald-300">🌸 التلقيح:</p>
+                                        <p class="text-xs text-slate-300">نقل حبوب اللقاح من المتك إلى الميسم لزهرة من النوع نفسه.</p>
+                                    </div>
+                                    <div class="p-2 bg-slate-800/80 rounded-lg">
+                                        <p class="font-bold text-emerald-300">🌱 الإخصاب:</p>
+                                        <p class="text-xs text-slate-300">اتحاد حبة اللقاح مع البويضة داخل المبيض لتكوين البذور.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="goToModeSelection()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">
+                            ✅ فهمت المفاهيم، انتقل لاختيار نمط اللعب
+                        </button>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'MODE_SELECTION') {
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-8 max-w-xl w-full text-center space-y-6 my-auto">
+                        <h2 class="text-2xl font-black text-sky-400">اختر نمط التحدي</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onclick="selectMode('solo')" class="p-6 bg-slate-800/80 hover:bg-slate-700 border-2 border-emerald-500/50 rounded-2xl flex flex-col items-center space-y-3 transition group">
+                                <span class="text-4xl">🎯</span>
+                                <span class="font-bold text-lg group-hover:text-emerald-400">لعب فردي</span>
+                                <span class="text-xs text-slate-400">تحدى نفسك في 10 أسئلة علمية</span>
+                            </button>
+                            <button onclick="selectMode('teams')" class="p-6 bg-slate-800/80 hover:bg-slate-700 border-2 border-sky-500/50 rounded-2xl flex flex-col items-center space-y-3 transition group">
+                                <span class="text-4xl">👥</span>
+                                <span class="font-bold text-lg group-hover:text-sky-400">لعب جماعي (فرق)</span>
+                                <span class="text-xs text-slate-400">تنافس مع زملائك في مجموعات</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'PLAYER_SETUP') {
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-8 max-w-md w-full text-center space-y-6 my-auto">
+                        <h2 class="text-2xl font-bold text-emerald-400">أدخل اسم الباحث الصغير</h2>
+                        <input type="text" id="playerNameInput" value="${gameState.playerName}" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-lg text-white focus:outline-none focus:border-emerald-500">
+                        <button onclick="startMainGame()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">
+                            🚀 انطلق إلى عجلة التحدي
+                        </button>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'TEAM_SETUP') {
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-8 max-w-lg w-full text-center space-y-6 my-auto">
+                        <h2 class="text-2xl font-bold text-sky-400">إعداد الفرق المتنافسة</h2>
+                        <p class="text-sm text-slate-300">اختر عدد الفرق (من 2 إلى 4):</p>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="setupTeamCount(2)" class="px-5 py-2 bg-slate-800 hover:bg-sky-600 rounded-xl font-bold border border-slate-600 transition">2 فرق</button>
+                            <button onclick="setupTeamCount(3)" class="px-5 py-2 bg-slate-800 hover:bg-sky-600 rounded-xl font-bold border border-slate-600 transition">3 فرق</button>
+                            <button onclick="setupTeamCount(4)" class="px-5 py-2 bg-slate-800 hover:bg-sky-600 rounded-xl font-bold border border-slate-600 transition">4 فرق</button>
+                        </div>
+                        <div id="teamNamesContainer" class="space-y-3"></div>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'WHEEL_SPIN' || gameState.screen === 'TEAM_TRANSITION') {
+                let activeTitle = gameState.mode === 'teams' ? `دور فريق: <span class="text-yellow-400">${gameState.teams[gameState.currentTeamIndex].name}</span>` : `الباحث: <span class="text-emerald-400">${gameState.playerName}</span>`;
+                
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-3xl w-full text-center space-y-6 my-auto">
+                        <div class="flex justify-between items-center bg-slate-900/60 p-3 rounded-xl border border-slate-700 text-sm">
+                            <div>${activeTitle}</div>
+                            <div class="text-sky-400 font-bold">السؤال ${gameState.currentQuestionIndex + 1} من 10</div>
+                            <div class="text-emerald-400 font-bold">النقاط: ${gameState.score}</div>
+                        </div>
+
+                        <div class="flex flex-col items-center space-y-2">
+                            <div class="w-full bg-slate-900 rounded-full h-4 overflow-hidden border border-slate-700">
+                                <div class="bg-gradient-to-r from-emerald-500 to-sky-500 h-full transition-all duration-500" style="width: ${gameState.energy}%"></div>
+                            </div>
+                            <p class="text-xs text-slate-400">طاقة المختبر: ${gameState.energy}%</p>
+                        </div>
+
+                        <div class="relative py-6 flex flex-col items-center">
+                            <div class="absolute z-10 -top-1 w-8 h-10 bg-yellow-400 shadow-lg transform -translate-x-1/2 left-1/2 rounded-b-md border border-amber-600 flex items-center justify-center text-xs font-black text-slate-950">▼</div>
+                            <div class="w-56 h-56 rounded-full border-8 border-emerald-500 bg-gradient-to-tr from-slate-950 via-emerald-950 to-sky-950 flex items-center justify-center relative shadow-2xl spin-wheel overflow-hidden" id="wheelElement">
+                                <div class="absolute inset-2 rounded-full border-4 border-dashed border-sky-400/40 pointer-events-none"></div>
+                                <div class="absolute w-3 h-3 bg-yellow-400 rounded-full z-20 shadow-md"></div>
+                                <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                    <span class="text-3xl filter drop-shadow">🎡</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h2 class="text-2xl font-black text-sky-300">عجلة التحدي العلمية جاهزة!</h2>
+                            <p class="text-slate-300 text-sm">اضغط على الزر أدناه لتدوير العجلة واكتشاف التحدي النباتي التالي:</p>
+                            <button onclick="spinWheel()" id="spinBtn" class="px-8 py-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-950 font-black text-lg rounded-2xl shadow-lg transition transform hover:scale-105">
+                                🎲 أدر العجلة الآن
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'QUESTION') {
+                let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+                gameState.selectedChallenge = q;
+                
+                startTimer();
+
+                let contentHtml = '';
+                if (q.type === 'matching') {
+                    contentHtml = renderMatchingQuestionHtml(q);
+                } else if (q.type === 'ordering') {
+                    contentHtml = renderOrderingQuestionHtml(q);
+                } else {
+                    contentHtml = renderMultipleChoiceHtml(q);
+                }
+
+                let activeName = gameState.mode === 'teams' ? gameState.teams[gameState.currentTeamIndex].name : gameState.playerName;
+
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-3xl w-full space-y-6 my-auto">
+                        <div class="flex justify-between items-center bg-slate-900/60 p-3 rounded-xl border border-slate-700 text-sm">
+                            <div class="text-emerald-400 font-bold">${activeName}</div>
+                            <div class="text-yellow-400 font-bold">⏱️ الوقت: <span id="timerDisplay">${gameState.timer}</span> ث</div>
+                            <div class="text-sky-400 font-bold">السؤال ${gameState.currentQuestionIndex + 1} / 10</div>
+                        </div>
+
+                        ${renderSvgArt(q.svgType || 'composite_flower')}
+
+                        <div class="space-y-4 text-center">
+                            <h2 class="text-xl md:text-2xl font-bold text-white">${q.question}</h2>
+                            ${contentHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'FEEDBACK') {
+                let historyItem = gameState.history[gameState.history.length - 1];
+                let isCorrect = historyItem.isCorrect;
+                
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-2xl w-full text-center space-y-6 my-auto">
+                        <div class="text-5xl">${isCorrect ? '✅' : '❌'}</div>
+                        <h2 class="text-2xl font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${isCorrect ? 'إجابة صحيحة!' : 'إجابة غير صحيحة'}
+                        </h2>
+
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-2 text-right">
+                            <p class="text-xs text-yellow-400 font-bold">⭐ النقاط المكتسبة لهذا السؤال: +${isCorrect ? 100 : 0}</p>
+                            <h3 class="font-bold text-sky-300 text-sm">لماذا؟ (التفسير العلمي):</h3>
+                            <p class="text-slate-200 text-sm leading-relaxed">${historyItem.explanation}</p>
+                        </div>
+
+                        <button onclick="nextStepAfterFeedback()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-bold rounded-xl shadow transition">
+                            متابعة التحدي ⬅️
+                        </button>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'FINISHED') {
+                let percentage = (gameState.correctCount / 10) * 100;
+                let ratingTitle = '';
+                let stars = '';
+                if (percentage >= 90) { ratingTitle = '🌟 عالم التلقيح'; stars = '⭐⭐⭐⭐⭐'; }
+                else if (percentage >= 80) { ratingTitle = '🔬 خبير النباتات'; stars = '⭐⭐⭐⭐'; }
+                else if (percentage >= 70) { ratingTitle = '🌱 مستكشف علمي'; stars = '⭐⭐⭐'; }
+                else if (percentage >= 60) { ratingTitle = '🌸 باحث واعد'; stars = '⭐⭐'; }
+                else { ratingTitle = '🧪 واصل التجربة'; stars = '⭐'; }
+
+                let winnerText = '';
+                if (gameState.mode === 'teams') {
+                    let bestTeam = [...gameState.teams].sort((a,b) => b.score - a.score)[0];
+                    winnerText = `<div class="p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-xl text-yellow-300 font-bold">🏆 الفريق الفائز: ${bestTeam.name} (${bestTeam.score} نقطة)</div>`;
+                }
+
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-2xl w-full text-center space-y-6 my-auto">
+                        <div class="space-y-2">
+                            <h2 class="text-3xl font-black text-emerald-400">🎉 تم تشغيل مختبر التلقيح بنجاح!</h2>
+                            <p class="text-slate-300 text-sm">أتممت رحلتك الاستكشافية في عالم النباتات الزهرية.</p>
+                        </div>
+
+                        ${winnerText}
+
+                        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div class="bg-slate-800/80 p-3 rounded-xl">
+                                <p class="text-xs text-slate-400">النقاط الإجمالية</p>
+                                <p class="text-xl font-bold text-yellow-400">${gameState.score} / 1000</p>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl">
+                                <p class="text-xs text-slate-400">الإجابات الصحيحة</p>
+                                <p class="text-xl font-bold text-emerald-400">${gameState.correctCount}</p>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl">
+                                <p class="text-xs text-slate-400">الإجابات الخاطئة</p>
+                                <p class="text-xl font-bold text-rose-400">${gameState.wrongCount}</p>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl">
+                                <p class="text-xs text-slate-400">النسبة المئوية</p>
+                                <p class="text-xl font-bold text-sky-400">${percentage}%</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                            <div class="text-2xl">${stars}</div>
+                            <h3 class="font-bold text-lg text-white">${ratingTitle}</h3>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-3">
+                            <button onclick="goToReview()" class="flex-1 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow transition">
+                                🔎 مراجعة الإجابات
+                            </button>
+                            <button onclick="restartGame()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">
+                                🔄 العب من جديد
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (gameState.screen === 'REVIEW') {
+                let historyCards = gameState.history.map((item, idx) => `
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 text-right space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-sky-400">السؤال ${idx + 1}: ${item.title}</span>
+                            <span class="${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'} font-bold">${item.isCorrect ? '✅ صحيحة' : '❌ خاطئة'}</span>
+                        </div>
+                        <p class="font-semibold text-white text-sm">${item.question}</p>
+                        <p class="text-xs text-slate-300"><strong class="text-yellow-400">إجابتك:</strong> ${item.userAnswer}</p>
+                        <p class="text-xs text-slate-300"><strong class="text-emerald-300">الإجابة الصحيحة:</strong> ${item.correctAnswer}</p>
+                        <p class="text-xs text-slate-400 pt-1 border-t border-slate-800"><strong class="text-sky-300">التفسير:</strong> ${item.explanation}</p>
+                    </div>
+                `).join('');
+
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-3xl w-full space-y-6 my-auto max-h-[85vh] flex flex-col">
+                        <h2 class="text-2xl font-bold text-sky-400 text-center">🔎 سجل مراجعة الإجابات العلمية</h2>
+                        <div class="flex-1 overflow-y-auto space-y-4 pr-2">
+                            ${historyCards}
+                        </div>
+                        <button onclick="restartGame()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">
+                            🔄 العب من جديد
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function goToExplore() {
+            gameState.screen = 'EXPLORE';
+            render();
+        }
+
+        function goToModeSelection() {
+            gameState.screen = 'MODE_SELECTION';
+            render();
+        }
+
+        function selectMode(mode) {
+            gameState.mode = mode;
+            if (mode === 'solo') {
+                gameState.screen = 'PLAYER_SETUP';
+            } else {
+                gameState.screen = 'TEAM_SETUP';
+            }
+            render();
+        }
+
+        function setupTeamCount(count) {
+            let container = document.getElementById('teamNamesContainer');
+            let html = '<div class="space-y-3 mt-4">';
+            for (let i = 1; i <= count; i++) {
+                html += `<input type="text" id="teamName_${i}" placeholder="اسم الفريق ${i}" value="فريق ${i}" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-center text-sm focus:outline-none focus:border-sky-550">`;
+            }
+            html += `<button onclick="saveTeams(${count})" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow transition mt-2">بدء التحدي الجماعي</button></div>`;
+            container.innerHTML = html;
+        }
+
+        function saveTeams(count) {
+            gameState.teams = [];
+            for (let i = 1; i <= count; i++) {
+                let name = document.getElementById(`teamName_${i}`).value || `فريق ${i}`;
+                gameState.teams.push({ name: name, score: 0 });
+            }
+            initNewGameSession();
+            gameState.screen = 'WHEEL_SPIN';
+            render();
+        }
+
+        function startMainGame() {
+            let input = document.getElementById('playerNameInput');
+            if (input && input.value.trim()) {
+                gameState.playerName = input.value.trim();
+            }
+            initNewGameSession();
+            gameState.screen = 'WHEEL_SPIN';
+            render();
+        }
+
+        function spinWheel() {
+            playSound('spin');
+            let wheel = document.getElementById('wheelElement');
+            let btn = document.getElementById('spinBtn');
+            if (btn) btn.disabled = true;
+
+            gameState.wheelAngle += 720 + Math.floor(Math.random() * 360);
+            if (wheel) {
+                wheel.style.transform = `rotate(${gameState.wheelAngle}deg)`;
+            }
+
+            setTimeout(() => {
+                playSound('correct');
+                gameState.screen = 'QUESTION';
+                render();
+            }, 3500);
+        }
+
+        function startTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+            gameState.timer = (q.type === 'matching' || q.type === 'drawing') ? 40 : (q.type === 'comparison' ? 45 : 30);
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                let display = document.getElementById('timerDisplay');
+                if (display) display.textContent = gameState.timer;
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+            gameState.wrongCount++;
+            gameState.unansweredCount++;
+            
+            let correctAnswerText = getCorrectAnswerText(q);
+            gameState.history.push({
+                title: q.title,
+                question: q.question,
+                userAnswer: 'انتهى الوقت ولم يجب',
+                correctAnswer: correctAnswerText,
+                explanation: q.explanation,
+                isCorrect: false
+            });
+
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function getCorrectAnswerText(q) {
+            if (q.options) {
+                let corrOpt = q.options.find(o => o.correct);
+                return corrOpt ? corrOpt.text : '';
+            } else if (q.matchingState && q.correctPairs) {
+                return Object.entries(q.correctPairs).map(([k,v]) => `${k} ↔ ${v}`).join(', ');
+            } else if (q.items) {
+                return q.correctOrder.join(' ← ');
+            }
+            return '';
+        }
+
+        function renderMultipleChoiceHtml(q) {
+            let buttons = q.options.map(opt => `
+                <button onclick="submitAnswer('${opt.id}')" class="w-full p-4 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 hover:border-sky-500 rounded-xl text-right text-white font-semibold transition transform hover:scale-101">
+                    <span class="inline-block w-8 h-8 bg-slate-800 rounded-lg text-center leading-8 ml-3 text-sky-400 font-bold">${opt.id.toUpperCase()}</span>
+                    ${opt.text}
+                </button>
+            `).join('');
+            return `<div class="space-y-3 mt-4">${buttons}</div>`;
+        }
+
+        function submitAnswer(optionId) {
+            clearInterval(gameState.timerInterval);
+            let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+            let selectedOpt = q.options.find(o => o.id === optionId);
+            let isCorrect = selectedOpt ? selectedOpt.correct : false;
+
+            if (isCorrect) {
+                playSound('correct');
+                gameState.score += 100;
+                gameState.energy = Math.min(100, gameState.energy + 10);
+                gameState.correctCount++;
+                if (gameState.mode === 'teams') {
+                    gameState.teams[gameState.currentTeamIndex].score += 100;
+                }
+            } else {
+                playSound('wrong');
+                gameState.wrongCount++;
+            }
+
+            let corrOpt = q.options.find(o => o.correct);
+            gameState.history.push({
+                title: q.title,
+                question: q.question,
+                userAnswer: selectedOpt ? selectedOpt.text : '',
+                correctAnswer: corrOpt ? corrOpt.text : '',
+                explanation: q.explanation,
+                isCorrect: isCorrect
+            });
+
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function renderMatchingQuestionHtml(q) {
+            if (!gameState.matchingState.leftItemsShuffled) {
+                gameState.matchingState.selectedLeft = null;
+                gameState.matchingState.connections = {};
+                gameState.matchingState.confirmed = false;
+                gameState.matchingState.leftItemsShuffled = q.leftItems;
+                gameState.matchingState.rightItemsShuffled = q.rightItems;
+            }
+
+            let leftBtns = gameState.matchingState.leftItemsShuffled.map(item => {
+                let isSelected = gameState.matchingState.selectedLeft === item;
+                let isConnected = gameState.matchingState.connections[item];
+                let bgClass = isSelected ? 'bg-sky-600 border-sky-400' : (isConnected ? 'bg-slate-800 border-slate-600' : 'bg-slate-900 border-slate-700');
+                return `<button onclick="selectMatchingLeft('${item}')" class="p-3 ${bgClass} border rounded-xl text-white font-semibold text-sm transition text-right flex justify-between items-center">
+                    <span>${item}</span>
+                    ${isConnected ? `<span class="text-xs text-sky-400">🔗 (مرتبط)</span>` : ''}
+                </button>`;
+            }).join('');
+
+            let rightBtns = gameState.matchingState.rightItemsShuffled.map(item => {
+                let isTargetConnected = Object.values(gameState.matchingState.connections).includes(item);
+                let bgClass = isTargetConnected ? 'bg-slate-800 border-slate-600' : 'bg-slate-900 border-slate-700';
+                return `<button onclick="selectMatchingRight('${item}')" class="p-3 ${bgClass} border rounded-xl text-white font-semibold text-sm transition text-right">
+                    ${item}
+                </button>`;
+            }).join('');
+
+            let connectionsList = Object.entries(gameState.matchingState.connections).map(([l, r]) => `
+                <div class="flex justify-between items-center bg-slate-800/80 px-3 py-1.5 rounded-lg text-xs">
+                    <span>${l} ↔ ${r}</span>
+                    <button onclick="removeConnection('${l}')" class="text-rose-400 hover:text-rose-300 font-bold">❌ إلغاء التوصيل</button>
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-4">
+                    <p class="text-xs text-sky-300">اختر عنصرًا من الطرف الأول ثم اختر ما يناسبه من الطرف الثاني:</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2"><p class="text-xs font-bold text-yellow-400">الطرف الأول</p>${leftBtns}</div>
+                        <div class="space-y-2"><p class="text-xs font-bold text-yellow-400">الطرف الثاني</p>${rightBtns}</div>
+                    </div>
+                    ${connectionsList ? `<div class="space-y-1 mt-2"><p class="text-xs text-slate-400">التوصيلات الحالية:</p>${connectionsList}</div>` : ''}
+                    <button onclick="confirmMatching()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition mt-2">تأكيد الإجابة</button>
+                </div>
+            `;
+        }
+
+        function selectMatchingLeft(item) {
+            gameState.matchingState.selectedLeft = item;
+            render();
+        }
+
+        function selectMatchingRight(item) {
+            if (gameState.matchingState.selectedLeft) {
+                let left = gameState.matchingState.selectedLeft;
+                gameState.matchingState.connections[left] = item;
+                gameState.matchingState.selectedLeft = null;
+                render();
+            }
+        }
+
+        function removeConnection(leftItem) {
+            delete gameState.matchingState.connections[leftItem];
+            render();
+        }
+
+        function confirmMatching() {
+            clearInterval(gameState.timerInterval);
+            let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+            let pairs = gameState.matchingState.connections;
+            let correctPairs = q.correctPairs;
+            
+            let isAllCorrect = true;
+            let keys = Object.keys(correctPairs);
+            if (Object.keys(pairs).length !== keys.length) {
+                isAllCorrect = false;
+            } else {
+                for (let k of keys) {
+                    if (pairs[k] !== correctPairs[k]) {
+                        isAllCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isAllCorrect) {
+                playSound('correct');
+                gameState.score += 100;
+                gameState.energy = Math.min(100, gameState.energy + 10);
+                gameState.correctCount++;
+                if (gameState.mode === 'teams') {
+                    gameState.teams[gameState.currentTeamIndex].score += 100;
+                }
+            } else {
+                playSound('wrong');
+                gameState.wrongCount++;
+            }
+
+            gameState.history.push({
+                title: q.title,
+                question: q.question,
+                userAnswer: JSON.stringify(pairs),
+                correctAnswer: JSON.stringify(correctPairs),
+                explanation: q.explanation,
+                isCorrect: isAllCorrect
+            });
+
+            gameState.matchingState = { selectedLeft: null, connections: {}, confirmed: false };
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function renderOrderingQuestionHtml(q) {
+            if (!gameState.orderingState.shuffledItems) {
+                gameState.orderingState.shuffledItems = shuffleArray(q.items);
+            }
+            let listHtml = gameState.orderingState.shuffledItems.map((item, idx) => `
+                <div class="flex justify-between items-center bg-slate-900 border border-slate-700 p-3 rounded-xl">
+                    <span class="font-bold text-white">${idx + 1}. ${item}</span>
+                    <div class="space-x-1 space-x-reverse">
+                        <button onclick="moveOrderItem(${idx}, -1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs">⬆️</button>
+                        <button onclick="moveOrderItem(${idx}, 1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs">⬇️</button>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-3">
+                    <p class="text-xs text-sky-300">استخدم أزرار التحريك لترتيب العناصر بالشكل الصحيح:</p>
+                    <div class="space-y-2">${listHtml}</div>
+                    <button onclick="confirmOrdering()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition mt-2">تأكيد الترتيب</button>
+                </div>
+            `;
+        }
+
+        function moveOrderItem(index, direction) {
+            let items = gameState.orderingState.shuffledItems;
+            let targetIdx = index + direction;
+            if (targetIdx >= 0 && targetIdx < items.length) {
+                let temp = items[index];
+                items[index] = items[targetIdx];
+                items[targetIdx] = temp;
+                render();
+            }
+        }
+
+        function confirmOrdering() {
+            clearInterval(gameState.timerInterval);
+            let q = gameState.roundQuestions[gameState.currentQuestionIndex];
+            let userOrder = gameState.orderingState.shuffledItems;
+            let correctOrder = q.correctOrder;
+
+            let isCorrect = userOrder.length === correctOrder.length && userOrder.every((val, i) => val === correctOrder[i]);
+
+            if (isCorrect) {
+                playSound('correct');
+                gameState.score += 100;
+                gameState.energy = Math.min(100, gameState.energy + 10);
+                gameState.correctCount++;
+                if (gameState.mode === 'teams') {
+                    gameState.teams[gameState.currentTeamIndex].score += 100;
+                }
+            } else {
+                playSound('wrong');
+                gameState.wrongCount++;
+            }
+
+            gameState.history.push({
+                title: q.title,
+                question: q.question,
+                userAnswer: userOrder.join(' ← '),
+                correctAnswer: correctOrder.join(' ← '),
+                explanation: q.explanation,
+                isCorrect: isCorrect
+            });
+
+            gameState.orderingState = {};
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function nextStepAfterFeedback() {
+            gameState.currentQuestionIndex++;
+            if (gameState.mode === 'teams') {
+                gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            }
+
+            if (gameState.currentQuestionIndex >= 10) {
+                gameState.screen = 'FINISHED';
+            } else {
+                gameState.screen = gameState.mode === 'teams' ? 'TEAM_TRANSITION' : 'WHEEL_SPIN';
+            }
+            render();
+        }
+
+        function goToReview() {
+            gameState.screen = 'REVIEW';
+            render();
+        }
+
+        function restartGame() {
+            gameState.screen = 'START';
+            gameState.matchingState = { selectedLeft: null, connections: {}, confirmed: false };
+            gameState.orderingState = {};
+            render();
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>

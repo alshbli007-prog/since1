@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سباق الزمن العلمي – أجزاء الزهرة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+        }
+        .clean-card {
+            background-color: #111827;
+            border: 1px solid #1f2937;
+        }
+        .accent-gradient {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white p-4">
+
+    <!-- حاوية اللعبة الرئيسية -->
+    <div id="app" class="flex-grow flex flex-col items-center justify-center max-w-3xl mx-auto w-full">
+        <!-- المحتوى يتغير ديناميكياً -->
+    </div>
+
+    <footer class="text-center py-3 text-xs text-slate-500 border-t border-slate-800/80 mt-4">
+        مختبر النباتات المستقبلي &bull; سلطنة عمان &bull; الصف الخامس الأساسي
+    </footer>
+
+    <script>
+        // نظام الصوتيات عبر Web Audio API
+        class SoundFX {
+            constructor() {
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {}
+            }
+            playTone(freq, type, duration, delay = 0) {
+                if (!this.ctx) return;
+                setTimeout(() => {
+                    try {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = type;
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + duration);
+                    } catch(e) {}
+                }, delay * 1000);
+            }
+            start() { this.playTone(400, 'sine', 0.1, 0); this.playTone(600, 'sine', 0.2, 0.1); }
+            select() { this.playTone(500, 'triangle', 0.08); }
+            correct() { this.playTone(523.25, 'sine', 0.1, 0); this.playTone(659.25, 'sine', 0.15, 0.1); }
+            wrong() { this.playTone(180, 'sawtooth', 0.15, 0); }
+            timeout() { this.playTone(250, 'square', 0.2, 0); }
+            end() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.playTone(f, 'sine', 0.2, i * 0.1)); }
+        }
+        const soundFx = new SoundFX();
+
+        // بيانات الأسئلة الأساسية
+        const questionsSource = [
+            {
+                id: 1, type: 'multiple-choice', timer: 35,
+                question: "انظر إلى الرسم. إلى أي جزء يشير السهم؟",
+                svgType: 'flower-pointer-1',
+                options: [
+                    { id: 'a', text: 'البتلات', correct: true },
+                    { id: 'b', text: 'السبلات', correct: false },
+                    { id: 'c', text: 'المتك', correct: false },
+                    { id: 'd', text: 'المبيض', correct: false }
+                ],
+                explanation: "البتلات هي الأجزاء الملونة والجذابة في الزهرة والتي تساعد على جذب الحشرات لإتمام عملية التلقيح."
+            },
+            {
+                id: 2, type: 'multiple-choice', timer: 35,
+                question: "أي جزء من الزهرة يشير إليه السهم؟",
+                svgType: 'flower-pointer-2',
+                options: [
+                    { id: 'a', text: 'الميسم', correct: false },
+                    { id: 'b', text: 'السبلات', correct: true },
+                    { id: 'c', text: 'المتك', correct: false },
+                    { id: 'd', text: 'القلم', correct: false }
+                ],
+                explanation: "السبلات هي الأوراق الخضراء الخارجية التي تحمي براعم الزهرة قبل أن تتفتح."
+            },
+            {
+                id: 3, type: 'multiple-choice', timer: 30,
+                question: "الجزء المحدد في الرسم هو السداة. مم تتكون؟",
+                svgType: 'flower-highlight-stamen',
+                options: [
+                    { id: 'a', text: 'الميسم والقلم والمبيض', correct: false },
+                    { id: 'b', text: 'المتك والخيط', correct: true },
+                    { id: 'c', text: 'البتلات والسبلات', correct: false },
+                    { id: 'd', text: 'المبيض والبتلات', correct: false }
+                ],
+                explanation: "تتكون السداة (عضو التذكير) من جزأين رئيسيين تشير إليهما الأسهم: المتك (الذي ينتج حبوب اللقاح) والخيط."
+            },
+            {
+                id: 4, type: 'multiple-choice', timer: 30,
+                question: "الجزء المحدد في الرسم هو الكربلة. ما الأجزاء التي تتكون منها؟",
+                svgType: 'flower-highlight-carpel',
+                options: [
+                    { id: 'a', text: 'المتك والخيط', correct: false },
+                    { id: 'b', text: 'البتلات والسبلات', correct: false },
+                    { id: 'c', text: 'الميسم والقلم والمبيض', correct: true },
+                    { id: 'd', text: 'المتك والمبيض', correct: false }
+                ],
+                explanation: "تتكون الكربلة (عضو التأنيث) من ثلاثة أجزاء أساسية: الميسم في الأعلى، القلم، والمبيض في الأسفل."
+            },
+            {
+                id: 5, type: 'multiple-choice', timer: 35,
+                question: "إلى أي جزء يشير السهم؟",
+                svgType: 'flower-pointer-stigma',
+                options: [
+                    { id: 'a', text: 'الميسم', correct: true },
+                    { id: 'b', text: 'المبيض', correct: false },
+                    { id: 'c', text: 'المتك', correct: false },
+                    { id: 'd', text: 'الخيط', correct: false }
+                ],
+                explanation: "الميسم هو الجزء المفلطح واللزج في قمة الكربلة المخصص لاستقبال والتصاق حبوب اللقاح."
+            },
+            {
+                id: 6, type: 'multiple-choice', timer: 35,
+                question: "انظر إلى الرسم. أي جزء يشير إليه السهم؟",
+                svgType: 'flower-pointer-ovary',
+                options: [
+                    { id: 'a', text: 'القلم', correct: false },
+                    { id: 'b', text: 'الخيط', correct: false },
+                    { id: 'c', text: 'المبيض', correct: true },
+                    { id: 'd', text: 'السبلات', correct: false }
+                ],
+                explanation: "المبيض هو الجزء المنتفخ في قاعدة الكربلة والذي يحتوي بداخله على البويضات."
+            },
+            {
+                id: 7, type: 'matching', timer: 40,
+                question: "صل بين كل جزء في القائمة الأولى والوظيفة أو الوصف المطابق له في القائمة الثانية:",
+                pairs: [
+                    { leftId: 1, leftText: "السداة", rightId: 'b', rightText: "عضو التذكير في الزهرة" },
+                    { leftId: 2, leftText: "الكربلة", rightId: 'd', rightText: "عضو التأنيث في الزهرة" },
+                    { leftId: 3, leftText: "المتك", rightId: 'c', rightText: "يتم فيه إنتاج حبوب اللقاح" },
+                    { leftId: 4, leftText: "المبيض", rightId: 'a', rightText: "يحتوي بداخله على البويضات" }
+                ],
+                explanation: "كل جزء من أجزاء الزهرة يؤدي وظيفة حيوية محددة تساهم في التكاثر وإنتاج البذور."
+            },
+            {
+                id: 8, type: 'multiple-choice', timer: 45,
+                question: "انظر إلى الرسم البياني. كم عدد الأسدية في هذه الزهرة؟",
+                svgType: 'bar-chart-1',
+                options: [
+                    { id: 'a', text: '3', correct: false },
+                    { id: 'b', text: '4', correct: false },
+                    { id: 'c', text: '6', correct: true },
+                    { id: 'd', text: '0', correct: false }
+                ],
+                explanation: "من خلال قراءة البيانات الظاهرة في الرسم البياني بالأعمدة، يظهر عمود الأسدية عند القيمة 6."
+            },
+            {
+                id: 9, type: 'multiple-choice', timer: 45,
+                question: "من خلال البيانات في الرسم البياني، هل هذه الزهرة مكتملة؟",
+                svgType: 'bar-chart-1',
+                options: [
+                    { id: 'a', text: 'نعم، لأنها تحتوي على أعضاء التذكير والتأنيث معاً.', correct: false },
+                    { id: 'b', text: 'لا، لأنها لا تحتوي على أعضاء التأنيث.', correct: true },
+                    { id: 'c', text: 'نعم، لأن عدد البتلات والأسدية متساوٍ.', correct: false },
+                    { id: 'd', text: 'لا، لأنها لا تحتوي على بتلات.', correct: false }
+                ],
+                explanation: "الزهرة المكتملة يجب أن تحتوي على أعضاء التذكير والتأنيث معاً؛ وبما أن عدد المياسم = 0، فهي تفتقر لأعضاء التأنيث إذن ليست مكتملة."
+            },
+            {
+                id: 10, type: 'multiple-choice', timer: 40,
+                question: "أي رسم من الرسوم الثلاثة يمثل زهرة مكتملة؟",
+                svgType: 'three-flowers-comparison',
+                options: [
+                    { id: 'a', text: 'الرسم 1', correct: false },
+                    { id: 'b', text: 'الرسم 2', correct: false },
+                    { id: 'c', text: 'الرسم 3', correct: true },
+                    { id: 'd', text: 'لا يمكن تحديد ذلك', correct: false }
+                ],
+                explanation: "الزهرة المكتملة هي التي تحتوي على أعضاء التذكير وأعضاء التأنيث معاً في نفس الزهرة كما في الرسم 3."
+            }
+        ];
+
+        // خوارزمية خلط الخيارات عشوائياً
+        function shuffleArray(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let gameState = {
+            screen: 'START',
+            mode: 'solo',
+            playerName: '',
+            teams: [],
+            currentTeamIndex: 0,
+            currentQuestionIndex: 0,
+            score: 0,
+            stars: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            timer: 30,
+            timerInterval: null,
+            userAnswers: [],
+            selectedAnswerId: null,
+            matchingState: { selectedLeft: null, pairs: {} },
+            activeQuestions: []
+        };
+
+        function randomizeQuizData() {
+            gameState.activeQuestions = questionsSource.map(q => {
+                const copy = JSON.parse(JSON.stringify(q));
+                if (copy.type === 'multiple-choice' && copy.options) {
+                    copy.options = shuffleArray(copy.options);
+                }
+                if (copy.type === 'matching' && copy.pairs) {
+                    copy.shuffledRightPairs = shuffleArray(copy.pairs);
+                }
+                return copy;
+            });
+        }
+
+        // رسم الزهرة الأساسي
+        function renderFlowerSvg(type) {
+            const isExploration = (type === 'explore');
+            let arrowsHTML = "";
+
+            if (type === 'flower-pointer-1') {
+                arrowsHTML = `
+                    <line x1="85" y1="85" x2="140" y2="75" stroke="#38bdf8" stroke-width="3" stroke-dasharray="3 3"/>
+                    <polygon points="140,75 130,70 131,80" fill="#38bdf8"/>
+                `;
+            } else if (type === 'flower-pointer-2') {
+                arrowsHTML = `
+                    <line x1="85" y1="210" x2="135" y2="205" stroke="#38bdf8" stroke-width="3" stroke-dasharray="3 3"/>
+                    <polygon points="135,205 125,200 126,210" fill="#38bdf8"/>
+                `;
+            } else if (type === 'flower-pointer-stigma') {
+                arrowsHTML = `
+                    <line x1="280" y1="65" x2="224" y2="68" stroke="#38bdf8" stroke-width="3" stroke-dasharray="3 3"/>
+                    <polygon points="224,68 233,63 232,73" fill="#38bdf8"/>
+                `;
+            } else if (type === 'flower-pointer-ovary') {
+                arrowsHTML = `
+                    <line x1="280" y1="180" x2="230" y2="180" stroke="#38bdf8" stroke-width="3" stroke-dasharray="3 3"/>
+                    <polygon points="230,180 239,175 239,185" fill="#38bdf8"/>
+                `;
+            } else if (type === 'flower-highlight-stamen') {
+                arrowsHTML = `
+                    <circle cx="70" cy="120" r="5" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+                    <path d="M 70 120 C 95 120, 105 102, 120 102" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <polygon points="120,102 111,98 112,107" fill="#f43f5e"/>
+                    <path d="M 70 120 C 95 120, 115 138, 146 138" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <polygon points="146,138 137,134 138,143" fill="#f43f5e"/>
+                `;
+            } else if (type === 'flower-highlight-carpel') {
+                arrowsHTML = `
+                    <circle cx="310" cy="120" r="5" fill="#0ea5e9" stroke="#ffffff" stroke-width="2"/>
+                    <path d="M 310 120 C 275 120, 255 68, 224 68" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <polygon points="224,68 233,64 232,73" fill="#0ea5e9"/>
+                    <path d="M 310 120 L 210 120" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <polygon points="210,120 219,116 219,124" fill="#0ea5e9"/>
+                    <path d="M 310 120 C 275 120, 255 180, 230 180" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <polygon points="230,180 239,175 239,185" fill="#0ea5e9"/>
+                `;
+            }
+
+            return `
+            <div class="clean-card rounded-2xl p-3 shadow-lg max-w-sm mx-auto my-2">
+                <svg viewBox="0 0 400 300" class="w-full h-52 mx-auto">
+                    <defs>
+                        <linearGradient id="penTubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#0369a1"/>
+                            <stop offset="30%" stop-color="#38bdf8"/>
+                            <stop offset="70%" stop-color="#bae6fd"/>
+                            <stop offset="100%" stop-color="#0284c7"/>
+                        </linearGradient>
+                    </defs>
+
+                    <circle cx="200" cy="150" r="130" fill="#0b0f19"/>
+
+                    <path d="M 200 150 Q 130 90 145 45 Q 180 75 200 130 Z" fill="#fb7185" opacity="0.85" stroke="#f43f5e" stroke-width="2"/>
+                    <path d="M 200 150 Q 270 90 255 45 Q 220 75 200 130 Z" fill="#fb7185" opacity="0.85" stroke="#f43f5e" stroke-width="2"/>
+                    <path d="M 175 160 Q 100 160 90 195 Q 135 210 180 180 Z" fill="#fb7185" opacity="0.85" stroke="#f43f5e" stroke-width="2"/>
+                    <path d="M 225 160 Q 300 160 310 195 Q 265 210 220 180 Z" fill="#fb7185" opacity="0.85" stroke="#f43f5e" stroke-width="2"/>
+                    <path d="M 200 150 Q 165 50 185 22 Q 215 22 235 50 Q 200 150 200 150 Z" fill="#e11d48" opacity="0.75" stroke="#fb7185" stroke-width="2"/>
+
+                    <path d="M 192 190 L 192 285 Q 196 290 200 285 L 208 190 Z" fill="#059669"/>
+                    <path d="M 155 190 Q 135 230 115 210 Q 145 170 170 180 Z" fill="#059669" stroke="#047857" stroke-width="2"/>
+                    <path d="M 245 190 Q 265 230 285 210 Q 255 170 230 180 Z" fill="#059669" stroke="#047857" stroke-width="2"/>
+
+                    <path d="M 175 135 Q 145 100 130 110" stroke="#fb7185" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <circle cx="127" cy="103" r="7.5" fill="#f59e0b" stroke="#b45309" stroke-width="1.8"/>
+                    <path d="M 225 135 Q 255 100 270 110" stroke="#fb7185" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <circle cx="273" cy="103" r="7.5" fill="#f59e0b" stroke="#b45309" stroke-width="1.8"/>
+
+                    <path d="M 193 150 C 176 156, 168 174, 171 190 C 173 203, 185 208, 200 208 C 215 208, 227 203, 229 190 C 232 174, 224 156, 207 150 Z" fill="#0284c7" opacity="0.95" stroke="#ffffff" stroke-width="2"/>
+                    <circle cx="195" cy="180" r="3.5" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+                    <circle cx="205" cy="180" r="3.5" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+                    <circle cx="200" cy="190" r="3.5" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+                    ${isExploration ? '<text x="200" y="202" font-size="8" fill="#ffffff" text-anchor="middle" font-weight="bold">بويضات</text>' : ''}
+
+                    <rect x="194" y="80" width="12" height="71" rx="2" fill="url(#penTubeGrad)" stroke="#ffffff" stroke-width="1.5" />
+                    <line x1="196.5" y1="82" x2="196.5" y2="148" stroke="#ffffff" stroke-width="1" opacity="0.75"/>
+
+                    <ellipse cx="200" cy="80" rx="7" ry="2.5" fill="#0284c7" stroke="#ffffff" stroke-width="1"/>
+                    <path d="M 178 74 C 176 60, 192 56, 200 58 C 208 56, 224 60, 222 74 C 214 79, 186 79, 178 74 Z" fill="#c084fc" stroke="#ffffff" stroke-width="2"/>
+                    <ellipse cx="188" cy="68" rx="6" ry="3.5" fill="#f3e8ff" opacity="0.8"/>
+                    <ellipse cx="212" cy="68" rx="6" ry="3.5" fill="#f3e8ff" opacity="0.8"/>
+                    <ellipse cx="200" cy="65" rx="5" ry="3" fill="#e9d5ff" opacity="0.9"/>
+
+                    ${arrowsHTML}
+                </svg>
+            </div>`;
+        }
+
+        function renderBarChartSvg() {
+            return `
+            <div class="clean-card rounded-2xl p-3 shadow-lg max-w-sm mx-auto my-2">
+                <svg viewBox="0 0 400 200" class="w-full h-40 mx-auto">
+                    <text x="200" y="20" fill="#f3f4f6" font-size="13" font-weight="bold" text-anchor="middle">الرسم البياني لأعداد أجزاء الزهرة</text>
+                    <line x1="50" y1="165" x2="370" y2="165" stroke="#374151" stroke-width="2"/>
+                    <line x1="50" y1="35" x2="50" y2="165" stroke="#374151" stroke-width="2"/>
+                    
+                    <rect x="80" y="105" width="40" height="60" fill="#059669" rx="4"/>
+                    <text x="100" y="97" fill="#059669" font-size="11" font-weight="bold" text-anchor="middle">3</text>
+                    <text x="100" y="183" fill="#9ca3af" font-size="10" text-anchor="middle">السبلات</text>
+
+                    <rect x="150" y="45" width="40" height="120" fill="#f43f5e" rx="4"/>
+                    <text x="170" y="37" fill="#f43f5e" font-size="11" font-weight="bold" text-anchor="middle">6</text>
+                    <text x="170" y="183" fill="#9ca3af" font-size="10" text-anchor="middle">البتلات</text>
+
+                    <rect x="220" y="45" width="40" height="120" fill="#f59e0b" rx="4"/>
+                    <text x="240" y="37" fill="#f59e0b" font-size="11" font-weight="bold" text-anchor="middle">6</text>
+                    <text x="240" y="183" fill="#9ca3af" font-size="10" text-anchor="middle">الأسدية</text>
+
+                    <rect x="290" y="165" width="40" height="0" fill="#0284c7" rx="4"/>
+                    <text x="310" y="157" fill="#0284c7" font-size="11" font-weight="bold" text-anchor="middle">0</text>
+                    <text x="310" y="183" fill="#9ca3af" font-size="10" text-anchor="middle">المياسم</text>
+                </svg>
+            </div>`;
+        }
+
+        // رسم زهور حقيقية واضحة ومتقنة للسؤال العاشر
+        function renderThreeFlowersSvg() {
+            return `
+            <div class="clean-card rounded-2xl p-2 shadow-lg max-w-lg mx-auto my-2">
+                <svg viewBox="0 0 450 175" class="w-full h-44 mx-auto">
+                    <defs>
+                        <linearGradient id="smallPenTube" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#0369a1"/>
+                            <stop offset="50%" stop-color="#38bdf8"/>
+                            <stop offset="100%" stop-color="#0284c7"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- 🌸 الرسم 1: زهرة حقيقية تحتوي على الأسدية فقط (ذكرية) -->
+                    <g transform="translate(10, 5)">
+                        <rect width="135" height="165" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+                        <!-- الساق والسبلات -->
+                        <path d="M 67 118 L 67 140" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 52 118 Q 38 126 35 116 Q 52 108 60 115 Z" fill="#059669"/>
+                        <path d="M 82 118 Q 96 126 99 116 Q 82 108 74 115 Z" fill="#059669"/>
+                        <!-- البتلات -->
+                        <path d="M 67 114 Q 28 85 35 55 Q 56 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 114 Q 106 85 99 55 Q 78 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 110 Q 50 45 67 30 Q 84 45 67 110 Z" fill="#e11d48" opacity="0.85" stroke="#f43f5e" stroke-width="1.5"/>
+                        <ellipse cx="67" cy="116" rx="14" ry="5" fill="#047857"/>
+
+                        <!-- الأعضاء: أسدية فقط (متوك صفراء وخيوط) - بدون كربلة -->
+                        <path d="M 60 114 Q 45 88 43 75" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="43" cy="74" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+                        
+                        <path d="M 74 114 Q 89 88 91 75" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="91" cy="74" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+
+                        <path d="M 63 114 Q 54 82 53 66" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="53" cy="65" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+
+                        <path d="M 71 114 Q 80 82 81 66" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="81" cy="65" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+
+                        <!-- لافتة الاسم -->
+                        <rect x="27" y="138" width="80" height="20" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+                        <text x="67" y="152" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">الرسم 1</text>
+                    </g>
+
+                    <!-- 🌸 الرسم 2: زهرة حقيقية تحتوي على الكربلة فقط (أنثوية) -->
+                    <g transform="translate(157, 5)">
+                        <rect width="135" height="165" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+                        <!-- الساق والسبلات -->
+                        <path d="M 67 118 L 67 140" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 52 118 Q 38 126 35 116 Q 52 108 60 115 Z" fill="#059669"/>
+                        <path d="M 82 118 Q 96 126 99 116 Q 82 108 74 115 Z" fill="#059669"/>
+                        <!-- البتلات -->
+                        <path d="M 67 114 Q 28 85 35 55 Q 56 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 114 Q 106 85 99 55 Q 78 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 110 Q 50 45 67 30 Q 84 45 67 110 Z" fill="#e11d48" opacity="0.85" stroke="#f43f5e" stroke-width="1.5"/>
+
+                        <!-- الأعضاء: كربلة فقط (مبيض + قلم أنبوبي + ميسم مفلطح) - بدون أسدية -->
+                        <path d="M 62 100 C 52 104, 49 114, 67 116 C 85 114, 82 104, 72 100 Z" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                        <rect x="63.5" y="66" width="7" height="35" rx="1.5" fill="url(#smallPenTube)" stroke="#ffffff" stroke-width="1"/>
+                        <path d="M 53 62 C 51 52, 63 50, 67 52 C 71 50, 83 52, 81 62 Z" fill="#c084fc" stroke="#ffffff" stroke-width="1.5"/>
+
+                        <!-- لافتة الاسم -->
+                        <rect x="27" y="138" width="80" height="20" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+                        <text x="67" y="152" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">الرسم 2</text>
+                    </g>
+
+                    <!-- 🌸 الرسم 3: زهرة حقيقية مكتملة تحتوي على التذكير والتأنيث معاً -->
+                    <g transform="translate(305, 5)">
+                        <rect width="135" height="165" rx="10" fill="#0f172a" stroke="#06b6d4" stroke-width="2"/>
+                        <!-- الساق والسبلات -->
+                        <path d="M 67 118 L 67 140" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 52 118 Q 38 126 35 116 Q 52 108 60 115 Z" fill="#059669"/>
+                        <path d="M 82 118 Q 96 126 99 116 Q 82 108 74 115 Z" fill="#059669"/>
+                        <!-- البتلات -->
+                        <path d="M 67 114 Q 28 85 35 55 Q 56 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 114 Q 106 85 99 55 Q 78 70 67 110 Z" fill="#fb7185" stroke="#f43f5e" stroke-width="1.5"/>
+                        <path d="M 67 110 Q 50 45 67 30 Q 84 45 67 110 Z" fill="#e11d48" opacity="0.85" stroke="#f43f5e" stroke-width="1.5"/>
+
+                        <!-- الأعضاء: الأسدية على الجانبين + الكربلة في المنتصف -->
+                        <path d="M 56 114 Q 45 88 43 75" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="43" cy="74" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+                        
+                        <path d="M 78 114 Q 89 88 91 75" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <ellipse cx="91" cy="74" rx="4" ry="2.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2"/>
+
+                        <!-- الكربلة المركزية -->
+                        <path d="M 62 100 C 52 104, 49 114, 67 116 C 85 114, 82 104, 72 100 Z" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                        <rect x="63.5" y="66" width="7" height="35" rx="1.5" fill="url(#smallPenTube)" stroke="#ffffff" stroke-width="1"/>
+                        <path d="M 53 62 C 51 52, 63 50, 67 52 C 71 50, 83 52, 81 62 Z" fill="#c084fc" stroke="#ffffff" stroke-width="1.5"/>
+
+                        <!-- لافتة الاسم -->
+                        <rect x="27" y="138" width="80" height="20" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="1.2"/>
+                        <text x="67" y="152" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">الرسم 3</text>
+                    </g>
+                </svg>
+            </div>`;
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+            switch (gameState.screen) {
+                case 'START': app.innerHTML = renderStartScreen(); break;
+                case 'MODE_SELECTION': app.innerHTML = renderModeSelectionScreen(); break;
+                case 'SETTINGS': app.innerHTML = renderSettingsScreen(); break;
+                case 'EXPLORATION': app.innerHTML = renderExplorationScreen(); break;
+                case 'QUESTION': app.innerHTML = renderQuestionScreen(); break;
+                case 'FEEDBACK': app.innerHTML = renderFeedbackScreen(); break;
+                case 'FINISHED': app.innerHTML = renderFinishedScreen(); break;
+                case 'REVIEW': app.innerHTML = renderReviewScreen(); break;
+            }
+        }
+
+        function renderStartScreen() {
+            return `
+            <div class="flex flex-col items-center justify-center text-center space-y-5 w-full max-w-lg mx-auto py-2">
+                <div class="clean-card p-5 rounded-3xl w-full shadow-xl space-y-3">
+                    <div class="flex justify-center">
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="[شعار سلطنة عمان]" class="w-14 h-14 object-contain" onerror="this.style.display='none'">
+                    </div>
+                    <div class="space-y-1">
+                        <h2 class="text-xs font-bold tracking-widest text-cyan-400">سلطنة عمان</h2>
+                        <h3 class="text-xs font-semibold text-slate-300">وزارة التعليم</h3>
+                        <p class="text-xs text-cyan-300 font-semibold">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-[11px] text-slate-400 mt-1">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+                    </div>
+
+                    <div class="my-2 flex flex-col items-center">
+                        <div class="w-32 h-32 rounded-2xl overflow-hidden border-2 border-cyan-500 shadow-lg bg-slate-900 mb-1 flex items-center justify-center">
+                            <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="[صورة المعلم أ. فيصل الشبلي]" class="w-full h-full object-cover object-top scale-105">
+                        </div>
+                        <p class="text-sm font-bold text-white mt-1">أ. فيصل الشبلي</p>
+                        <p class="text-xs text-cyan-400">الهاتف: 99812126 &bull; Instagram: faalll8</p>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800 text-xs text-slate-400">
+                        مدير المدرسة: <span class="text-slate-200 font-semibold">أ. سعود الشيزاوي</span>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h1 class="text-2xl sm:text-3xl font-black text-cyan-400">
+                        سباق الزمن العلمي – أجزاء الزهرة
+                    </h1>
+                    <p class="text-xs text-slate-400">لعبة تعليمية تفاعلية لطلاب الصف الخامس في مادة العلوم</p>
+                </div>
+
+                <button onclick="soundFx.start(); goToModeSelection();" class="w-full max-w-sm py-3.5 accent-gradient hover:opacity-95 text-white font-bold rounded-2xl shadow-lg transition-all text-base cursor-pointer">
+                    🚀 ابدأ مغامرة المختبر
+                </button>
+            </div>`;
+        }
+
+        function renderModeSelectionScreen() {
+            return `
+            <div class="flex flex-col items-center justify-center text-center space-y-5 max-w-md mx-auto py-8 w-full">
+                <h2 class="text-xl font-bold text-cyan-400">اختر نمط السباق</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                    <div onclick="soundFx.select(); setGameMode('solo');" class="clean-card hover:border-cyan-500 p-5 rounded-2xl cursor-pointer transition-all flex flex-col items-center space-y-2">
+                        <span class="text-3xl">👤</span>
+                        <h3 class="text-base font-bold text-white">اللعب الفردي</h3>
+                        <p class="text-xs text-slate-400">تحدي الزمن بمفردك.</p>
+                    </div>
+                    <div onclick="soundFx.select(); setGameMode('team');" class="clean-card hover:border-pink-500 p-5 rounded-2xl cursor-pointer transition-all flex flex-col items-center space-y-2">
+                        <span class="text-3xl">👥</span>
+                        <h3 class="text-base font-bold text-white">سباق الفرق</h3>
+                        <p class="text-xs text-slate-400">تنافس جماعي في الفصل.</p>
+                    </div>
+                </div>
+                <button onclick="soundFx.select(); gameState.screen='START'; render();" class="px-5 py-2 clean-card text-slate-300 rounded-xl text-xs">
+                    العودة للخلف
+                </button>
+            </div>`;
+        }
+
+        function renderSettingsScreen() {
+            if (gameState.mode === 'solo') {
+                return `
+                <div class="flex flex-col items-center justify-center text-center space-y-4 max-w-sm mx-auto py-10 w-full">
+                    <div class="clean-card p-5 rounded-2xl w-full space-y-3">
+                        <h2 class="text-base font-bold text-cyan-400">أدخل اسم الطالب الباحث</h2>
+                        <input type="text" id="player-name-input" placeholder="اكتب اسمك هنا..." class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-center text-sm focus:outline-none focus:border-cyan-500" value="${gameState.playerName}">
+                        <button onclick="confirmSoloSetup()" class="w-full py-3 accent-gradient text-white font-bold rounded-xl text-sm shadow cursor-pointer">
+                            الانتقال للاستكشاف 🔬
+                        </button>
+                    </div>
+                    <button onclick="soundFx.select(); gameState.screen='MODE_SELECTION'; render();" class="text-xs text-slate-400 underline">العودة</button>
+                </div>`;
+            } else {
+                return `
+                <div class="flex flex-col items-center justify-center text-center space-y-4 max-w-sm mx-auto py-6 w-full">
+                    <div class="clean-card p-5 rounded-2xl w-full space-y-3">
+                        <h2 class="text-base font-bold text-pink-400">إعداد سباق الفرق</h2>
+                        <div class="flex justify-center space-x-2 space-x-reverse text-xs">
+                            <button onclick="setTeamCount(2)" class="px-3 py-1.5 ${gameState.teams.length === 2 ? 'bg-pink-600 text-white' : 'bg-slate-900 text-slate-300'} rounded-lg font-bold border border-slate-700">فريقان</button>
+                            <button onclick="setTeamCount(3)" class="px-3 py-1.5 ${gameState.teams.length === 3 ? 'bg-pink-600 text-white' : 'bg-slate-900 text-slate-300'} rounded-lg font-bold border border-slate-700">3 فرق</button>
+                            <button onclick="setTeamCount(4)" class="px-3 py-1.5 ${gameState.teams.length === 4 ? 'bg-pink-600 text-white' : 'bg-slate-900 text-slate-300'} rounded-lg font-bold border border-slate-700">4 فرق</button>
+                        </div>
+                        <div class="space-y-2 w-full">
+                            ${gameState.teams.map((t, idx) => `
+                                <div class="flex items-center space-x-2 space-x-reverse w-full text-xs">
+                                    <span class="font-bold text-cyan-400 w-14">فريق ${idx+1}:</span>
+                                    <input type="text" id="team-name-${idx}" value="${t.name}" class="flex-grow px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button onclick="confirmTeamSetup()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow cursor-pointer">
+                            بدء سباق الفرق 🚀
+                        </button>
+                    </div>
+                    <button onclick="soundFx.select(); gameState.screen='MODE_SELECTION'; render();" class="text-xs text-slate-400 underline">العودة</button>
+                </div>`;
+            }
+        }
+
+        function renderExplorationScreen() {
+            return `
+            <div class="flex flex-col items-center space-y-3 max-w-lg mx-auto py-2 w-full">
+                <div class="text-center space-y-0.5">
+                    <h2 class="text-lg font-bold text-cyan-400">مرحلة الاستكشاف العلمي</h2>
+                    <p class="text-xs text-slate-400">تعرف على أجزاء الزهرة قبل انطلاق التحدي!</p>
+                </div>
+
+                <div class="w-full clean-card p-3 rounded-2xl space-y-2">
+                    ${renderFlowerSvg('explore')}
+                    <div class="grid grid-cols-2 gap-1.5 text-center text-xs">
+                        <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 text-pink-400 font-bold">🌸 البتلات</div>
+                        <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 text-emerald-400 font-bold">🌿 السبلات</div>
+                        <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 text-amber-400 font-bold">🔬 السداة (متك + خيط)</div>
+                        <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 text-cyan-400 font-bold">🌸 الكربلة (ميسم، قلم، مبيض)</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full text-xs text-slate-300">
+                    <div class="clean-card p-3 rounded-xl space-y-1">
+                        <h3 class="font-bold text-cyan-400">أعضاء التذكير والتأنيث:</h3>
+                        <p><strong class="text-amber-400">السداة:</strong> عضو التذكير (المتك لإنتاج اللقاح، والخيط).</p>
+                        <p><strong class="text-pink-400">الكربلة:</strong> عضو التأنيث (الميسم المفلطح، القلم الأنبوبي، والمبيض).</p>
+                    </div>
+                    <div class="clean-card p-3 rounded-xl space-y-1">
+                        <h3 class="font-bold text-cyan-400">أنواع الأزهار:</h3>
+                        <p><strong class="text-white">المكتملة:</strong> تذكير وتأنيث معاً.</p>
+                        <p><strong class="text-amber-400">الذكرية:</strong> أعضاء تذكير فقط.</p>
+                        <p><strong class="text-pink-400">الأنثوية:</strong> أعضاء تأنيث فقط.</p>
+                    </div>
+                </div>
+
+                <button onclick="soundFx.start(); startActualQuiz();" class="px-6 py-3 accent-gradient text-white font-bold rounded-xl text-sm shadow cursor-pointer">
+                    انطلق إلى الأسئلة العشرة! ⏱️
+                </button>
+            </div>`;
+        }
+
+        function renderQuestionScreen() {
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            const currentTeam = gameState.mode === 'team' ? gameState.teams[gameState.currentTeamIndex] : null;
+            const arabicLetters = ['أ', 'ب', 'ج', 'د'];
+
+            return `
+            <div class="flex flex-col space-y-3 max-w-lg mx-auto w-full py-2">
+                <div class="flex justify-between items-center clean-card px-3.5 py-2 rounded-xl text-xs">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-lg font-bold">السؤال ${gameState.currentQuestionIndex + 1} / 10</span>
+                        ${gameState.mode === 'team' ? `<span class="bg-pink-500/10 text-pink-400 px-2.5 py-1 rounded-lg font-bold">دور: ${currentTeam.name}</span>` : `<span class="text-slate-300">${gameState.playerName}</span>`}
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <span class="text-amber-400 font-bold">⭐ ${gameState.mode === 'team' ? currentTeam.score : gameState.score}</span>
+                        <span id="timer-display" class="bg-slate-900 border border-red-500/40 text-red-400 px-2.5 py-0.5 rounded-lg font-bold">⏱️ ${gameState.timer} ث</span>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    ${q.svgType === 'bar-chart-1' ? renderBarChartSvg() : 
+                      q.svgType === 'three-flowers-comparison' ? renderThreeFlowersSvg() : 
+                      renderFlowerSvg(q.svgType || 'default')}
+                </div>
+
+                <div class="clean-card p-4 rounded-2xl space-y-3">
+                    <h3 class="text-xs sm:text-sm font-bold text-white leading-relaxed whitespace-pre-line">${q.question}</h3>
+
+                    ${q.type === 'multiple-choice' ? `
+                        <div class="grid grid-cols-1 gap-2 pt-1">
+                            ${q.options.map((opt, idx) => `
+                                <button onclick="selectOption('${opt.id}')" id="opt-${opt.id}" class="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-right text-xs text-slate-200 transition-all flex items-center justify-between cursor-pointer">
+                                    <span>${opt.text}</span>
+                                    <span class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-bold text-cyan-400">${arabicLetters[idx]}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div class="space-y-2 pt-1">
+                            <p class="text-[11px] text-cyan-400">انقر على الجزء أولاً ثم انقر على الوظيفة أو الوصف المناسب له في اليسار:</p>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="space-y-1.5">
+                                    ${q.pairs.map(p => {
+                                        const connectedRightId = gameState.matchingState.pairs[p.leftId];
+                                        const connectedRightObj = q.pairs.find(item => item.rightId === connectedRightId);
+                                        return `
+                                        <div onclick="selectMatchingLeft(${p.leftId})" id="match-l-${p.leftId}" class="p-2.5 bg-slate-900 border ${gameState.matchingState.selectedLeft === p.leftId ? 'border-cyan-400 bg-cyan-950/40 ring-1 ring-cyan-400' : 'border-slate-800'} rounded-xl cursor-pointer text-white flex flex-col justify-between transition-all">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-bold text-cyan-300">${p.leftText}</span>
+                                                ${connectedRightId ? `
+                                                    <button onclick="event.stopPropagation(); disconnectSinglePair(${p.leftId});" class="text-[10px] bg-red-950/70 text-red-300 border border-red-800/80 px-1.5 py-0.5 rounded hover:bg-red-900">إلغاء ✕</button>
+                                                ` : ''}
+                                            </div>
+                                            ${connectedRightId ? `
+                                                <span class="text-[10px] text-amber-300 mt-1 leading-tight border-t border-slate-800 pt-1">← ${connectedRightObj?.rightText || ''}</span>
+                                            ` : `
+                                                <span class="text-[10px] text-slate-500 mt-1">انقر للتوصيل...</span>
+                                            `}
+                                        </div>`;
+                                    }).join('')}
+                                </div>
+                                <div class="space-y-1.5">
+                                    ${(q.shuffledRightPairs || q.pairs).map(p => `
+                                        <div onclick="selectMatchingRight('${p.rightId}')" class="p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer text-slate-300 text-[11px] hover:border-pink-500 hover:text-white transition-all flex items-center min-h-[52px]">
+                                            <span>${p.rightText}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `}
+
+                    <div class="flex justify-end pt-2 border-t border-slate-800">
+                        <button onclick="confirmAnswer()" class="px-5 py-2 accent-gradient text-white font-bold rounded-xl text-xs shadow cursor-pointer">
+                            تأكيد الإجابة ✓
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderFeedbackScreen() {
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            const isCorrect = gameState.lastAnswerCorrect;
+
+            return `
+            <div class="flex flex-col items-center justify-center text-center space-y-3 max-w-sm mx-auto py-10 w-full">
+                <div class="clean-card p-5 rounded-2xl ${isCorrect ? 'border-emerald-500/50' : 'border-red-500/50'} border w-full space-y-2.5">
+                    <span class="text-3xl">${isCorrect ? '🎉' : '❌'}</span>
+                    <h2 class="text-base font-bold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">
+                        ${isCorrect ? 'إجابة صحيحة!' : 'إجابة غير صحيحة'}
+                    </h2>
+                    <div class="text-xs font-bold text-amber-400">
+                        ${isCorrect ? '+100 نقطة ⭐' : '+0 نقطة'}
+                    </div>
+
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-right space-y-1">
+                        <h4 class="text-[11px] font-bold text-cyan-400">💡 لماذا؟ التفسير العلمي:</h4>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">${q.explanation}</p>
+                    </div>
+
+                    <button onclick="soundFx.select(); nextQuestionOrFinish();" class="w-full py-2.5 accent-gradient text-white font-bold rounded-xl text-xs shadow cursor-pointer">
+                        ▶️ متابعة السباق
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function renderFinishedScreen() {
+            let totalScore = gameState.mode === 'team' ? gameState.teams[gameState.currentTeamIndex].score : gameState.score;
+            let percentage = Math.round((gameState.correctCount / 10) * 100);
+            
+            let rankTitle = "واصل الاستكشاف 🌱";
+            if (percentage >= 90) rankTitle = "🌟 عالم الزهور";
+            else if (percentage >= 80) rankTitle = "🌸 خبير أجزاء الزهرة";
+            else if (percentage >= 70) rankTitle = "🌱 مستكشف نباتي";
+            else if (percentage >= 60) rankTitle = "🔬 باحث واعد";
+
+            return `
+            <div class="flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto py-4 w-full">
+                <div class="clean-card p-5 rounded-2xl space-y-3 w-full">
+                    <span class="text-2xl">🏆</span>
+                    <h2 class="text-base font-bold text-cyan-400">نهاية سباق الزمن العلمي</h2>
+                    
+                    <div class="py-2 px-3 bg-slate-900 rounded-xl border border-slate-800">
+                        <div class="text-[11px] text-slate-400">الرتبة المحرزة:</div>
+                        <div class="text-sm font-bold text-amber-400 mt-0.5">${rankTitle}</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs text-right">
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-[10px] block">إجمالي النقاط:</span>
+                            <strong class="text-amber-400">${totalScore} / 1000</strong>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-[10px] block">النسبة المئوية:</span>
+                            <strong class="text-cyan-400">${percentage}%</strong>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-[10px] block">الصحيحة:</span>
+                            <strong class="text-emerald-400">${gameState.correctCount}</strong>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                            <span class="text-slate-400 text-[10px] block">الخاطئة:</span>
+                            <strong class="text-red-400">${gameState.wrongCount}</strong>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-1 text-xs">
+                        <button onclick="soundFx.select(); gameState.screen='REVIEW'; render();" class="flex-1 py-2 clean-card hover:bg-slate-800 text-white font-bold rounded-xl cursor-pointer">
+                            🔍 مراجعة الإجابات
+                        </button>
+                        <button onclick="soundFx.start(); restartGame();" class="flex-1 py-2 accent-gradient text-white font-bold rounded-xl cursor-pointer">
+                            🔄 إعادة السباق بخيارات جديدة
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderReviewScreen() {
+            return `
+            <div class="flex flex-col space-y-3 max-w-lg mx-auto w-full py-3">
+                <div class="flex justify-between items-center clean-card p-3 rounded-xl text-xs">
+                    <span class="font-bold text-cyan-400">مراجعة الإجابات</span>
+                    <button onclick="soundFx.select(); gameState.screen='FINISHED'; render();" class="px-2.5 py-1 bg-slate-800 text-white rounded-lg">العودة</button>
+                </div>
+
+                <div class="space-y-2 max-h-[55vh] overflow-y-auto px-0.5 text-xs">
+                    ${gameState.activeQuestions.map((q, index) => {
+                        const userAns = gameState.userAnswers[index];
+                        const isCorrect = userAns && userAns.correct;
+                        return `
+                        <div class="clean-card p-3 rounded-xl border ${isCorrect ? 'border-emerald-500/30' : 'border-red-500/30'} space-y-1">
+                            <div class="flex justify-between items-center font-bold">
+                                <span class="text-cyan-400">السؤال ${index + 1}</span>
+                                <span class="${isCorrect ? 'text-emerald-400' : 'text-red-400'}">${isCorrect ? '✓ صحيح' : '✗ غير صحيح'}</span>
+                            </div>
+                            <p class="text-white text-[11px]">${q.question}</p>
+                            <div class="bg-slate-900 p-2 rounded-lg space-y-0.5 text-[11px]">
+                                <p class="text-slate-300">إجابتك: <strong class="${isCorrect ? 'text-emerald-400' : 'text-red-400'}">${userAns ? userAns.text : 'لم تجب'}</strong></p>
+                                <p class="text-slate-300">الصحيحة: <strong class="text-cyan-400">${q.options ? q.options.find(o=>o.correct).text : 'نشاط توصيل'}</strong></p>
+                                <p class="text-slate-400 pt-1 border-t border-slate-800"><strong>التفسير:</strong> ${q.explanation}</p>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+
+        function goToModeSelection() { gameState.screen = 'MODE_SELECTION'; render(); }
+        function setGameMode(mode) {
+            gameState.mode = mode;
+            if (mode === 'team') {
+                gameState.teams = [{ name: 'فريق الياسمين', score: 0 }, { name: 'فريق البنفسج', score: 0 }];
+            }
+            gameState.screen = 'SETTINGS';
+            render();
+        }
+        function setTeamCount(count) {
+            gameState.teams = [];
+            for (let i = 0; i < count; i++) gameState.teams.push({ name: `فريق ${i+1}`, score: 0 });
+            render();
+        }
+        function confirmSoloSetup() {
+            const input = document.getElementById('player-name-input');
+            gameState.playerName = input && input.value.trim() !== '' ? input.value.trim() : 'الباحث الصغير';
+            gameState.screen = 'EXPLORATION';
+            render();
+        }
+        function confirmTeamSetup() {
+            for (let i = 0; i < gameState.teams.length; i++) {
+                const input = document.getElementById(`team-name-${i}`);
+                if (input && input.value.trim() !== '') gameState.teams[i].name = input.value.trim();
+            }
+            gameState.screen = 'EXPLORATION';
+            render();
+        }
+        function startActualQuiz() {
+            randomizeQuizData();
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.stars = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.userAnswers = [];
+            gameState.screen = 'QUESTION';
+            startTimer();
+            render();
+        }
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            gameState.timer = q.timer || 30;
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                const timerEl = document.getElementById('timer-display');
+                if (timerEl) timerEl.innerText = `⏱️ ${gameState.timer} ث`;
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    soundFx.timeout();
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+        function selectOption(optId) {
+            soundFx.select();
+            gameState.selectedAnswerId = optId;
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            q.options.forEach(o => {
+                const btn = document.getElementById(`opt-${o.id}`);
+                if (btn) {
+                    btn.className = o.id === optId ? 
+                        "p-2.5 bg-cyan-950/80 border border-cyan-400 rounded-xl text-right text-xs text-white transition-all flex items-center justify-between cursor-pointer" :
+                        "p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-right text-xs text-slate-200 transition-all flex items-center justify-between cursor-pointer";
+                }
+            });
+        }
+        function selectMatchingLeft(id) {
+            soundFx.select();
+            gameState.matchingState.selectedLeft = (gameState.matchingState.selectedLeft === id) ? null : id;
+            render();
+        }
+        function selectMatchingRight(rightId) {
+            if (!gameState.matchingState.selectedLeft) return;
+            soundFx.select();
+            gameState.matchingState.pairs[gameState.matchingState.selectedLeft] = rightId;
+            gameState.matchingState.selectedLeft = null;
+            render();
+        }
+        function disconnectSinglePair(leftId) {
+            soundFx.select();
+            delete gameState.matchingState.pairs[leftId];
+            if (gameState.matchingState.selectedLeft === leftId) {
+                gameState.matchingState.selectedLeft = null;
+            }
+            render();
+        }
+        function confirmAnswer() {
+            clearInterval(gameState.timerInterval);
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            let isCorrect = false, userAnsText = "";
+            if (q.type === 'multiple-choice') {
+                if (!gameState.selectedAnswerId) {
+                    gameState.userAnswers.push({ correct: false, text: 'لم يقدم إجابة' });
+                    gameState.wrongCount++;
+                    gameState.screen = 'FEEDBACK';
+                    gameState.lastAnswerCorrect = false;
+                    soundFx.wrong();
+                    render();
+                    return;
+                }
+                const selectedOpt = q.options.find(o => o.id === gameState.selectedAnswerId);
+                isCorrect = selectedOpt.correct;
+                userAnsText = selectedOpt.text;
+            } else if (q.type === 'matching') {
+                let correctCount = 0;
+                q.pairs.forEach(p => { if (gameState.matchingState.pairs[p.leftId] === p.rightId) correctCount++; });
+                isCorrect = (correctCount === q.pairs.length);
+                userAnsText = `تم توصيل ${correctCount} من ${q.pairs.length}`;
+            }
+            gameState.userAnswers.push({ correct: isCorrect, text: userAnsText });
+            if (isCorrect) {
+                gameState.correctCount++;
+                gameState.score += 100;
+                gameState.stars++;
+                if (gameState.mode === 'team') gameState.teams[gameState.currentTeamIndex].score += 100;
+                soundFx.correct();
+            } else {
+                gameState.wrongCount++;
+                soundFx.wrong();
+            }
+            gameState.lastAnswerCorrect = isCorrect;
+            gameState.screen = 'FEEDBACK';
+            gameState.selectedAnswerId = null;
+            gameState.matchingState = { selectedLeft: null, pairs: {} };
+            render();
+        }
+        function handleTimeout() {
+            gameState.userAnswers.push({ correct: false, text: 'انتهى الوقت' });
+            gameState.wrongCount++;
+            gameState.lastAnswerCorrect = false;
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+        function nextQuestionOrFinish() {
+            gameState.currentQuestionIndex++;
+            if (gameState.mode === 'team') gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            if (gameState.currentQuestionIndex >= gameState.activeQuestions.length) {
+                soundFx.end();
+                gameState.screen = 'FINISHED';
+            } else {
+                gameState.screen = 'QUESTION';
+                startTimer();
+            }
+            render();
+        }
+        function restartGame() {
+            randomizeQuizData();
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.stars = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.userAnswers = [];
+            gameState.screen = 'START';
+            render();
+        }
+        window.onload = function() {
+            randomizeQuizData();
+            render();
+        };
+    </script>
+</body>
+</html>

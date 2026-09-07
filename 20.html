@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ المحقق العلمي - قضية: لغز الانصهار</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #080d1a;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060a12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        .lab-glow {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+        }
+        .lab-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 13, 26, 0.99) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+        @keyframes pulseSlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
+        .pulse-slow {
+            animation: pulseSlow 4s ease-in-out infinite;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(1000%); }
+        }
+        .scanline::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            animation: scanline 6s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-blue-500 selection:text-white">
+
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600 rounded-full filter blur-[140px]"></div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-cyan-600 rounded-full filter blur-[140px]"></div>
+    </div>
+
+    <!-- Top Navigation / Header -->
+    <header id="app-header" class="w-full bg-slate-900/90 backdrop-blur-md border-b border-blue-500/20 py-3 px-4 z-20 flex justify-between items-center transition-all">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🕵️‍♂️</span>
+            <div>
+                <h1 class="font-black text-lg md:text-xl text-blue-400 tracking-wide">المحقق العلمي</h1>
+                <p class="text-xs text-slate-400">قضية: لغز الانصهار (الصف الخامس)</p>
+            </div>
+        </div>
+        <div id="header-stats" class="hidden items-center gap-3 md:gap-4 bg-slate-800/80 px-4 py-1.5 rounded-full border border-slate-700 text-xs md:text-sm">
+            <div>المحقق: <span id="stat-player" class="font-bold text-blue-300">--</span></div>
+            <div class="border-r border-slate-700 pr-3">النقاط: <span id="stat-score" class="font-bold text-amber-400">0</span> / 1000</div>
+            <div class="border-r border-slate-700 pr-3">الأدلة: <span id="stat-clues" class="font-bold text-emerald-400">0</span> / 10</div>
+            <div id="timer-container" class="hidden border-r border-slate-700 pr-3 text-red-400 font-mono font-bold">⏱️ <span id="stat-timer">30</span>s</div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleAudio()" id="audio-toggle-btn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition border border-slate-700" title="تشغيل/إيقاف الأصوات">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Container -->
+    <main id="app-container" class="flex-grow flex items-center justify-center p-4 md:p-6 z-10 max-w-5xl mx-auto w-full">
+        <!-- Content rendered dynamically -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-800 z-10 bg-slate-950/40">
+        مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10) © 2026 - جميع الحقوق محفوظة
+    </footer>
+
+    <!-- Audio & Game Script -->
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(554.37, now + 0.1);
+                    osc.frequency.setValueAtTime(659.25, now + 0.2);
+                    osc.frequency.setValueAtTime(880, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(165, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'clue') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'solve') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(freq, now + i * 0.08);
+                        g.gain.setValueAtTime(0.15, now + i * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.start(now + i * 0.08);
+                        o.stop(now + 1.2);
+                    });
+                }
+            } catch (e) {
+                console.error("Audio error:", e);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('audio-toggle-btn').innerText = soundEnabled ? '🔊' : '🔇';
+        }
+
+        const gameState = {
+            status: 'START',
+            mode: 'solo',
+            playerName: '',
+            teams: [],
+            currentTeamIndex: 0,
+            currentQuestionIndex: 0,
+            score: 0,
+            cluesUnlocked: 0,
+            correctAnswersCount: 0,
+            wrongAnswersCount: 0,
+            unansweredCount: 0,
+            timer: 30,
+            timerInterval: null,
+            isTimerActive: false,
+            selectedOptionId: null,
+            matchingPairs: {},
+            tempLeftSelected: null,
+            sortingOrder: [],
+            questionResults: []
+        };
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const rawQuestionsData = [
+            {
+                id: 1,
+                title: "الدليل الأول: ظاهرة المختبر",
+                type: "mcq",
+                questionText: "ما العملية العلمية التي يدرسها المحقق في هذا المشهد؟",
+                sceneType: "ice_melt",
+                options: [
+                    { id: 'a', text: 'التجمد' },
+                    { id: 'b', text: 'الانصهار' },
+                    { id: 'c', text: 'التكثيف' },
+                    { id: 'd', text: 'الغليان' }
+                ],
+                correctOptionId: 'b',
+                explanation: "الانصهار هو تحول المادة من الحالة الصلبة إلى الحالة السائلة بفعل الحرارة."
+            },
+            {
+                id: 2,
+                title: "دليل الجزيئات والحرارة",
+                type: "particle_analysis",
+                questionText: "أي النموذجين يمثل سلوك الجزيئات عند اكتساب المادة الصلبة طاقة حرارية في المختبر؟",
+                sceneType: "particles",
+                options: [
+                    { id: 'a', text: 'النموذج A (جزيئات متراصة وساكنة)' },
+                    { id: 'b', text: 'النموذج B (جزيئات تتحرك بسرعة أكبر وتبتعد عن بعضها)' },
+                    { id: 'c', text: 'النموذج C (توقف حركة الجزيئات نهائياً)' },
+                    { id: 'd', text: 'النموذج D (تحول الجزيئات إلى غاز بشكل مباشر)' }
+                ],
+                correctOptionId: 'b',
+                explanation: "عند اكتساب طاقة حرارية، تتحرك جزيئات المادة الصلبة بسرعة أكبر وتبتعد عن بعضها للتحول إلى الحالة السائلة."
+            },
+            {
+                id: 3,
+                title: "ملف درجة الانصهار",
+                type: "thermometer_infer",
+                questionText: "بناءً على المشهد المعملي، أي قراءة تمثل درجة انصهار الثلج المعتمدة في الدرس؟",
+                sceneType: "thermometer",
+                options: [
+                    { id: 'a', text: '-5°C' },
+                    { id: 'b', text: '0°C' },
+                    { id: 'c', text: '20°C' },
+                    { id: 'd', text: '100°C' }
+                ],
+                correctOptionId: 'b',
+                explanation: "درجة انصهار الثلج النقي هي 0°C في الظروف المعيارية للدرس."
+            },
+            {
+                id: 4,
+                title: "لغز سرعة الانصهار مقابل الدرجة",
+                type: "speed_vs_temp",
+                questionText: "عند مقارنة كأسين متساويين من الثلج (أحدهما في الشمس والآخر على اللهب فانصهرت أسرع)، ماذا يستنتج المحقق؟",
+                sceneType: "sun_vs_flame",
+                options: [
+                    { id: 'a', text: 'ترتفع درجة انصهار الثلج في الكأس المعرض للهب المباشر.' },
+                    { id: 'b', text: 'سرعة الانصهار تختلف باختلاف شدة الحرارة، لكن درجة انصهار الثلج تبقى ثابتة عند 0°C.' },
+                    { id: 'c', text: 'الثلج لا يمتلك درجة انصهار محددة.' },
+                    { id: 'd', text: 'الكأس المعرض للشمس ينصهر عند درجة حرارة سالبة.' }
+                ],
+                correctOptionId: 'b',
+                explanation: "سرعة الانصهار لا تؤثر في درجة الانصهار؛ فقد ينصهر كأس أسرع من الآخر بفعل شدة الحرارة، لكن درجة انصهار الثلج تبقى ثابتة عند 0°C."
+            },
+            {
+                id: 5,
+                title: "لغز الرسم البياني (النقطة ع)",
+                type: "graph_analysis",
+                questionText: "في الرسم البياني لتسخين الثلج، ماذا تمثل النقطة (ع) التي تبدأ عندها درجة الحرارة بالثبات عند 0°C لفترة أثناء تحول الثلج إلى ماء؟",
+                sceneType: "graph_point",
+                options: [
+                    { id: 'a', text: 'أعلى درجة حرارة يمكن أن يصل إليها السائل' },
+                    { id: 'b', text: 'بداية تجربة التسخين بدون معيار ثابت' },
+                    { id: 'c', text: 'درجة انصهار الثلج ودرجة تجمد الماء' },
+                    { id: 'd', text: 'درجة حرارة الغرفة المحيطة بأجهزة القياس' }
+                ],
+                correctOptionId: 'c',
+                explanation: "النقطة (ع) في الرسم البياني تمثل بداية ثبات درجة الحرارة أثناء الانصهار وهي درجة انصهار الثلج ودرجة تجمد الماء (0°C)."
+            },
+            {
+                id: 6,
+                title: "تحليل البيانات الزمنية للثلج",
+                type: "graph_behavior",
+                questionText: "بناءً على تتبع الرسم البياني لعينات الثلج، كيف تصرفت درجة الحرارة قبل وصول الثلج إلى نقطة الانصهار؟",
+                sceneType: "graph_trend",
+                options: [
+                    { id: 'a', text: 'بدأت عند -5°C ثم ارتفعت تدريجياً حتى وصلت إلى 0°C' },
+                    { id: 'b', text: 'بقيت ثابتة عند 0°C منذ الدقيقة الأولى للتجربة' },
+                    { id: 'c', text: 'انخفضت باستمرار حتى وصلت إلى أدنى حد ممكن' },
+                    { id: 'd', text: 'قفزت مباشرة من الصقيع إلى الغليان' }
+                ],
+                correctOptionId: 'a',
+                explanation: "في الرسم البياني، تبدأ درجة حرارة عينة الثلج عند -5°C ثم ترتفع تدريجياً حتى تصل إلى نقطة الانصهار 0°C."
+            },
+            {
+                id: 7,
+                title: "ترتيب أحداث الانصهار العلمي",
+                type: "sorting",
+                questionText: "رتب المراحل العلمية التالية بالتسلسل الصحيح لحدوث عملية الانصهار:",
+                sceneType: "sorting_steps",
+                items: [
+                    { id: 's1', text: 'تكتسب المادة الصلبة طاقة حرارية' },
+                    { id: 's2', text: 'تتحرك الجزيئات بسرعة أكبر' },
+                    { id: 's3', text: 'ابتعاد الجزيئات عن بعضها' },
+                    { id: 's4', text: 'تحول المادة الصلبة إلى سائل' }
+                ],
+                correctOrder: ['s1', 's2', 's3', 's4'],
+                explanation: "الترتيب العلمي الصحيح: تكتسب المادة طاقة حرارية ➔ تتحرك الجزيئات أسرع ➔ تبتعد عن بعضها ➔ تحول المادة إلى سائل."
+            },
+            {
+                id: 8,
+                title: "مطابقة الأدلة العلمية",
+                type: "matching",
+                questionText: "قم بربط مفاهيم درس الانصهار بتفسيراتها العلمية المعتمدة:",
+                sceneType: "matching_scene",
+                leftItems: [
+                    { id: 'l1', text: '1. الانصهار' },
+                    { id: 'l2', text: '2. درجة الانصهار' },
+                    { id: 'l3', text: '3. جزيئات المادة الصلبة' },
+                    { id: 'l4', text: '4. إضافة الملح للثلج' }
+                ],
+                rightItems: [
+                    { id: 'r1', text: 'أ) تقلل درجة انصهار الثلج' },
+                    { id: 'r2', text: 'ب) تتحرك أسرع وتبتعد عن بعضها' },
+                    { id: 'r3', text: 'ج) تحويل الصلب إلى سائل بفعل الحرارة' },
+                    { id: 'r4', text: 'د) درجة الحرارة التي تنصهر عندها المادة' }
+                ],
+                correctPairs: {
+                    'l1': 'r3',
+                    'l2': 'r4',
+                    'l3': 'r2',
+                    'l4': 'r1'
+                },
+                explanation: "الروابط الصحيحة تربط المفاهيم بمعانيها العلمية الدقيقة في الدرس."
+            },
+            {
+                id: 9,
+                title: "لغز تأثير الملح على الثلج",
+                type: "salt_infer",
+                questionText: "ما هو الأثر العلمي لإضافة الملح إلى عينات الثلج حسب نتائج المختبر؟",
+                sceneType: "salt_scene",
+                options: [
+                    { id: 'a', text: 'ترفع درجة انصهار الثلج وتجعله أصلب' },
+                    { id: 'b', text: 'تجعل الثلج ينصهر عند درجة حرارة أقل (وكلما زاد الملح قلت درجة الانصهار)' },
+                    { id: 'c', text: 'تمنع حدوث الانصهار كلياً تحت أي ظرف' },
+                    { id: 'd', text: 'ليس لها أي تأثير معملي' }
+                ],
+                correctOptionId: 'b',
+                explanation: "إضافة الملح إلى الثلج تخفض درجة انصهاره، وكلما زادت كمية الملح قلت درجة انصهار الثلج."
+            },
+            {
+                id: 10,
+                title: "القضية النهائية: حل لغز الانصهار الشامل",
+                type: "mcq",
+                questionText: "أي استنتاج علمي متكامل يجمع الأدلة الأربعة الكبرى للدرس بشكل دقيق؟",
+                sceneType: "final_lab",
+                options: [
+                    { id: 'a', text: 'الانصهار تحول السائل إلى صلب دون الحاجة لاكتساب أي طاقة حرارية.' },
+                    { id: 'b', text: 'الانصهار تحول المادة الصلبة إلى سائل بفعل الحرارة، وتكتسب الجزيئات طاقة حرارية وتتحرك أسرع وتبتعد عن بعضها، ويمكن أن تقل درجة انصهار الثلج بإضافة الملح.' },
+                    { id: 'c', text: 'جميع المواد الصلبة في الطبيعة تنصهر عند 100°C حصراً.' },
+                    { id: 'd', text: 'سرعة الانصهار ودرجة الانصهار مفهومان متطابقان.' }
+                ],
+                correctOptionId: 'b',
+                explanation: "هذا هو الاستنتاج العلمي الشامل الذي يربط كافة المفاهيم والأساسيات المعملية لدرس الانصهار."
+            }
+        ];
+
+        let questionsData = [];
+
+        function prepareGameQuestions() {
+            questionsData = rawQuestionsData.map(q => {
+                let newQ = { ...q };
+                if (newQ.options) {
+                    newQ.options = shuffleArray(newQ.options);
+                }
+                return newQ;
+            });
+        }
+
+        function render() {
+            const container = document.getElementById('app-container');
+            const headerStats = document.getElementById('header-stats');
+            const timerContainer = document.getElementById('timer-container');
+
+            if (gameState.status === 'START') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderStartScreen();
+            } else if (gameState.status === 'MODE_SELECTION') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderModeSelectionScreen();
+            } else if (gameState.status === 'PLAYER_SETUP') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderPlayerSetupScreen();
+            } else if (gameState.status === 'TEAM_SETUP') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderTeamSetupScreen();
+            } else if (gameState.status === 'READY') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderReadyScreen();
+            } else if (gameState.status === 'QUESTION' || gameState.status === 'FEEDBACK') {
+                headerStats.classList.remove('hidden');
+                timerContainer.classList.remove('hidden');
+                document.getElementById('stat-player').innerText = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[gameState.currentTeamIndex].name;
+                document.getElementById('stat-score').innerText = gameState.score;
+                document.getElementById('stat-clues').innerText = gameState.cluesUnlocked;
+                container.innerHTML = renderQuestionScreen();
+            } else if (gameState.status === 'FINISHED') {
+                headerStats.classList.remove('hidden');
+                timerContainer.classList.add('hidden');
+                container.innerHTML = renderFinishedScreen();
+            } else if (gameState.status === 'REVIEW') {
+                headerStats.classList.add('hidden');
+                container.innerHTML = renderReviewScreen();
+            }
+        }
+
+        function renderStartScreen() {
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-2xl w-full text-center shadow-2xl relative overflow-hidden scanline border border-blue-500/30">
+                    <!-- Official Header Section with Omani Dagger & Teacher Details -->
+                    <div class="mb-6 pb-6 border-b border-slate-700/80 flex flex-col items-center">
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="الخنجر العُماني" class="h-16 w-auto object-contain mb-3 drop-shadow-md" onerror="this.style.display='none'">
+                        
+                        <div class="text-xs md:text-sm text-slate-300 font-semibold space-y-1">
+                            <p>سلطنة عمان</p>
+                            <p>وزارة التعليم</p>
+                            <p>المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                            <p class="text-blue-400 font-bold">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</p>
+                        </div>
+
+                        <!-- Teacher Image & Details -->
+                        <div class="mt-4 flex flex-col items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700 max-w-xs w-full">
+                            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-400 shadow-md mb-2 bg-slate-900">
+                                <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top" onerror="this.src='https://placehold.co/150x150/1e293b/ffffff?text=Teacher'">
+                            </div>
+                            <h3 class="font-bold text-sm text-slate-100">أ. فيصل الشبلي</h3>
+                            <p class="text-xs text-slate-400 font-mono">99812126</p>
+                            <p class="text-xs text-blue-400">Instagram: faalll8</p>
+                        </div>
+
+                        <div class="mt-3 text-xs text-slate-400 bg-slate-900/40 px-3 py-1 rounded-full border border-slate-800">
+                            مدير المدرسة: <span class="text-slate-200 font-semibold">أ. سعود الشيزاوي</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="inline-block bg-blue-500/10 text-blue-400 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-500/30">
+                            🔬 الدرس الثامن: الانصهار (الصف الخامس)
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-black text-white">🕵️‍♂️ المحقق العلمي: قضية لغز الانصهار</h2>
+                        <p class="text-sm text-slate-300 leading-relaxed max-w-lg mx-auto bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                            "وصلت إلى المختبر قضية غامضة: اختفى الثلج وتحول إلى ماء... لكن ما الذي حدث للجزيئات؟ ولماذا تنصهر بعض المواد عند درجات حرارة مختلفة؟ عليك جمع 10 أدلة علمية لحل القضية!"
+                        </p>
+
+                        <div class="pt-4">
+                            <button onclick="playSound('click'); setGameStatus('MODE_SELECTION')" class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 text-base flex items-center justify-center gap-2 mx-auto">
+                                <span>🚀 بدء التحقيق العلمي</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModeSelectionScreen() {
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-xl w-full text-center shadow-2xl border border-blue-500/30">
+                    <h3 class="text-xl font-bold text-white mb-2">اختر وضع التحقيق</h3>
+                    <p class="text-xs text-slate-400 mb-6">حدد نمط الدخول إلى مختبر لغز الانصهار</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="playSound('click'); selectMode('solo')" class="p-6 bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-blue-500 rounded-2xl transition flex flex-col items-center group">
+                            <span class="text-4xl mb-3 group-hover:scale-110 transition">👤</span>
+                            <h4 class="font-bold text-white text-lg">الوضع الفردي</h4>
+                            <p class="text-xs text-slate-400 mt-1">تحقيق فردي وتحدي شخصي لجمع الأدلة</p>
+                        </button>
+                        <button onclick="playSound('click'); selectMode('teams')" class="p-6 bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-cyan-500 rounded-2xl transition flex flex-col items-center group">
+                            <span class="text-4xl mb-3 group-hover:scale-110 transition">👥</span>
+                            <h4 class="font-bold text-white text-lg">الوضع الجماعي</h4>
+                            <p class="text-xs text-slate-400 mt-1">تنافس بين 2 إلى 4 فرق علمية متناوبة</p>
+                        </button>
+                    </div>
+
+                    <div class="mt-6">
+                        <button onclick="playSound('click'); setGameStatus('START')" class="text-xs text-slate-400 hover:text-white underline">العودة للرئيسية</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPlayerSetupScreen() {
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-md w-full text-center shadow-2xl border border-blue-500/30">
+                    <h3 class="text-xl font-bold text-white mb-2">تسجيل المحقق الفردي</h3>
+                    <p class="text-xs text-slate-400 mb-6">أدخل اسمك الكريم للانضمام إلى غرفة التحقيق</p>
+
+                    <div class="space-y-4 text-right">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">اسم المحقق أو الباحث:</label>
+                            <input type="text" id="player-name-input" placeholder="مثال: أحمد المحقق" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500" value="${gameState.playerName}">
+                        </div>
+                        <button onclick="submitPlayerName()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                            دخول المختبر 🔬
+                        </button>
+                    </div>
+
+                    <div class="mt-4">
+                        <button onclick="playSound('click'); setGameStatus('MODE_SELECTION')" class="text-xs text-slate-400 hover:text-white underline">العودة</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTeamSetupScreen() {
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border border-blue-500/30">
+                    <h3 class="text-xl font-bold text-white mb-2">إعداد الفرق العلمية</h3>
+                    <p class="text-xs text-slate-400 mb-6">حدد عدد الفرق (من 2 إلى 4 فرق) وأدخل أسمائها</p>
+
+                    <div class="space-y-4 text-right">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">عدد الفرق:</label>
+                            <select id="team-count-select" onchange="updateTeamInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                                <option value="2">فريقين (2)</option>
+                                <option value="3">ثلاثة فرق (3)</option>
+                                <option value="4">أربعة فرق (4)</option>
+                            </select>
+                        </div>
+                        <div id="team-inputs-container" class="space-y-2"></div>
+                        <button onclick="submitTeams()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                            بدء المنافسة الجماعية 🏆
+                        </button>
+                    </div>
+
+                    <div class="mt-4">
+                        <button onclick="playSound('click'); setGameStatus('MODE_SELECTION')" class="text-xs text-slate-400 hover:text-white underline">العودة</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReadyScreen() {
+            const investigatorName = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[gameState.currentTeamIndex].name;
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border border-blue-500/30">
+                    <span class="text-5xl mb-3 block">🔎</span>
+                    <h3 class="text-2xl font-bold text-white mb-2">المحقق: ${investigatorName}</h3>
+                    <p class="text-sm text-slate-300 mb-6">غرفة التحقيق متطورة وجاهزة. أمامك 10 أدلة علمية يجب جمعها لحل لغز الانصهار.</p>
+                    <button onclick="playSound('click'); startInvestigationLoop()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition text-base">
+                        فتح ملف القضية والانطلاق 🔓
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderQuestionScreen() {
+            const q = questionsData[gameState.currentQuestionIndex];
+            const isFeedback = gameState.status === 'FEEDBACK';
+            const investigatorName = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[gameState.currentTeamIndex].name;
+
+            return `
+                <div class="w-full max-w-4xl space-y-4">
+                    <div class="bg-slate-900/90 border border-blue-500/30 rounded-xl p-4 flex flex-wrap justify-between items-center text-xs md:text-sm shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-lg border border-blue-500/30 font-bold">السؤال ${gameState.currentQuestionIndex + 1} / 10</span>
+                            <span class="text-slate-300">🕵️ المحقق: <strong class="text-white">${investigatorName}</strong></span>
+                        </div>
+                        <div class="flex items-center gap-4 mt-2 md:mt-0">
+                            <span class="text-emerald-400">📁 الأدلة: ${gameState.cluesUnlocked} / 10</span>
+                            <span class="text-amber-400">⭐ النقاط: ${gameState.score}</span>
+                        </div>
+                    </div>
+
+                    <div class="lab-card rounded-2xl p-6 md:p-8 shadow-2xl border border-slate-700">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg md:text-xl font-bold text-blue-300">${q.title}</h3>
+                            <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">100 نقطة</span>
+                        </div>
+
+                        <!-- Investigation Visual Asset -->
+                        <div class="my-6 bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[160px]">
+                            ${renderSceneAsset(q.sceneType)}
+                        </div>
+
+                        <p class="text-sm md:text-base text-slate-200 mb-6 font-medium leading-relaxed">${q.questionText}</p>
+
+                        <div class="space-y-3">
+                            ${renderQuestionInteraction(q, isFeedback)}
+                        </div>
+
+                        ${isFeedback ? renderFeedbackBox(q) : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSceneAsset(sceneType) {
+            if (sceneType === 'ice_melt') {
+                return `
+                    <div class="flex items-center justify-center gap-6 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 bg-blue-900/60 rounded-xl flex items-center justify-center shadow-md text-2xl border-2 border-blue-500/50">🧊</div>
+                            <span class="text-xs text-slate-300 mt-2">عينة المادة</span>
+                        </div>
+                        <div class="text-blue-400 text-xl font-bold animate-pulse">⚡ طاقة حرارية ⚡</div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 bg-cyan-900/60 rounded-xl flex items-center justify-center shadow-md text-2xl border-2 border-cyan-500/50">💧</div>
+                            <span class="text-xs text-slate-300 mt-2">تحول الحالة</span>
+                        </div>
+                    </div>
+                `;
+            } else if (sceneType === 'particles') {
+                return `
+                    <div class="grid grid-cols-2 gap-6 w-full max-w-md">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-center">
+                            <span class="text-xs text-blue-400 font-bold block mb-2">النموذج A</span>
+                            <div class="flex flex-wrap justify-center gap-1 p-2 bg-slate-950 rounded-lg">
+                                <div class="w-4 h-4 bg-slate-400 rounded-full"></div>
+                                <div class="w-4 h-4 bg-slate-400 rounded-full"></div>
+                                <div class="w-4 h-4 bg-slate-400 rounded-full"></div>
+                                <div class="w-4 h-4 bg-slate-400 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-center">
+                            <span class="text-xs text-cyan-400 font-bold block mb-2">النموذج B</span>
+                            <div class="flex flex-wrap justify-center gap-3 p-2 bg-slate-950 rounded-lg">
+                                <div class="w-4 h-4 bg-blue-400 rounded-full animate-bounce"></div>
+                                <div class="w-4 h-4 bg-blue-400 rounded-full animate-pulse"></div>
+                                <div class="w-4 h-4 bg-blue-400 rounded-full"></div>
+                                <div class="w-4 h-4 bg-blue-400 rounded-full animate-bounce"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (sceneType === 'thermometer') {
+                return `
+                    <div class="flex items-center gap-6">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-32 bg-slate-900 border-2 border-slate-700 rounded-full relative flex items-end justify-center overflow-hidden">
+                                <div class="w-4 bg-blue-500 rounded-b-full h-[40%]"></div>
+                            </div>
+                            <span class="text-xs text-blue-300 font-bold mt-2">مقياس الحرارة</span>
+                        </div>
+                        <div class="text-slate-300 text-xs bg-slate-900 p-3 rounded-xl border border-slate-800 max-w-xs">
+                            رصد دقيق لقراءات مقياس الحرارة والملاحظة المعملية لعينات الثلج.
+                        </div>
+                    </div>
+                `;
+            } else if (sceneType === 'sun_vs_flame') {
+                return `
+                    <div class="flex items-center justify-around w-full gap-4">
+                        <div class="text-center bg-slate-900 p-3 rounded-xl border border-slate-800">
+                            <span class="text-2xl">☀️</span>
+                            <p class="text-xs text-slate-300 mt-1">طاقة الشمس الطبيعية</p>
+                        </div>
+                        <div class="text-xl text-blue-400 font-bold">VS</div>
+                        <div class="text-center bg-slate-900 p-3 rounded-xl border border-slate-800">
+                            <span class="text-2xl">🔥</span>
+                            <p class="text-xs text-slate-300 mt-1">مصدر حراري مباشر</p>
+                        </div>
+                    </div>
+                `;
+            } else if (sceneType === 'graph_point' || sceneType === 'graph_trend') {
+                // Corrected Scientific Melting Curve:
+                // Temperature starts at -5°C (y=90), rises to 0°C (y=60), then plateaus flat at 0°C for melting, then rises as liquid.
+                // Point ع is precisely placed at the *beginning* of the flat plateau (x=85, y=60).
+                return `
+                    <div class="w-full max-w-md bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+                        <div class="h-32 w-full border-b border-l border-slate-700 relative flex items-end">
+                            <div class="absolute inset-0 flex items-center justify-center p-2">
+                                <svg class="w-full h-full" viewBox="0 0 240 120" preserveAspectRatio="none">
+                                    <line x1="20" y1="100" x2="220" y2="100" stroke="#334155" stroke-dasharray="2" />
+                                    <line x1="20" y1="60" x2="220" y2="60" stroke="#334155" stroke-dasharray="2" />
+                                    
+                                    <!-- Curve path: rises from (-5°C at y=90) to (0°C at y=60), plateaus flat from x=80 to x=160, then rises -->
+                                    <path d="M 30 90 L 80 60 L 160 60 L 210 20" fill="none" stroke="#3b82f6" stroke-width="3" />
+                                    
+                                    <!-- Point ع precisely at the beginning of the flat plateau -->
+                                    <circle cx="80" cy="60" r="6" fill="#f59e0b" />
+                                    <text x="70" y="48" fill="#f59e0b" font-size="14" font-weight="bold">ع</text>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="text-xs text-slate-400 mt-2 block">رسم بياني لتسخين الثلج (النقطة ع تمثل بداية ثبوت درجة الحرارة عند الانصهار)</span>
+                    </div>
+                `;
+            } else if (sceneType === 'sorting_steps') {
+                return `
+                    <div class="text-xs text-blue-300 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
+                        ترتيب تسلسلي لمراحل حدوث الانصهار في المعمل
+                    </div>
+                `;
+            } else if (sceneType === 'matching_scene') {
+                return `
+                    <div class="text-xs text-cyan-300 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
+                        لوحة توصيل الأدلة والمفاهيم العلمية للدرس
+                    </div>
+                `;
+            } else if (sceneType === 'salt_scene') {
+                return `
+                    <div class="flex items-center gap-6">
+                        <div class="text-center bg-slate-900 p-3 rounded-xl border border-slate-800">
+                            <span class="text-2xl">🧪🧂</span>
+                            <p class="text-xs text-slate-300 mt-1">مختبر المحاليل والعينات</p>
+                        </div>
+                        <div class="text-slate-300 text-xs bg-slate-900 p-3 rounded-xl border border-slate-800 max-w-xs">
+                            فحص أثر إضافة الملح على درجات انصهار الثلج.
+                        </div>
+                    </div>
+                `;
+            } else if (sceneType === 'final_lab') {
+                return `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center w-full">
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 text-xs">🔬 دليل الانصهار</div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 text-xs">🌡️ ميزان الحرارة</div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 text-xs">🧬 نموذج الجزيئات</div>
+                        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 text-xs">🧂 عينة الملح</div>
+                    </div>
+                `;
+            }
+            return `<div class="text-slate-400 text-xs">غرفة التحقيق العلمي</div>`;
+        }
+
+        function renderQuestionInteraction(q, isFeedback) {
+            if (q.type === 'sorting') {
+                return renderSortingInteraction(q, isFeedback);
+            } else if (q.type === 'matching') {
+                return renderMatchingInteraction(q, isFeedback);
+            } else {
+                return q.options.map(opt => {
+                    let btnStyle = "bg-slate-800/80 hover:bg-slate-750 border-slate-700 text-slate-200";
+                    if (isFeedback) {
+                        if (opt.id === q.correctOptionId) {
+                            btnStyle = "bg-emerald-900/60 border-emerald-500 text-emerald-200 font-bold";
+                        } else if (opt.id === gameState.selectedOptionId) {
+                            btnStyle = "bg-red-900/60 border-red-500 text-red-200";
+                        } else {
+                            btnStyle = "bg-slate-900/50 border-slate-800 text-slate-500 opacity-50";
+                        }
+                    } else if (gameState.selectedOptionId === opt.id) {
+                        btnStyle = "bg-blue-900/60 border-blue-500 text-blue-200 font-bold";
+                    }
+
+                    return `
+                        <button ${isFeedback ? 'disabled' : `onclick="selectOption('${opt.id}')"`} 
+                            class="w-full text-right p-4 rounded-xl border transition flex items-center justify-between ${btnStyle}">
+                            <span class="text-sm md:text-base">${opt.text}</span>
+                            <span class="w-6 h-6 rounded-full border border-slate-600 flex items-center justify-center text-xs font-mono">
+                                ${gameState.selectedOptionId === opt.id ? '✓' : ''}
+                            </span>
+                        </button>
+                    `;
+                }).join('') + (!isFeedback ? `
+                    <div class="pt-4">
+                        <button onclick="confirmAnswer()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                            تأكيد الإجابة 🔒
+                        </button>
+                    </div>
+                ` : '');
+            }
+        }
+
+        function renderSortingInteraction(q, isFeedback) {
+            if (gameState.sortingOrder.length === 0) {
+                gameState.sortingOrder = [...q.items].sort(() => Math.random() - 0.5).map(i => i.id);
+            }
+
+            return `
+                <div class="space-y-2 mb-4">
+                    <p class="text-xs text-slate-400">انقر على الأسهم لتعديل الترتيب التصاعدي العلمي السليم:</p>
+                    <div class="space-y-2">
+                        ${gameState.sortingOrder.map((itemId, idx) => {
+                            const item = q.items.find(i => i.id === itemId);
+                            return `
+                                <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-sm">
+                                    <span>${idx + 1}. ${item.text}</span>
+                                    ${!isFeedback ? `
+                                        <div class="flex gap-1">
+                                            <button onclick="moveSortingItem(${idx}, -1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs">⬆️</button>
+                                            <button onclick="moveSortingItem(${idx}, 1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs">⬇️</button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ${!isFeedback ? `
+                    <button onclick="confirmSortingAnswer()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                        تأكيد الترتيب 🔒
+                    </button>
+                ` : ''}
+            `;
+        }
+
+        function renderMatchingInteraction(q, isFeedback) {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="space-y-2">
+                        <span class="text-xs font-bold text-blue-400 block mb-1">المفاهيم العلمية:</span>
+                        ${q.leftItems.map(left => {
+                            const connectedRightId = gameState.matchingPairs[left.id];
+                            const connectedRight = connectedRightId ? q.rightItems.find(r => r.id === connectedRightId) : null;
+                            return `
+                                <div class="bg-slate-900 border ${connectedRight ? 'border-blue-500' : 'border-slate-700'} p-3 rounded-xl text-sm flex flex-col gap-2">
+                                    <div class="flex justify-between items-center">
+                                        <span>${left.text}</span>
+                                        ${!isFeedback && !connectedRight ? `
+                                            <button onclick="selectMatchingLeft('${left.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs">
+                                                ${gameState.tempLeftSelected === left.id ? 'محدد...' : 'اختر للربط'}
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                    ${connectedRight ? `
+                                        <div class="flex justify-between items-center bg-blue-950/40 p-2 rounded-lg border border-blue-800/50 text-xs">
+                                            <span class="text-blue-300">🔗 متصل مع: ${connectedRight.text}</span>
+                                            ${!isFeedback ? `
+                                                <button onclick="cancelMatch('${left.id}')" class="px-2 py-1 bg-red-900/60 hover:bg-red-800 text-red-200 rounded text-xs font-bold">
+                                                    إلغاء التوصيل
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="space-y-2">
+                        <span class="text-xs font-bold text-cyan-400 block mb-1">التفسيرات والإجابات:</span>
+                        ${q.rightItems.map(right => {
+                            const isAlreadyConnected = Object.values(gameState.matchingPairs).includes(right.id);
+                            return `
+                                <div class="bg-slate-900 border ${isAlreadyConnected ? 'border-emerald-500/50 opacity-75' : 'border-slate-700'} p-3 rounded-xl text-sm flex justify-between items-center">
+                                    <span>${right.text}</span>
+                                    ${!isFeedback && gameState.tempLeftSelected && !isAlreadyConnected ? `
+                                        <button onclick="createMatch('${gameState.tempLeftSelected}', '${right.id}')" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs">
+                                            ربط هنا 🔗
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ${!isFeedback ? `
+                    <button onclick="confirmMatchingAnswer()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                        تأكيد التوصيل 🔒
+                    </button>
+                ` : ''}
+            `;
+        }
+
+        function renderFeedbackBox(q) {
+            const isCorrect = gameState.lastAnswerCorrect;
+            return `
+                <div class="mt-6 p-4 rounded-xl border ${isCorrect ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-red-950/40 border-red-500/40 text-red-200'} space-y-2 animate-pulseSlow">
+                    <div class="font-bold text-base">
+                        ${isCorrect ? '🎉 دليل صحيح! +100 نقطة' : '🔎 الدليل غير مكتمل'}
+                    </div>
+                    <div>
+                        <span class="font-semibold text-xs opacity-80 block mb-1">لماذا؟</span>
+                        <p class="text-xs md:text-sm leading-relaxed">${q.explanation}</p>
+                    </div>
+                    <div class="pt-2">
+                        <button onclick="nextQuestion()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+                            متابعة التحقيق ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFinishedScreen() {
+            const percentage = Math.round((gameState.correctAnswersCount / 10) * 100);
+            let rankTitle = "🌟 محقق تحت التدريب";
+            if (percentage >= 90) rankTitle = "🧠 عبقري العلوم";
+            else if (percentage >= 80) rankTitle = "🔬 خبير علمي";
+            else if (percentage >= 70) rankTitle = "🕵️ محقق علمي متميز";
+            else if (percentage >= 60) rankTitle = "🔎 مستكشف المعرفة";
+
+            const investigatorName = gameState.mode === 'solo' ? gameState.playerName : gameState.teams[gameState.currentTeamIndex].name;
+
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-2xl w-full text-center shadow-2xl border border-blue-500/30 space-y-6">
+                    <span class="text-6xl block">🔓</span>
+                    <h2 class="text-2xl md:text-3xl font-black text-white">تم حل القضية بالكامل!</h2>
+                    <p class="text-xs text-blue-300">تهانينا للمحقق العلمي <strong class="text-white">${investigatorName}</strong> على إنجاز التحقيق</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">النقاط الكلية</span>
+                            <span class="text-xl font-bold text-amber-400">${gameState.score} / 1000</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">الإجابات الصحيحة</span>
+                            <span class="text-xl font-bold text-emerald-400">${gameState.correctAnswersCount}</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">الأدلة المكتشفة</span>
+                            <span class="text-xl font-bold text-cyan-400">${gameState.cluesUnlocked} / 10</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">النسبة المئوية</span>
+                            <span class="text-xl font-bold text-blue-400">${percentage}%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-950/50 p-4 rounded-xl border border-blue-800/60">
+                        <span class="text-xs text-slate-400 block mb-1">رتبة المحقق العلمي:</span>
+                        <span class="text-xl font-black text-amber-300">${rankTitle}</span>
+                    </div>
+
+                    <p class="text-xs text-slate-400">يمكنك إعادة التحقيق واكتشاف أدلة جديدة أو مراجعة الأسئلة العلمية!</p>
+
+                    <div class="flex flex-col md:flex-row gap-3 justify-center pt-2">
+                        <button onclick="playSound('click'); setGameStatus('REVIEW')" class="py-3 px-6 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl text-sm transition">
+                            📋 مراجعة التحقيق والأدلة
+                        </button>
+                        <button onclick="playSound('click'); restartGame()" class="py-3 px-6 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition shadow-lg">
+                            🔄 العب من جديد
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="lab-card rounded-2xl p-6 md:p-8 max-w-4xl w-full space-y-6 border border-blue-500/30">
+                    <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                        <h3 class="text-xl font-bold text-white">📋 سجل مراجعة التحقيق والأدلة العلمية</h3>
+                        <button onclick="playSound('click'); setGameStatus('FINISHED')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-slate-300">العودة للنتائج</button>
+                    </div>
+
+                    <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        ${gameState.questionResults.map((res, index) => `
+                            <div class="bg-slate-900/90 border ${res.correct ? 'border-emerald-500/40' : 'border-red-500/40'} p-4 rounded-xl space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-blue-300">السؤال ${index + 1}: ${res.title}</span>
+                                    <span class="${res.correct ? 'text-emerald-400' : 'text-red-400'} font-bold">${res.correct ? '✓ صحيح (+100)' : '✗ خطأ (0)'}</span>
+                                </div>
+                                <p class="text-sm text-slate-200">${res.questionText}</p>
+                                <div class="text-xs text-slate-400 bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1">
+                                    <p>إجابتك: <strong class="text-white">${res.userAnswerText}</strong></p>
+                                    <p>الإجابة الصحيحة: <strong class="text-emerald-300">${res.correctAnswerText}</strong></p>
+                                    <p class="text-blue-300 pt-1">💡 التفسير العلمي: ${res.explanation}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function setGameStatus(status) {
+            gameState.status = status;
+            stopTimer();
+            render();
+            if (status === 'QUESTION') {
+                startTimer();
+            }
+        }
+
+        function selectMode(mode) {
+            gameState.mode = mode;
+            if (mode === 'solo') {
+                setGameStatus('PLAYER_SETUP');
+            } else {
+                setGameStatus('TEAM_SETUP');
+                setTimeout(updateTeamInputs, 50);
+            }
+        }
+
+        function submitPlayerName() {
+            const input = document.getElementById('player-name-input');
+            const name = input.value.trim();
+            if (!name) {
+                alert('الرجاء إدخال اسم المحقق');
+                return;
+            }
+            gameState.playerName = name;
+            playSound('click');
+            setGameStatus('READY');
+        }
+
+        function updateTeamInputs() {
+            const count = parseInt(document.getElementById('team-count-select').value);
+            const container = document.getElementById('team-inputs-container');
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `<div><input type="text" id="team-name-${i}" placeholder="اسم الفريق ${i + 1}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500" value="فريق ${i + 1}"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function submitTeams() {
+            const count = parseInt(document.getElementById('team-count-select').value);
+            gameState.teams = [];
+            for (let i = 0; i < count; i++) {
+                const name = document.getElementById(`team-name-${i}`).value.trim() || `فريق ${i + 1}`;
+                gameState.teams.push({ name: name, score: 0 });
+            }
+            gameState.currentTeamIndex = 0;
+            playSound('click');
+            setGameStatus('READY');
+        }
+
+        function startInvestigationLoop() {
+            prepareGameQuestions();
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.cluesUnlocked = 0;
+            gameState.correctAnswersCount = 0;
+            gameState.wrongAnswersCount = 0;
+            gameState.unansweredCount = 0;
+            gameState.questionResults = [];
+            setGameStatus('QUESTION');
+        }
+
+        function startTimer() {
+            gameState.timer = 30;
+            gameState.isTimerActive = true;
+            document.getElementById('stat-timer').innerText = gameState.timer;
+
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                const timerEl = document.getElementById('stat-timer');
+                if (timerEl) timerEl.innerText = gameState.timer;
+
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.isTimerActive = false;
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            gameState.isTimerActive = false;
+        }
+
+        function handleTimeOut() {
+            const q = questionsData[gameState.currentQuestionIndex];
+            gameState.lastAnswerCorrect = false;
+            gameState.wrongAnswersCount++;
+            gameState.unansweredCount++;
+            gameState.selectedOptionId = null;
+
+            gameState.questionResults.push({
+                title: q.title,
+                questionText: q.questionText,
+                userAnswerText: 'انتهى الوقت دون إجابة',
+                correctAnswerText: q.options ? q.options.find(o => o.id === q.correctOptionId).text : 'الإجابة العلمية الصحيحة',
+                explanation: q.explanation,
+                correct: false
+            });
+
+            playSound('error');
+            setGameStatus('FEEDBACK');
+        }
+
+        function selectOption(optionId) {
+            gameState.selectedOptionId = optionId;
+            playSound('click');
+            render();
+        }
+
+        function confirmAnswer() {
+            if (!gameState.selectedOptionId) {
+                alert('الرجاء اختيار إجابة أولاً');
+                return;
+            }
+            stopTimer();
+
+            const q = questionsData[gameState.currentQuestionIndex];
+            const isCorrect = gameState.selectedOptionId === q.correctOptionId;
+            gameState.lastAnswerCorrect = isCorrect;
+
+            let userAnswerText = q.options.find(o => o.id === gameState.selectedOptionId).text;
+            let correctAnswerText = q.options.find(o => o.id === q.correctOptionId).text;
+
+            if (isCorrect) {
+                gameState.score += 100;
+                gameState.cluesUnlocked++;
+                gameState.correctAnswersCount++;
+                playSound('success');
+                playSound('clue');
+            } else {
+                gameState.wrongAnswersCount++;
+                playSound('error');
+            }
+
+            gameState.questionResults.push({
+                title: q.title,
+                questionText: q.questionText,
+                userAnswerText: userAnswerText,
+                correctAnswerText: correctAnswerText,
+                explanation: q.explanation,
+                correct: isCorrect
+            });
+
+            setGameStatus('FEEDBACK');
+        }
+
+        function moveSortingItem(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= gameState.sortingOrder.length) return;
+            const temp = gameState.sortingOrder[index];
+            gameState.sortingOrder[index] = gameState.sortingOrder[newIndex];
+            gameState.sortingOrder[newIndex] = temp;
+            playSound('click');
+            render();
+        }
+
+        function confirmSortingAnswer() {
+            stopTimer();
+            const q = questionsData[gameState.currentQuestionIndex];
+            const isCorrect = JSON.stringify(gameState.sortingOrder) === JSON.stringify(q.correctOrder);
+            gameState.lastAnswerCorrect = isCorrect;
+
+            if (isCorrect) {
+                gameState.score += 100;
+                gameState.cluesUnlocked++;
+                gameState.correctAnswersCount++;
+                playSound('success');
+                playSound('clue');
+            } else {
+                gameState.wrongAnswersCount++;
+                playSound('error');
+            }
+
+            gameState.questionResults.push({
+                title: q.title,
+                questionText: q.questionText,
+                userAnswerText: 'ترتيب تسلسلي مقترن',
+                correctAnswerText: 'الترتيب العلمي السليم',
+                explanation: q.explanation,
+                correct: isCorrect
+            });
+
+            setGameStatus('FEEDBACK');
+        }
+
+        function selectMatchingLeft(leftId) {
+            gameState.tempLeftSelected = leftId;
+            playSound('click');
+            render();
+        }
+
+        function createMatch(leftId, rightId) {
+            gameState.matchingPairs[leftId] = rightId;
+            gameState.tempLeftSelected = null;
+            playSound('click');
+            render();
+        }
+
+        function cancelMatch(leftId) {
+            delete gameState.matchingPairs[leftId];
+            playSound('click');
+            render();
+        }
+
+        function confirmMatchingAnswer() {
+            stopTimer();
+            const q = questionsData[gameState.currentQuestionIndex];
+            let isCorrect = true;
+            for (let key of Object.keys(q.correctPairs)) {
+                if (gameState.matchingPairs[key] !== q.correctPairs[key]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            if (Object.keys(gameState.matchingPairs).length !== Object.keys(q.correctPairs).length) {
+                isCorrect = false;
+            }
+
+            gameState.lastAnswerCorrect = isCorrect;
+
+            if (isCorrect) {
+                gameState.score += 100;
+                gameState.cluesUnlocked++;
+                gameState.correctAnswersCount++;
+                playSound('success');
+                playSound('clue');
+            } else {
+                gameState.wrongAnswersCount++;
+                playSound('error');
+            }
+
+            gameState.questionResults.push({
+                title: q.title,
+                questionText: q.questionText,
+                userAnswerText: 'توصيل الأدلة العلمية',
+                correctAnswerText: 'المطابقة الصحيحة',
+                explanation: q.explanation,
+                correct: isCorrect
+            });
+
+            setGameStatus('FEEDBACK');
+        }
+
+        function nextQuestion() {
+            gameState.currentQuestionIndex++;
+            gameState.selectedOptionId = null;
+            gameState.sortingOrder = [];
+            gameState.matchingPairs = {};
+            gameState.tempLeftSelected = null;
+
+            if (gameState.mode === 'teams' && gameState.teams.length > 0) {
+                gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            }
+
+            if (gameState.currentQuestionIndex >= questionsData.length) {
+                playSound('solve');
+                setGameStatus('FINISHED');
+            } else {
+                setGameStatus('QUESTION');
+            }
+        }
+
+        function restartGame() {
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.cluesUnlocked = 0;
+            gameState.selectedOptionId = null;
+            gameState.sortingOrder = [];
+            gameState.matchingPairs = {};
+            gameState.questionResults = [];
+            setGameStatus('START');
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>

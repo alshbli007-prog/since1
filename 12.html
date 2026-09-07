@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صندوق المعرفة - دورة حياة النبات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .box-3d {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .box-3d:hover:not(.opened) {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+        .box-opened {
+            opacity: 0.6;
+            filter: grayscale(40%);
+            cursor: not-allowed !important;
+            border-color: rgba(100, 116, 139, 0.5) !important;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 text-white min-h-screen flex flex-col select-none overflow-x-hidden">
+
+    <!-- تطبيق اللعبة الرئيسي -->
+    <div id="app" class="flex-1 flex flex-col w-full max-w-6xl mx-auto p-4 md:p-6"></div>
+
+    <script>
+        // --- مولد الأصوات عبر Web Audio API ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (window.reduceMotion) return;
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'boxOpen') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.setValueAtTime(500, now + 0.1);
+                osc.frequency.setValueAtTime(700, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.setValueAtTime(120, now + 0.15);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'star') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'win') {
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((freq, idx) => {
+                    const nOsc = audioCtx.createOscillator();
+                    const nGain = audioCtx.createGain();
+                    nOsc.connect(nGain);
+                    nGain.connect(audioCtx.destination);
+                    nOsc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    nGain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                    nGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+                    nOsc.start(now + idx * 0.12);
+                    nOsc.stop(now + idx * 0.12 + 0.3);
+                });
+            }
+        }
+
+        // --- بنك الأسئلة الشامل الموسع (18 سؤالاً) ---
+        const questionBank = [
+            {
+                id: 1,
+                type: "image_choice",
+                title: "استنتاج مراحل دورة الحياة",
+                question: "أي ترتيب بصري يمثل مراحل دورة حياة النبات الزهري بشكل صحيح ومتسلسل؟",
+                imageType: "life_cycle_sequence",
+                options: [
+                    { id: "A", text: "بذرة ➔ إنبات ➔ شتلة ➔ نبات ناضج ➔ إزهار ➔ ثمار وبذور", correct: true },
+                    { id: "B", text: "ثمرة ➔ بذرة ➔ إزهار ➔ شتلة ➔ نبات ناضج", correct: false },
+                    { id: "C", text: "إزهار ➔ بذرة ➔ إنبات ➔ ثمرة ➔ شتلة", correct: false },
+                    { id: "D", text: "شتلة ➔ ثمرة ➔ بذرة ➔ إزهار ➔ إنبات", correct: false }
+                ],
+                explanation: "تبدأ دورة حياة النبات دائماً من البذرة التي تنبت وتنمو لشتلة، ثم تصبح نباتاً بالغاً يزهر ويكون الثمار والبذور لتتجدد الدورة.",
+                concept: "مراحل دورة الحياة"
+            },
+            {
+                id: 2,
+                type: "image_stage",
+                title: "تحديد المرحلة من الصورة",
+                question: "تأمل الرسم التوضيحي للشتلة الخارجة من التربة، ما المرحلة الأساسية التي يمثلها هذا الشكل؟",
+                imageType: "seedling_stage",
+                options: [
+                    { id: "A", text: "مرحلة الإزهار والتلقيح", correct: false },
+                    { id: "B", text: "مرحلة الإنبات وبداية النمو الخضري", correct: true },
+                    { id: "C", text: "مرحلة تكوين الثمار الناضجة", correct: false },
+                    { id: "D", text: "مرحلة انتشار البذور في الهواء", correct: false }
+                ],
+                explanation: "عندما تبدأ البذرة بامتصاص الماء وتخرج الجذير والساق الصغيرة خارج التربة، فإننا نسمي هذه المرحلة بالإنبات وبداية النمو.",
+                concept: "مرحلة الإنبات"
+            },
+            {
+                id: 3,
+                type: "matching",
+                title: "ربط أجزاء الدورة بعملياتها",
+                question: "اختر العنصر المناسب لكل مرحلة رئيسية من مراحل حياة النبات الزهري:",
+                pairs: [
+                    { q: "البذرة", a: "بداية دورة الحياة" },
+                    { q: "النبات البالغ", a: "النمو والامتداد" },
+                    { q: "الزهرة", a: "التلقيح والإخصاب" },
+                    { q: "الثمرة", a: "إنتاج وحماية البذور" }
+                ],
+                explanation: "كل جزء في النبات له دور محدد؛ البذرة تبدأ الدورة، والنبات ينمو، والزهرة تتولى التلقيح، والثمرة تحمي البذور الجديدة.",
+                concept: "وظائف أعضاء ودورة النبات"
+            },
+            {
+                id: 4,
+                type: "sorting",
+                title: "ترتيب أحداث الدورة",
+                question: "رتب مراحل دورة حياة النبات بالترتيب الصحيح من البداية للنهاية:",
+                items: ["البذرة والإنبات", "نمو الشتلة", "النبات الناضج", "الإزهار", "التلقيح والإخصاب", "تكون الثمار وبذور جديدة"],
+                correctOrder: [0, 1, 2, 3, 4, 5],
+                explanation: "الترتيب الطبيعي يبدأ بالبذرة ثم الإنبات والنمو، ثم الإزهار والتلقيح، وينتهي بتكوين الثمار والبذور لتبدأ دورة جديدة.",
+                concept: "تسلسل دورة الحياة"
+            },
+            {
+                id: 5,
+                type: "image_choice",
+                title: "استنتاج التلقيح",
+                question: "ما العملية الحيوية الهامة التي تحدث عندما تقف الحشرات أو النحل على أزهار النبات؟",
+                imageType: "flower_bee",
+                options: [
+                    { id: "A", text: "عملية التلقيح ونقل حبوب اللقاح", correct: true },
+                    { id: "B", text: "امتصاص الأملاح المعدنية مباشرة", correct: false },
+                    { id: "C", text: "إنتاج الأوراق الخضراء الجديدة", correct: false },
+                    { id: "D", text: "موت النبات وانقضاء أجله", correct: false }
+                ],
+                explanation: "تلعب الحشرات كالمنحل دوراً أساسياً في عملية التلقيح عبر نقل حبوب اللقاح بين الأزهار، مما يؤدي لاحقاً للإخصاب وتكوين الثمار.",
+                concept: "التلقيح والإخصاب"
+            },
+            {
+                id: 6,
+                type: "classification",
+                title: "النباتات الحولية والمعمرة",
+                question: "أي من النباتات الآتية يُصنف ضمن (النباتات الحولية) التي تموت بعد تكوين بذورها في موسم واحد؟",
+                options: [
+                    { id: "A", text: "نبات النخيل المعمر", correct: false },
+                    { id: "B", text: "نبات الفجل (أو البصل)", correct: true },
+                    { id: "C", text: "شجرة المانجو الضخمة", correct: false },
+                    { id: "D", text: "شجرة الليمون البالغة", correct: false }
+                ],
+                explanation: "النباتات الحولية مثل البصل والثوم والفجل تكمل دورة حياتها وتموت في موسم نمو واحد بعد إنتاج البذور، بخلاف المعمرة.",
+                concept: "الحولية والمعمرة"
+            },
+            {
+                id: 7,
+                type: "true_false",
+                title: "حقيقة علمية",
+                question: "هل صحيح أن جميع النباتات الزهرية تنتج ثماراً وبداخلها بذور لتضمن بقاء النوع؟",
+                options: [
+                    { id: "A", text: "صحيح تماماً", correct: true },
+                    { id: "B", text: "خطأ غير صحيح", correct: false }
+                ],
+                explanation: "نعم، بعد حدوث الإخصاب في زهرة النبات، تذبل أجزاء الزهرة وتتحول المبيض إلى ثمرة تحتوي على بذور جاهزة للانتشار.",
+                concept: "الثمار والبذور"
+            },
+            {
+                id: 8,
+                type: "image_stage",
+                title: "استنتاج مرحلة الثمار",
+                question: "تأمل صورة الثمرة الناضجة المفتوحة التي تحتوي على بذور كثيرة، ماذا تمثل هذه المرحلة?",
+                imageType: "fruit_seeds",
+                options: [
+                    { id: "A", text: "مرحلة الإنبات المبكر", correct: false },
+                    { id: "B", text: "مرحلة تكوين وإنتاج البذور الجديدة", correct: true },
+                    { id: "C", text: "مرحلة امتصاص الماء والتربة", correct: false },
+                    { id: "D", text: "مرحلة تكوين الجذور الوترية", correct: false }
+                ],
+                explanation: "الثمرة تعمل كغلاف حماية للبذور، وعند نضجها تصبح جاهزة لانتشار البذور بواسطة الرياح أو الحيوانات لبدء دورة جديدة.",
+                concept: "إنتاج البذور"
+            },
+            {
+                id: 9,
+                type: "image_choice",
+                title: "طرق انتشار البذور",
+                question: "ما الأهمية الكبرى لانتشار البذور بعيداً عن النبات الأم؟",
+                imageType: "seed_dispersal",
+                options: [
+                    { id: "A", text: "تقليل التنافس على الماء والضوء والغذاء", correct: true },
+                    { id: "B", text: "إيقاف دورة حياة النبات نهائياً", correct: false },
+                    { id: "C", text: "منع تكون الثمار في المستقبل", correct: false },
+                    { id: "D", text: "زيادة طول جذور النبات الأم فقط", correct: false }
+                ],
+                explanation: "انتشار البذور عبر الرياح أو الحيوانات أو الماء يمنع تزاحم الشتلات الجديدة مع النبتة الأم ويضمن حصولها على موارد كافية.",
+                concept: "انتشار البذور"
+            },
+            {
+                id: 10,
+                type: "classification",
+                title: "تصنيف النباتات المعمرة",
+                question: "أي من الآتي يُعد مثالاً صحيحاً على النباتات المعمرة التي تزهر وتثمر لعدة أعوام متتالية؟",
+                options: [
+                    { id: "A", text: "أشجار المانجو والليمون والنخيل", correct: true },
+                    { id: "B", text: "نبات الفجل والثوم فقط", correct: false },
+                    { id: "C", text: "البصل الزراعي الحولي", correct: false },
+                    { id: "D", text: "الشتلات التي تموت خلال أسابيع", correct: false }
+                ],
+                explanation: "النباتات المعمرة تعيش لسنوات عديدة وتستمر في تكوين الأزهار والثمار والبذور كل عام، مثل المانجو والليمون والنخيل.",
+                concept: "النباتات المعمرة"
+            },
+            {
+                id: 11,
+                type: "true_false",
+                title: "مفهوم الإنبات",
+                question: "هل تحتاج البذرة إلى الماء والحرارة المناسبة لكي تبدأ عملية الإنبات؟",
+                options: [
+                    { id: "A", text: "نعم، ضروري جداً", correct: true },
+                    { id: "B", text: "لا، تنبت في الجفاف التام", correct: false }
+                ],
+                explanation: "تحتوي البذرة على غذاء مخزن وتحتاج للماء والدفء لتنشط وتستيقظ ويبدأ الجذير في النمو.",
+                concept: "شروط الإنبات"
+            },
+            {
+                id: 12,
+                type: "image_choice",
+                title: "فحص دورة النمو",
+                question: "بعد أن تنبت البذرة وتصبح شتلة صغيرة، ما الخطوة التالية الأساسية في حياتها؟",
+                imageType: "growing_plant",
+                options: [
+                    { id: "A", text: "تتحول مباشرة إلى ثمرة ناضجة بدون أوراق", correct: false },
+                    { id: "B", text: "تنمو وتكبر لتصبح نباتاً ناضجاً له سيقان وأوراق قوية", correct: true },
+                    { id: "C", text: "تعود لتصبح بذرة مرة أخرى تحت التربة", correct: false },
+                    { id: "D", text: "تفقد جذورها تماماً وتطفو بالهواء", correct: false }
+                ],
+                explanation: "تستمر الشتلة في امتصاص الماء والمغذيات ونمو الأوراق لصنع الغذاء بالتمثيل الضوئي حتى تصبح نباتاً كاملاً.",
+                concept: "النمو الخضري"
+            },
+            {
+                id: 13,
+                type: "true_false",
+                title: "أهمية الزهرة",
+                question: "هل تُعد الزهرة هي الجزء المسؤول عن تكوين البذور في النباتات الزهرية؟",
+                options: [
+                    { id: "A", text: "نعم، بكل تأكيد", correct: true },
+                    { id: "B", text: "لا، الجذور هي المسؤولة", correct: false }
+                ],
+                explanation: "الزهرة هي العضو التكاثري في النبات الزهري؛ فتحتوي على أعضاء التذكير والتأنيث التي تنتج البذور وثمارها بعد التلقيح.",
+                concept: "دور الزهرة"
+            },
+            {
+                id: 14,
+                type: "image_choice",
+                title: "موقع البذرة",
+                question: "أين تختبئ البذور في أغلب النباتات الزهرية بعد نضجها بالكامل؟",
+                imageType: "fruit_seeds",
+                options: [
+                    { id: "A", text: "داخل ثمار النبات المحمية", correct: true },
+                    { id: "B", text: "على أطراف الأوراق الخارجية فقط", correct: false },
+                    { id: "C", text: "في الهواء فوق النباتات", correct: false },
+                    { id: "D", text: "داخل جذور النبات السفلية", correct: false }
+                ],
+                explanation: "تتكون البذور داخل الثمرة التي تحميها وتغذيها حتى تصبح قادرة على الإنبات في مكان جديد.",
+                concept: "تكوين البذور"
+            },
+            {
+                id: 15,
+                type: "classification",
+                title: "مقارنة دورة الحياة",
+                question: "ما الفرق الأساسي بين النباتات الحولية والمعمرة من حيث دورة الحياة؟",
+                options: [
+                    { id: "A", text: "الحولية تعيش موسماً واحداً والمعمرة لعدة أعوام", correct: true },
+                    { id: "B", text: "المعمرة لا تنتج بذوراً نهائياً", correct: false },
+                    { id: "C", text: "الحولية لا تنمو لها أوراق خضراء", correct: false },
+                    { id: "D", text: "لا يوجد أي فرق بينهما", correct: false }
+                ],
+                explanation: "النباتات الحولية تكمل حياتها في موسم واحد وتموت، بينما النباتات المعمرة تعيش لسنوات وتزهر كل عام.",
+                concept: "مقارنة النباتات"
+            },
+            {
+                id: 16,
+                type: "true_false",
+                title: "دور الرياح",
+                question: "هل تستطيع الرياح المساعدة في عملية انتشار بذور بعض النباتات؟",
+                options: [
+                    { id: "A", text: "نعم، صحيحة تماماً", correct: true },
+                    { id: "B", text: "خطأ، الرياح تضر البذور دائماً", correct: false }
+                ],
+                explanation: "بعض البذور خفيفة الوزن أو لها أشكال تشبه الأجنحة أو المظلات لتتمكن الرياح من حملها ونشرها لمسافات بعيدة.",
+                concept: "انتشار البذور بالرياح"
+            },
+            {
+                id: 17,
+                type: "image_choice",
+                title: "مرحلة الشتلة",
+                question: "متى نطلق على النبات الصغير اسم (شتلة)؟",
+                imageType: "seedling_stage",
+                options: [
+                    { id: "A", text: "عندما تخرج الأوراق الأولى فوق التربة بعد الإنبات", correct: true },
+                    { id: "B", text: "عندما تكون بذرة صلبة داخل الثمرة", correct: false },
+                    { id: "C", text: "عندما يذبل النبات ويموت تماماً", correct: false },
+                    { id: "D", text: "قبل حدوث التلقيح في الزهرة", correct: false }
+                ],
+                explanation: "الشتلة هي النبتة الفتية الصغيرة التي ظهرت حديثاً بعد إنبات البذرة وبدأت بالاعتماد على نفسها في النمو.",
+                concept: "مرحلة الشتلة"
+            },
+            {
+                id: 18,
+                type: "true_false",
+                title: "تجدد الحياة",
+                question: "هل تضمن دورة حياة النبات بقاء الأنواع النباتية على الأرض واستمرارها؟",
+                options: [
+                    { id: "A", text: "نعم، بالتأكيد", correct: true },
+                    { id: "B", text: "لا علاقة لها ببقاء الأنواع", correct: false }
+                ],
+                explanation: "عبر تكرار مراحل البذرة، النمو، الإزهار، وتكوين بذور جديدة، تضمن الطبيعة استمرار وتكاثر النباتات عبر الأجيال.",
+                concept: "استمرارية الحياة النباتية"
+            }
+        ];
+
+        // --- حالة اللعبة العامة ---
+        let gameState = {
+            screen: 'START',
+            mode: 'solo',
+            playerName: 'الباحث الصغير',
+            teams: [],
+            currentTeamIndex: 0,
+            score: 0,
+            stars: 0,
+            currentQuestionIndex: 0,
+            activeQuestions: [],
+            openedBoxes: [], // لتتبع الصناديق المفتوحة الـ 10
+            selectedBox: null,
+            selectedAnswer: null,
+            isCorrect: false,
+            timeRemaining: 30,
+            timerInterval: null,
+            timerEnabled: false,
+            reduceMotion: false,
+            answersLog: [],
+            matchLeft: null,
+            matchPairs: [],
+            userMatches: {},
+            sortItems: []
+        };
+
+        // --- أدوات رسم رسومات SVG التفاعلية داخل الأسئلة ---
+        function renderQuestionImage(imageType) {
+            if (imageType === 'life_cycle_sequence') {
+                return `
+                <svg viewBox="0 0 400 160" class="w-full h-36 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2 shadow-inner">
+                    <g transform="translate(10, 20)">
+                        <circle cx="30" cy="60" r="14" fill="#a16207" />
+                        <text x="30" y="95" fill="#a7f3d0" font-size="11" text-anchor="middle">1. بذرة</text>
+                        <path d="M 50 60 L 70 60" stroke="#34d399" stroke-width="2" />
+                        <ellipse cx="95" cy="60" rx="12" ry="10" fill="#a16207" />
+                        <path d="M 95 50 Q 95 30 105 25" fill="none" stroke="#4ade80" stroke-width="3" />
+                        <text x="95" y="95" fill="#a7f3d0" font-size="11" text-anchor="middle">2. إنبات</text>
+                        <path d="M 120 60 L 140 60" stroke="#34d399" stroke-width="2" />
+                        <path d="M 170 80 L 170 40 M 170 55 Q 160 45 155 50 M 170 50 Q 180 40 185 45" stroke="#22c55e" stroke-width="3" fill="none" />
+                        <rect x="160" y="80" width="20" height="15" fill="#b45309" rx="3" />
+                        <text x="170" y="115" fill="#a7f3d0" font-size="11" text-anchor="middle">3. شتلة</text>
+                        <path d="M 195 60 L 215 60" stroke="#34d399" stroke-width="2" />
+                        <circle cx="250" cy="50" r="12" fill="#f43f5e" />
+                        <circle cx="250" cy="50" r="4" fill="#facc15" />
+                        <path d="M 250 62 L 250 85" stroke="#16a34a" stroke-width="3" />
+                        <text x="250" y="105" fill="#a7f3d0" font-size="11" text-anchor="middle">4. إزهار</text>
+                        <path d="M 275 60 L 295 60" stroke="#34d399" stroke-width="2" />
+                        <circle cx="330" cy="55" r="14" fill="#ef4444" />
+                        <circle cx="327" cy="53" r="2" fill="#fef08a" />
+                        <circle cx="333" cy="57" r="2" fill="#fef08a" />
+                        <text x="330" y="95" fill="#a7f3d0" font-size="11" text-anchor="middle">5. ثمرة وبذور</text>
+                    </g>
+                </svg>`;
+            } else if (imageType === 'seedling_stage') {
+                return `
+                <svg viewBox="0 0 300 130" class="w-full h-32 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2 flex justify-center">
+                    <g transform="translate(100, 10)">
+                        <ellipse cx="50" cy="90" rx="70" ry="15" fill="#78350f" />
+                        <rect x="-20" y="90" width="140" height="10" fill="#92400e" rx="3" />
+                        <path d="M 50 90 Q 40 105 30 115 M 50 90 Q 60 105 70 115" stroke="#b45309" stroke-width="3" fill="none" />
+                        <path d="M 50 90 L 50 40" stroke="#22c55e" stroke-width="4" />
+                        <path d="M 50 45 Q 35 30 25 35 Q 35 50 50 45" fill="#4ade80" />
+                        <path d="M 50 45 Q 65 30 75 35 Q 65 50 50 45" fill="#4ade80" />
+                        <ellipse cx="40" cy="85" rx="8" ry="6" fill="#a16207" />
+                    </g>
+                </svg>`;
+            } else if (imageType === 'flower_bee') {
+                return `
+                <svg viewBox="0 0 300 130" class="w-full h-32 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2">
+                    <g transform="translate(120, 15)">
+                        <circle cx="30" cy="60" r="10" fill="#facc15" />
+                        <circle cx="15" cy="50" r="12" fill="#ec4899" />
+                        <circle cx="45" cy="50" r="12" fill="#ec4899" />
+                        <circle cx="15" cy="70" r="12" fill="#ec4899" />
+                        <circle cx="45" cy="70" r="12" fill="#ec4899" />
+                        <path d="M 30 70 L 30 110" stroke="#15803d" stroke-width="4" />
+                        <ellipse cx="75" cy="30" rx="12" ry="8" fill="#eab308" />
+                        <ellipse cx="70" cy="30" rx="4" ry="7" fill="#1e293b" />
+                        <ellipse cx="80" cy="30" rx="4" ry="7" fill="#1e293b" />
+                        <ellipse cx="75" cy="20" rx="8" ry="5" fill="#e0f2fe" opacity="0.8" />
+                    </g>
+                </svg>`;
+            } else if (imageType === 'fruit_seeds') {
+                return `
+                <svg viewBox="0 0 300 130" class="w-full h-32 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2">
+                    <g transform="translate(100, 15)">
+                        <path d="M 50 20 Q 80 10 90 40 Q 100 80 50 115 Q 0 80 10 40 Q 20 10 50 20 Z" fill="#dc2626" />
+                        <path d="M 50 20 L 50 10" stroke="#78350f" stroke-width="4" />
+                        <ellipse cx="40" cy="65" rx="5" ry="8" fill="#fef08a" />
+                        <ellipse cx="60" cy="65" rx="5" ry="8" fill="#fef08a" />
+                    </g>
+                </svg>`;
+            } else if (imageType === 'seed_dispersal') {
+                return `
+                <svg viewBox="0 0 300 130" class="w-full h-32 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2">
+                    <g transform="translate(80, 20)">
+                        <path d="M 30 90 L 30 40" stroke="#15803d" stroke-width="4" />
+                        <circle cx="30" cy="35" r="15" fill="#4ade80" />
+                        <path d="M 50 30 Q 70 20 90 35 M 60 50 Q 80 40 100 55" stroke="#93c5fd" stroke-width="2" fill="none" stroke-dasharray="4" />
+                        <circle cx="85" cy="30" r="3" fill="#fef08a" />
+                        <circle cx="105" cy="45" r="3" fill="#fef08a" />
+                        <circle cx="95" cy="60" r="3" fill="#fef08a" />
+                    </g>
+                </svg>`;
+            } else if (imageType === 'growing_plant') {
+                return `
+                <svg viewBox="0 0 300 130" class="w-full h-32 bg-emerald-950/60 rounded-xl border border-emerald-500/30 p-2 my-2">
+                    <g transform="translate(100, 15)">
+                        <rect x="25" y="90" width="50" height="20" fill="#b45309" rx="4" />
+                        <path d="M 50 90 L 50 30" stroke="#15803d" stroke-width="5" />
+                        <path d="M 50 60 Q 25 50 20 65 Q 35 75 50 60" fill="#22c55e" />
+                        <path d="M 50 45 Q 75 35 80 50 Q 65 60 50 45" fill="#22c55e" />
+                        <circle cx="50" cy="25" r="10" fill="#16a34a" />
+                    </g>
+                </svg>`;
+            }
+            return '';
+        }
+
+        function initGame() {
+            gameState.screen = 'START';
+            render();
+        }
+
+        function setScreen(screenName) {
+            gameState.screen = screenName;
+            render();
+        }
+
+        function startNewSession() {
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            gameState.activeQuestions = shuffled.slice(0, 10);
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.stars = 0;
+            gameState.openedBoxes = [];
+            gameState.answersLog = [];
+            gameState.selectedBox = null;
+            gameState.selectedAnswer = null;
+            
+            if (gameState.mode === 'team' && gameState.teams.length > 0) {
+                gameState.currentTeamIndex = 0;
+                gameState.teams.forEach(t => t.score = 0);
+            }
+            
+            gameState.screen = 'BOX_SELECTION';
+            playSound('win');
+            render();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            let html = '';
+
+            if (gameState.screen === 'START') {
+                html = `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 text-center animate-fade-in">
+                    <div class="bg-slate-800/80 backdrop-blur border border-emerald-500/30 rounded-2xl p-6 max-w-xl w-full shadow-2xl mb-6">
+                        <div class="flex justify-center mb-4">
+                            <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="" class="w-20 h-20 object-contain drop-shadow-md animate-float" onerror="this.style.display='none'">
+                        </div>
+                        <h2 class="text-xl font-bold text-emerald-400 mb-1">سلطنة عمان</h2>
+                        <h3 class="text-lg font-semibold text-slate-200 mb-1">وزارة التعليم</h3>
+                        <p class="text-sm text-slate-300 mb-1">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-sm font-medium text-emerald-300 mb-6">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+
+                        <div class="flex flex-col items-center border-t border-slate-700 pt-5 mt-2">
+                            <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-emerald-500 shadow-lg mb-3">
+                                <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="" class="w-full h-full object-cover object-top" onerror="this.src='https://via.placeholder.com/150'">
+                            </div>
+                            <h4 class="text-lg font-bold text-white">أ. فيصل الشبلي</h4>
+                            <p class="text-emerald-400 font-mono text-sm mb-1">99812126</p>
+                            <p class="text-slate-400 text-xs mb-3">Instagram: faalll8</p>
+                            <div class="text-xs text-slate-400 bg-slate-900/60 px-4 py-1.5 rounded-full border border-slate-700">
+                                مدير المدرسة: <span class="text-slate-200 font-semibold">أ. سعود الشيزاوي</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-green-500 mb-2 drop-shadow">
+                            📦🧠 صندوق المعرفة
+                        </h1>
+                        <p class="text-2xl font-bold text-emerald-200">🌱 دورة حياة النبات</p>
+                        <p class="text-sm text-slate-400 mt-1">المادة: العلوم | الصف الخامس | الوحدة: دورة حياة النباتات الزهرية</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center">
+                        <button onclick="gameState.mode='solo'; setScreen('PLAYER_SETUP'); playSound('star');" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg border border-emerald-400/40">
+                            👤 اللعب الفردي
+                        </button>
+                        <button onclick="gameState.mode='team'; setScreen('PLAYER_SETUP'); playSound('star');" class="flex-1 bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg border border-teal-400/40">
+                            👥 اللعب الجماعي (فرق)
+                        </button>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                        <input type="checkbox" id="reduceMotion" ${gameState.reduceMotion ? 'checked' : ''} onchange="gameState.reduceMotion = this.checked;" class="w-4 h-4 accent-emerald-500 cursor-pointer">
+                        <label for="reduceMotion" class="text-xs text-slate-300 cursor-pointer">♿ تقليل الحركة والمؤثرات البصرية</label>
+                    </div>
+                </div>
+                `;
+            } 
+            else if (gameState.screen === 'PLAYER_SETUP') {
+                html = `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 max-w-md mx-auto w-full animate-fade-in">
+                    <div class="bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-6 w-full shadow-2xl">
+                        <h2 class="text-2xl font-bold text-emerald-400 mb-4 text-center">
+                            ${gameState.mode === 'solo' ? '👤 إعداد اللاعب الفردي' : '👥 إعداد الفرق والمجموعات'}
+                        </h2>
+
+                        ${gameState.mode === 'solo' ? `
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-300 mb-2">اكتب اسمك أيها الباحث الصغير:</label>
+                                <input type="text" id="playerNameInput" value="${gameState.playerName}" class="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-400 text-center font-bold text-lg">
+                            </div>
+                        ` : `
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-300 mb-2">اختر عدد الفرق المنافسة:</label>
+                                <select id="teamCountSelect" onchange="updateTeamInputs(this.value)" class="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-400 font-bold mb-4">
+                                    <option value="2">2 فرق</option>
+                                    <option value="3">3 فرق</option>
+                                    <option value="4">4 فرق</option>
+                                </select>
+                                <div id="teamNamesContainer" class="flex flex-col gap-3">
+                                    <input type="text" class="team-name-input bg-slate-900 border border-teal-500/50 rounded-xl px-4 py-2.5 text-white" value="فريق البراعم 🌱">
+                                    <input type="text" class="team-name-input bg-slate-900 border border-teal-500/50 rounded-xl px-4 py-2.5 text-white" value="فريق الزهور 🌼">
+                                </div>
+                            </div>
+                        `}
+
+                        <div class="mb-6 bg-slate-900/60 p-3 rounded-xl border border-slate-700 flex items-center justify-between">
+                            <span class="text-sm text-slate-200">⏱️ وضع التحدي بالمؤقت (30 ثانية):</span>
+                            <input type="checkbox" id="timerEnabledToggle" ${gameState.timerEnabled ? 'checked' : ''} onchange="gameState.timerEnabled = this.checked;" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="setScreen('START')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-3 rounded-xl transition">رجوع</button>
+                            <button onclick="confirmSetupAndStart()" class="flex-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                                ▶ ابدأ المغامرة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+            // شاشة قاعة الصناديق الـ 10 المعرفية
+            else if (gameState.screen === 'BOX_SELECTION') {
+                const progressPercent = ((gameState.currentQuestionIndex) / 10) * 100;
+                const zones = [
+                    "🌰 منطقة البذور",
+                    "🌱 منطقة الإنبات",
+                    "🌿 منطقة النمو",
+                    "🌼 منطقة الإزهار",
+                    "🐝 منطقة التلقيح والإخصاب",
+                    "🍅 منطقة الثمار والبذور",
+                    "🌬️ منطقة انتشار البذور",
+                    "🔄 دورة حياة جديدة"
+                ];
+                const currentZone = zones[Math.min(Math.floor(gameState.currentQuestionIndex / 1.5), zones.length - 1)];
+
+                html = `
+                <div class="bg-slate-800/90 border border-emerald-500/30 rounded-2xl p-4 mb-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 font-bold">
+                            🏛️
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-emerald-300">قاعة المعرفة النباتية</h3>
+                            <p class="text-xs text-slate-300">${currentZone}</p>
+                        </div>
+                    </div>
+
+                    ${gameState.mode === 'team' ? `
+                        <div class="bg-teal-950/80 px-4 py-1.5 rounded-full border border-teal-500/40 text-sm font-bold text-teal-300">
+                            🎯 دور فريق: ${gameState.teams[gameState.currentTeamIndex].name}
+                        </div>
+                    ` : `
+                        <div class="text-sm font-semibold text-slate-200">
+                            👤 ${gameState.playerName}
+                        </div>
+                    `}
+
+                    <div class="flex items-center gap-4 text-sm font-bold">
+                        <span class="bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-500/30 text-emerald-300">⭐ النجوم: ${gameState.stars} / 10</span>
+                        <span class="bg-amber-950 px-3 py-1 rounded-lg border border-amber-500/30 text-amber-300">🏆 النقاط: ${gameState.score}</span>
+                        <span class="bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-slate-300">السؤال: ${gameState.currentQuestionIndex + 1} / 10</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-800/80 rounded-xl p-3 mb-6 border border-slate-700 flex items-center gap-4">
+                    <div class="text-xs font-bold text-emerald-400 whitespace-nowrap">🌱 نمو العالم:</div>
+                    <div class="flex-1 bg-slate-900 h-4 rounded-full overflow-hidden relative border border-slate-700">
+                        <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-500" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="text-xs text-slate-300 font-mono">${Math.round(progressPercent)}%</div>
+                </div>
+
+                <div class="flex-1 flex flex-col items-center justify-center text-center my-auto">
+                    <div class="mb-6">
+                        <h2 class="text-2xl md:text-3xl font-black text-white mb-2">اختر أحد الصناديق العشرة لتكتشف التحدي القادم!</h2>
+                        <p class="text-sm text-emerald-300">الصناديق المفتوحة تظهر مفتوحة وباهتة (📂) لتعلم أنك أنجزتها 🌿</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-5 w-full max-w-5xl">
+                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(boxNum => {
+                            const isOpened = gameState.openedBoxes.includes(boxNum);
+                            return `
+                                <div onclick="${isOpened ? '' : `openBox(${boxNum})`}" class="box-3d bg-gradient-to-b from-slate-800 to-emerald-950 border-2 ${isOpened ? 'box-opened bg-slate-900' : 'border-emerald-500/40'} rounded-2xl p-5 flex flex-col items-center justify-center ${isOpened ? '' : 'cursor-pointer'} shadow-xl relative group">
+                                    <div class="absolute top-2 right-2 w-6 h-6 rounded-full ${isOpened ? 'bg-emerald-600/40 text-emerald-200' : 'bg-emerald-500/20 text-emerald-300'} flex items-center justify-center text-xs font-bold">
+                                        ${isOpened ? '✓' : `#${boxNum}`}
+                                    </div>
+                                    <div class="text-3xl md:text-4xl mb-2 ${isOpened ? '' : 'group-hover:scale-110'} transition">
+                                        ${isOpened ? '📂' : '📦'}
+                                    </div>
+                                    <span class="font-bold text-xs ${isOpened ? 'text-slate-400' : 'text-emerald-200 group-hover:text-white'}">
+                                        ${isOpened ? 'تم فتحه' : 'صندوق المعرفة'}
+                                    </span>
+                                    <span class="text-[9px] ${isOpened ? 'text-emerald-400 font-bold mt-1' : 'text-slate-400 mt-1'}">
+                                        ${isOpened ? '✨ تم الإنجاز' : 'انقر للفتح 🔓'}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                `;
+            }
+            else if (gameState.screen === 'QUESTION') {
+                const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+                html = `
+                <div class="bg-slate-800/90 border border-emerald-500/30 rounded-2xl p-4 mb-4 flex items-center justify-between shadow-lg">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-emerald-600 text-white font-bold px-3 py-1 rounded-lg text-sm">سؤال ${gameState.currentQuestionIndex + 1} / 10</span>
+                        <span class="text-xs text-slate-300 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700">${q.concept}</span>
+                    </div>
+
+                    ${gameState.timerEnabled ? `
+                        <div id="timerDisplay" class="bg-amber-950 border border-amber-500/50 px-4 py-1 rounded-xl text-amber-300 font-bold text-sm flex items-center gap-2">
+                            ⏱️ <span id="timeLeft">${gameState.timeRemaining}</span> ثانية
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="flex-1 bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-6 shadow-2xl flex flex-col max-w-3xl mx-auto w-full">
+                    <div class="mb-4">
+                        <h3 class="text-xl md:text-2xl font-bold text-white mb-2">${q.title}</h3>
+                        <p class="text-base text-emerald-200 leading-relaxed">${q.question}</p>
+                    </div>
+
+                    ${q.imageType ? renderQuestionImage(q.imageType) : ''}
+
+                    <div class="mt-4 flex-1 flex flex-col justify-center">
+                        ${q.type === 'matching' ? renderMatchingQuestion(q) : 
+                          q.type === 'sorting' ? renderSortingQuestion(q) : 
+                          renderStandardOptions(q)}
+                    </div>
+                </div>
+                `;
+            }
+            else if (gameState.screen === 'FEEDBACK') {
+                const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+                html = `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 max-w-2xl mx-auto w-full animate-fade-in">
+                    <div class="bg-slate-800/95 border-2 ${gameState.isCorrect ? 'border-emerald-500' : 'border-rose-500'} rounded-2xl p-6 w-full shadow-2xl text-center">
+                        <div class="text-5xl mb-3">${gameState.isCorrect ? '🎉' : '💡'}</div>
+                        <h2 class="text-2xl font-black ${gameState.isCorrect ? 'text-emerald-400' : 'text-amber-400'} mb-2">
+                            ${gameState.isCorrect ? 'إجابة صحيحة وموفقة!' : 'توضيح علمي مهم'}
+                        </h2>
+                        <p class="text-sm text-slate-300 mb-4 bg-slate-900/60 p-3 rounded-xl border border-slate-700 text-right leading-relaxed">
+                            <strong class="text-emerald-300 block mb-1">لماذا؟</strong>
+                            ${q.explanation}
+                        </p>
+
+                        <div class="flex justify-center gap-4 text-sm font-bold mb-6">
+                            <span class="bg-emerald-950 text-emerald-300 px-4 py-2 rounded-xl border border-emerald-500/30">
+                                ${gameState.isCorrect ? '+100 نقطة | ⭐ نجمة واحدة' : '0 نقطة (لا توجد خصومات)'}
+                            </span>
+                        </div>
+
+                        <button onclick="proceedToNext()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition text-lg flex items-center justify-center gap-2">
+                            ➡️ متابعة التحدي
+                        </button>
+                    </div>
+                </div>
+                `;
+            }
+            else if (gameState.screen === 'FINISHED') {
+                const percentage = Math.round((gameState.score / 1000) * 100);
+                let rankTitle = "🌱 واصل الاستكشاف";
+                let rankColor = "text-amber-400";
+                if (percentage >= 90) { rankTitle = "🏆 عبقري المعرفة"; rankColor = "text-emerald-400"; }
+                else if (percentage >= 80) { rankTitle = "🥇 خبير المعرفة"; rankColor = "text-teal-400"; }
+                else if (percentage >= 70) { rankTitle = "🥈 مستكشف متميز"; rankColor = "text-cyan-400"; }
+                else if (percentage >= 60) { rankTitle = "🥉 باحث واعد"; rankColor = "text-blue-400"; }
+
+                html = `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 max-w-xl mx-auto w-full animate-fade-in text-center">
+                    <div class="bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-6 w-full shadow-2xl">
+                        <div class="text-5xl mb-2">🎉</div>
+                        <h2 class="text-3xl font-black text-white mb-1">اكتملت دورة الحياة بنجاح!</h2>
+                        <p class="text-sm text-emerald-300 mb-4">${gameState.mode === 'solo' ? gameState.playerName : 'جميع الفرق المشاركة'}</p>
+
+                        <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-700 mb-6 grid grid-cols-2 gap-4 text-right">
+                            <div>
+                                <p class="text-xs text-slate-400">إجمالي النقاط:</p>
+                                <p class="text-xl font-bold text-amber-400">${gameState.score} / 1000</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400">النجوم المكتسبة:</p>
+                                <p class="text-xl font-bold text-emerald-400">⭐ ${gameState.stars} / 10</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400">نسبة النجاح:</p>
+                                <p class="text-xl font-bold text-teal-300">${percentage}%</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400">الرتبة العلمية:</p>
+                                <p class="text-sm font-bold ${rankColor}">${rankTitle}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="setScreen('REVIEW')" class="flex-1 bg-teal-700 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
+                                🔎 مراجعة التحديات
+                            </button>
+                            <button onclick="startNewSession()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                                🔄 العب من جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+            else if (gameState.screen === 'REVIEW') {
+                html = `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 max-w-3xl mx-auto w-full animate-fade-in">
+                    <div class="bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-6 w-full shadow-2xl mb-4">
+                        <h2 class="text-2xl font-bold text-emerald-400 mb-2 text-center">🔎 مراجعة التحديات والمفاهيم</h2>
+                        <p class="text-xs text-slate-300 text-center mb-6">استعرض الأسئلة والإجابات الصحيحة والتفسيرات العلمية لتثبيت معلوماتك.</p>
+
+                        <div class="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-2">
+                            ${gameState.answersLog.map((log, idx) => `
+                                <div class="bg-slate-900/80 border ${log.correct ? 'border-emerald-500/40' : 'border-rose-500/40'} rounded-xl p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-emerald-300">السؤال ${idx + 1}: ${log.concept}</span>
+                                        <span class="text-sm">${log.correct ? '✅ صحيح' : '❌ غير صحيح'}</span>
+                                    </div>
+                                    <p class="text-sm font-semibold text-white mb-2">${log.question}</p>
+                                    <div class="text-xs text-slate-300 bg-slate-800/60 p-2 rounded-lg mb-1">
+                                        <span class="text-emerald-400 font-bold">الإجابة الصحيحة:</span> ${log.correctAnswerText}
+                                    </div>
+                                    <div class="text-xs text-slate-400 italic">
+                                        💡 ${log.explanation}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="mt-6 flex justify-center">
+                            <button onclick="setScreen('FINISHED')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-xl transition">
+                                العودة لنتيجة المغامرة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+
+            app.innerHTML = html;
+        }
+
+        function updateTeamInputs(count) {
+            const container = document.getElementById('teamNamesContainer');
+            const defaultNames = ["فريق البراعم 🌱", "فريق الزهور 🌼", "فريق الثمار 🍅", "فريق البذور 🌰"];
+            let html = '';
+            for (let i = 0; i < parseInt(count); i++) {
+                html += `<input type="text" class="team-name-input bg-slate-900 border border-teal-500/50 rounded-xl px-4 py-2.5 text-white" value="${defaultNames[i]}">`;
+            }
+            container.innerHTML = html;
+        }
+
+        function confirmSetupAndStart() {
+            if (gameState.mode === 'solo') {
+                const nameInput = document.getElementById('playerNameInput');
+                if (nameInput && nameInput.value.trim() !== '') {
+                    gameState.playerName = nameInput.value.trim();
+                }
+            } else {
+                const inputs = document.querySelectorAll('.team-name-input');
+                gameState.teams = Array.from(inputs).map((inp, idx) => ({
+                    id: idx,
+                    name: inp.value.trim() || `فريق ${idx + 1}`,
+                    score: 0
+                }));
+            }
+            const timerToggle = document.getElementById('timerEnabledToggle');
+            if (timerToggle) {
+                gameState.timerEnabled = timerToggle.checked;
+            }
+            startNewSession();
+        }
+
+        function openBox(boxNum) {
+            if (gameState.openedBoxes.includes(boxNum)) return;
+            gameState.openedBoxes.push(boxNum);
+
+            playSound('boxOpen');
+            gameState.selectedBox = boxNum;
+            gameState.screen = 'QUESTION';
+            gameState.selectedAnswer = null;
+            gameState.timeRemaining = 30;
+            
+            render();
+
+            if (gameState.timerEnabled) {
+                if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+                gameState.timerInterval = setInterval(() => {
+                    gameState.timeRemaining--;
+                    const timeEl = document.getElementById('timeLeft');
+                    if (timeEl) timeEl.textContent = gameState.timeRemaining;
+                    if (gameState.timeRemaining <= 0) {
+                        clearInterval(gameState.timerInterval);
+                        handleAnswerSubmission(null, true);
+                    }
+                }, 1000);
+            }
+        }
+
+        function renderStandardOptions(q) {
+            const shuffledOpts = [...q.options].sort(() => 0.5 - Math.random());
+            return `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    ${shuffledOpts.map(opt => `
+                        <button onclick="handleAnswerSubmission('${opt.id}')" class="bg-slate-900/80 hover:bg-emerald-950/60 border border-emerald-500/30 hover:border-emerald-400 text-white font-medium p-4 rounded-xl transition text-right shadow flex items-center justify-between group">
+                            <span>${opt.text}</span>
+                            <span class="w-6 h-6 rounded-full bg-slate-800 text-emerald-400 flex items-center justify-center text-xs group-hover:bg-emerald-600 group-hover:text-white transition">${opt.id}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderMatchingQuestion(q) {
+            if (!gameState.matchPairs || gameState.matchPairs.length === 0) {
+                gameState.matchPairs = [...q.pairs];
+                gameState.userMatches = {};
+                gameState.matchLeft = null;
+            }
+            const rightOptions = [...q.pairs].map(p => p.a).sort(() => 0.5 - Math.random());
+
+            return `
+                <div class="flex flex-col gap-4 my-2">
+                    <p class="text-xs text-slate-300 bg-slate-900/60 p-2 rounded-lg">اختر عنصراً من اليمين ثم العنصر المطابق له من اليسار:</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-bold text-emerald-300">العناصر:</span>
+                            ${q.pairs.map((p, idx) => `
+                                <button onclick="selectMatchLeft(${idx})" class="p-3 rounded-xl border text-right font-bold text-sm transition ${gameState.matchLeft === idx ? 'bg-emerald-600 border-white' : gameState.userMatches[idx] !== undefined ? 'bg-teal-900/60 border-teal-500' : 'bg-slate-900 border-slate-700 hover:border-emerald-400'}">
+                                    ${p.q} ${gameState.userMatches[idx] !== undefined ? ` ➔ (${gameState.userMatches[idx]})` : ''}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-bold text-teal-300">الخيارات المطابقة:</span>
+                            ${rightOptions.map(ans => `
+                                <button onclick="selectMatchRight('${ans}')" class="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-teal-400 text-right font-medium text-sm transition">
+                                    ${ans}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button onclick="submitMatchingAnswer()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow">
+                        ✅ تأكيد الإجابة
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectMatchLeft(idx) {
+            gameState.matchLeft = idx;
+            render();
+        }
+
+        function selectMatchRight(ans) {
+            if (gameState.matchLeft !== null) {
+                gameState.userMatches[gameState.matchLeft] = ans;
+                gameState.matchLeft = null;
+                playSound('star');
+                render();
+            }
+        }
+
+        function submitMatchingAnswer() {
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            let allCorrect = true;
+            q.pairs.forEach((p, idx) => {
+                if (gameState.userMatches[idx] !== p.a) allCorrect = false;
+            });
+            handleAnswerSubmissionResult(allCorrect, q);
+        }
+
+        function renderSortingQuestion(q) {
+            if (!gameState.sortItems || gameState.sortItems.length === 0) {
+                gameState.sortItems = [...q.items].map((text, originalIndex) => ({ text, originalIndex })).sort(() => 0.5 - Math.random());
+            }
+
+            return `
+                <div class="flex flex-col gap-3 my-2">
+                    <p class="text-xs text-slate-300 bg-slate-900/60 p-2 rounded-lg">استخدم أزرار التحريك (⬆⬇) لترتيب الخطوات بالتسلسل الصحيح:</p>
+                    <div class="flex flex-col gap-2">
+                        ${gameState.sortItems.map((item, idx) => `
+                            <div class="bg-slate-900 border border-emerald-500/40 p-3 rounded-xl flex items-center justify-between">
+                                <span class="font-bold text-sm text-emerald-200">${idx + 1}. ${item.text}</span>
+                                <div class="flex gap-2">
+                                    <button onclick="moveSortItem(${idx}, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-700 text-white flex items-center justify-center font-bold">⬆</button>
+                                    <button onclick="moveSortItem(${idx}, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-700 text-white flex items-center justify-center font-bold">⬇</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="submitSortingAnswer()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow">
+                        ✅ تأكيد الإجابة
+                    </button>
+                </div>
+            `;
+        }
+
+        function moveSortItem(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < gameState.sortItems.length) {
+                const temp = gameState.sortItems[index];
+                gameState.sortItems[index] = gameState.sortItems[newIndex];
+                gameState.sortItems[newIndex] = temp;
+                playSound('star');
+                render();
+            }
+        }
+
+        function submitSortingAnswer() {
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            let isCorrect = true;
+            gameState.sortItems.forEach((item, idx) => {
+                if (item.originalIndex !== q.correctOrder[idx]) isCorrect = false;
+            });
+            handleAnswerSubmissionResult(isCorrect, q);
+        }
+
+        function handleAnswerSubmission(optionId, isTimeout = false) {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            const q = gameState.activeQuestions[gameState.currentQuestionIndex];
+            
+            let isCorrect = false;
+            let correctOption = q.options.find(o => o.correct);
+            let correctText = correctOption ? correctOption.text : "";
+
+            if (!isTimeout && optionId) {
+                const selected = q.options.find(o => o.id === optionId);
+                if (selected && selected.correct) {
+                    isCorrect = true;
+                }
+            }
+
+            handleAnswerSubmissionResult(isCorrect, q, correctText);
+        }
+
+        function handleAnswerSubmissionResult(isCorrect, q, customCorrectText = "") {
+            gameState.isCorrect = isCorrect;
+            
+            if (isCorrect) {
+                gameState.score += 100;
+                gameState.stars += 1;
+                if (gameState.mode === 'team' && gameState.teams.length > 0) {
+                    gameState.teams[gameState.currentTeamIndex].score += 100;
+                }
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            const correctOpt = q.options ? q.options.find(o => o.correct) : null;
+            const correctText = customCorrectText || (correctOpt ? correctOpt.text : "الترتيب أو المطابقة الصحيحة الموضحة بالأعلى");
+
+            gameState.answersLog.push({
+                question: q.question,
+                correct: isCorrect,
+                correctAnswerText: correctText,
+                explanation: q.explanation,
+                concept: q.concept
+            });
+
+            gameState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function proceedToNext() {
+            gameState.matchPairs = [];
+            gameState.sortItems = [];
+            gameState.currentQuestionIndex++;
+
+            if (gameState.mode === 'team' && gameState.teams.length > 0) {
+                gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+            }
+
+            if (gameState.currentQuestionIndex >= 10) {
+                gameState.screen = 'FINISHED';
+                playSound('win');
+            } else {
+                gameState.screen = 'BOX_SELECTION';
+            }
+            render();
+        }
+
+        window.onload = function() {
+            initGame();
+        };
+    </script>
+</body>
+</html>

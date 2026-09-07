@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦🧠 صندوق المعرفة - 💧 دورة الماء</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #064e3b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+        .box-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .box-hover:hover:not(.opened) {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+            border-color: rgba(56, 189, 248, 0.8);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.04); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <div id="app" class="w-full max-w-6xl mx-auto flex flex-col flex-grow justify-between">
+        <!-- Dynamic App Content -->
+    </div>
+
+    <script>
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playClick() {
+                this.init();
+                if(!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+            playSuccess() {
+                this.init();
+                if(!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.2);
+                });
+            }
+            playError() {
+                this.init();
+                if(!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [220, 196].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.15);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.15);
+                    osc.stop(now + i * 0.15 + 0.2);
+                });
+            }
+            playBoxOpen() {
+                this.init();
+                if(!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.35);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        const questionBank = [
+            {
+                id: "q1",
+                type: "image_analysis",
+                title: "تحليل ظاهرة التبخر في دورة الماء",
+                prompt: "بالاعتماد على الرسم التوضيحي لدورة الماء في الطبيعة، ما هي العملية الرئيسية التي تحدث عندما تكتسب مياه البحار والمحيطات حرارة الشمس؟",
+                image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "condensation", text: "التكثيف (تحول بخار الماء إلى سائل بارد)" },
+                    { id: "evaporation", text: "التبخر (تحول الماء السائل بفعل الحرارة إلى بخار صاعد)" },
+                    { id: "freezing", text: "التجمد (تحول السائل إلى بلورات صلبة)" },
+                    { id: "precipitation", text: "الهطول (سقوط قطرات المطر)" }
+                ],
+                correctId: "evaporation",
+                explanation: "يحدث التبخر عندما تمتص المياه الحرارة من الشمس وتتحول من الحالة السائلة إلى الغازية (بخار ماء) لتصعد نحو طبقات الجو."
+            },
+            {
+                id: "q2",
+                type: "interactive_plant_exp",
+                title: "تجربة خروج الماء من أوراق النبات (النتح)",
+                prompt: "في تجربة وضع كيس بلاستيكي محكم حول أوراق نبات أخضر مع وجود حجر صغير في المنتصف لتوجيه القطرات، لماذا تجمعت قطرات الماء الصافية في العلبة؟",
+                image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "a", text: "لأن الحجر قام بجذب الرطوبة من الهواء الخارجي للكيس" },
+                    { id: "b", text: "لأن النبات يطرح بخار الماء عبر أوراقه، فيتكثف على الكيس البارد ويتزحلق بفعل الحجر نحو العلبة" },
+                    { id: "c", text: "لأن الكيس البلاستيكي ينتج تفاعلاً كيميائياً لصنع الماء" },
+                    { id: "d", text: "لأن التربة تسربت عبر الجدار البلاستيكي للكيس" }
+                ],
+                correctId: "b",
+                explanation: "تفرز النباتات بخار الماء من أوراقها في عملية حيوية، وعندما يلامس البخار الجدار البارد يتكثف ويتم تجميعه كماء عذب نقي."
+            },
+            {
+                id: "q3",
+                type: "matching",
+                title: "توصيل حالات تحول المادة في الماء",
+                prompt: "صل بين كل عملية فيزيائية لدورة الماء وبين تحولها المناسب (يمكنك النقر على المصطلح ثم على تحوله، وإلغاء أي توصيلة بحرية قبل التأكيد):",
+                pairs: [
+                    { qId: "p1", term: "التبخر", targetId: "target_evap", targetText: "سائل ⬅️ غاز" },
+                    { qId: "p2", term: "التكثيف", targetId: "target_cond", targetText: "غاز ⬅️ سائل" },
+                    { qId: "p3", term: "التجمد", targetId: "target_freez", targetText: "سائل ⬅️ صلب" },
+                    { qId: "p4", term: "الانصهار", targetId: "target_melt", targetText: "صلب ⬅️ سائل" }
+                ],
+                explanation: "يتغير الماء بين حالاته الثلاث (السائلة والصلبة والغازية) عبر عمليات التسخين والتبريد المنتظمة في الطبيعة."
+            },
+            {
+                id: "q4",
+                type: "ordering",
+                title: "ترتيب مراحل دورة الماء في الطبيعة",
+                prompt: "رتب المراحل الأربع لدورة الماء في الطبيعة بالترتيب الصحيح من البداية للنهاية:",
+                items: [
+                    { id: "step1", text: "1. تسخين الشمس لمياه البحار والمحيطات والبحيرات" },
+                    { id: "step2", text: "2. صعود بخار الماء وتبريده في الجو لتكوين السحب" },
+                    { id: "step3", text: "3. سقوط الماء على هيئة مطر أو ثلج أو برد (الهطول)" },
+                    { id: "step4", text: "4. جريان المياه عبر الأنهار والأودية وعودتها للبحار" }
+                ],
+                correctOrder: ["step1", "step2", "step3", "step4"],
+                explanation: "تبدأ الدورة بتبخر الماء بفعل حرارة الشمس، ثم تكثفه في السحب، ثم هطوله، ثم جريانه عائدًا إلى المسطحات المائية."
+            },
+            {
+                id: "q5",
+                type: "cloud_analysis",
+                title: "تحليل تكون السحب في طبقات الجو",
+                prompt: "بالاعتماد على الصورة التوضيحية لتصاعد بخار الماء وتبريده في طبقات الجو العليا لتكوين السحب، ما الذي يحدث لبخار الماء؟",
+                image: "https://images.unsplash.com/photo-1517760444937-f6397edcbbcd?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "opt1", text: "يتمدد ويتحول إلى غازات خاملة غير مرئية" },
+                    { id: "opt2", text: "يبرد بخار الماء ويتكثف متحولاً إلى قطرات ماء دقيقة أو بلورات ثلجية تشكل السحب" },
+                    { id: "opt3", text: "يحترق نتيجة الضغط الجوي العالي" },
+                    { id: "opt4", text: "يتحول مباشرة إلى صخور صلبة في الفضاء" }
+                ],
+                correctId: "opt2",
+                explanation: "بانخفاض حرارة بخار الماء المرتفع في الجو، يحدث له تكثف متحولاً إلى قطرات ماء دقيقة تتجمع حول ذرات الغبار لتكون السحب."
+            },
+            {
+                id: "q6",
+                type: "true_false",
+                title: "صح وخطأ بصري لظاهرة الهطول",
+                prompt: "تأمل ظاهرة الهطول المائي. العبارة: (الهطول في دورة الماء يقتصر على المطر السائل ولا يمكن أبداً أن يكون على شكل ثلج أو برد). هل العبارة صحيحة أم خاطئة؟",
+                image: "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "true", text: "✅ صحيح" },
+                    { id: "false", text: "❌ خاطئ" }
+                ],
+                correctId: "false",
+                explanation: "عبارة خاطئة؛ فالهطول يشمل المطر السائل، والثلج، والبرد بحسب درجة حرارة طبقات الغلاف الجوي."
+            },
+            {
+                id: "q7",
+                type: "spot_error",
+                title: "اكتشف الحقيقة العلمية المستدامة لدورة الماء",
+                prompt: "أي من العبارات أو المفاهيم التالية يعتبر حقيقة علمية صحيحة تصف حركة الماء على الأرض؟",
+                options: [
+                    { id: "err1", text: "الشمس هي مصدر الطاقة الأساسي الذي يدفع دورة الماء عبر التبخر المستمر." },
+                    { id: "err2", text: "الماء في دورة الماء ينتهي ويزول تماماً بعد هطوله على الصحراء." },
+                    { id: "err3", text: "التكثيف يحدث بفعل التسخين المباشر للنار." },
+                    { id: "err4", text: "النباتات تمتص الماء ولا تطرحه أبداً." }
+                ],
+                correctId: "err1",
+                explanation: "الشمس هي المحرك الأساسي للطاقة؛ فهي تبخر المياه لتعود في دورة مغلقة ومستمرة."
+            },
+            {
+                id: "q8",
+                type: "stone_purpose",
+                title: "دور الحجر في تجربة النبات التفاعلية",
+                prompt: "في تجربة الكيس البلاستيكي المربوط حول أوراق النبات، ما هي الفائدة الفيزيائية الأساسية من وضع حجر صغير في منتصف الغطاء البلاستيكي؟",
+                image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "st1", text: "زيادة ثقل الكيس لمنع طيرانه بالرياح الخارجية" },
+                    { id: "st2", text: "إحداث ميلان وتحدب نحو الأسفل في منتصف الكيس لكي تتجمع القطرات المكثفة وتتزحلق بدقة نحو العلبة الصغرى بالأسفل" },
+                    { id: "st3", text: "تسخين الكيس لزيادة معدل التبخر للضعف" },
+                    { id: "st4", text: "منع وصول ضوء الشمس المباشر تماماً للعلبة" }
+                ],
+                correctId: "st2",
+                explanation: "الحجر يخفض منتصف الكيس البلاستيكي ليشكل قمعاً يوجه القطرات المكثفة نحو وعاء التجميع بدقة لاستخلاص الماء العذب."
+            },
+            {
+                id: "q9",
+                type: "fresh_water",
+                title: "نوع الماء الناتج من التكثيف",
+                prompt: "عند تبخر الماء من النبات أو المسطحات المائية ثم تكثفه على السطح البارد، ما هو تصنيف نوع الماء الذي يتم تجميعه؟",
+                options: [
+                    { id: "fw1", text: "ماء مالح تماماً وغير صالح للشرب" },
+                    { id: "fw2", text: "ماء عذب نقي صالح للشرب؛ لأن عملية التبخر والتكثف تفصل الأملاح والشوائب" },
+                    { id: "fw3", text: "ماء كيميائي سام وخطير" },
+                    { id: "fw4", text: "غاز الهيدروجين الخالص" }
+                ],
+                correctId: "fw2",
+                explanation: "عملية التبخر والتكثف تفصل الماء عن الأملاح والمعادن والشوائب، مما ينتج عنه ماء عذب نقي صالح للاستهلاك."
+            },
+            {
+                id: "q10",
+                type: "runoff_analysis",
+                title: "تحليل الجريان السطحي والأودية",
+                prompt: "تأمل الأودية والجبال بعد هطول أمطار غزيرة. إلى أين تتجه مياه الأمطار الجارية عبر السيول في سلطنة عمان؟",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80",
+                options: [
+                    { id: "rn1", text: "تتبخر بالكامل فوراً قبل وصولها لأي مسطح" },
+                    { id: "rn2", text: "تتجمع عبر الأودية والمسارات لتصب في البحار والمحيطات أو تتسرب لتخزين المياه الجوفية" },
+                    { id: "rn3", text: "تتحول إلى طبقات صلبة من الجليد للأبد" },
+                    { id: "rn4", text: "تختفي في باطن الأرض ولا تعود أبداً للطبيعة" }
+                ],
+                correctId: "rn2",
+                explanation: "الجريان السطحي ينقل المياه عبر الأودية لتصب في البحر، مع تسرب جزء منها لتغذية طبقات المياه الجوفية."
+            },
+            {
+                id: "q11",
+                type: "freezing_melting",
+                title: "التجمد والانصهار في الطبيعة",
+                prompt: "عندما ترتفع حرارة الثلوج المتراكمة على قمم الجبال العالية فتذوب وتتحول إلى مياه جارية في الأودية، ما هي العملية الفيزيائية التي حدثت؟",
+                options: [
+                    { id: "fm1", text: "عملية التجمد" },
+                    { id: "fm2", text: "عملية الانصهار (تحول الصلب إلى سائل)" },
+                    { id: "fm3", text: "عملية التبخر الفوري" },
+                    { id: "fm4", text: "عملية التكثف العكسي" }
+                ],
+                correctId: "fm2",
+                explanation: "انصهار الثلوج هو تحولها من الحالة الصلبة إلى الحالة السائلة عند اكتسابها الحرارة البيئية."
+            },
+            {
+                id: "q12",
+                type: "sun_role",
+                title: "الدور الأساسي للشمس في دورة الماء",
+                prompt: "لماذا تُعتبر الشمس المحرك الأول والأساسي لدورة الماء في كوكب الأرض؟",
+                options: [
+                    { id: "sr1", text: "لأنها تضيء الكوكب ليلاً ونهاراً فقط دون تأثير حراري" },
+                    { id: "sr2", text: "لأنها تمد الأرض بالطاقة الحرارية اللازمة لتبخير المياه المستمر من البحار والنباتات والتربة" },
+                    { id: "sr3", text: "لأنها تجذب السحب نحو الفضاء الخارجي بعيداً عن الغلاف الجوي" },
+                    { id: "sr4", text: "لأنها تمنع تساقط الأمطار نهائياً" }
+                ],
+                correctId: "sr2",
+                explanation: "الشمس هي مصدر الطاقة الحرارية الأساسية التي ترفع درجة حرارة المياه فتتبخر وتبدأ رحلة الدورة المتجددة."
+            }
+        ];
+
+        let appState = {
+            screen: 'START', // START, MODE_SELECTION, PLAYER_SETUP, BOX_SELECTION, QUESTION, FEEDBACK, FINISHED, REVIEW
+            gameMode: 'solo', // 'solo' or 'teams'
+            teams: [],
+            currentTeamIndex: 0,
+            soloPlayerName: '',
+            score: 0,
+            stars: 0,
+            currentQuestionIndex: 0,
+            selectedQuestions: [],
+            currentQuestion: null,
+            selectedOptionId: null,
+            matchingState: { selectedTerm: null, pairsMade: {} },
+            orderingState: [],
+            openedBoxesStatus: {}, // Tracks opened/solved boxes { index: true }
+            userAnswersLog: []
+        };
+
+        const render = () => {
+            const container = document.getElementById('app');
+            container.innerHTML = '';
+
+            switch(appState.screen) {
+                case 'START':
+                    container.innerHTML = renderStartScreen();
+                    break;
+                case 'MODE_SELECTION':
+                    container.innerHTML = renderModeSelectionScreen();
+                    break;
+                case 'PLAYER_SETUP':
+                    container.innerHTML = renderPlayerSetupScreen();
+                    break;
+                case 'BOX_SELECTION':
+                    container.innerHTML = renderBoxSelectionScreen();
+                    break;
+                case 'QUESTION':
+                    container.innerHTML = renderQuestionScreen();
+                    break;
+                case 'FEEDBACK':
+                    container.innerHTML = renderFeedbackScreen();
+                    break;
+                case 'FINISHED':
+                    container.innerHTML = renderFinishedScreen();
+                    break;
+                case 'REVIEW':
+                    container.innerHTML = renderReviewScreen();
+                    break;
+            }
+        };
+
+        function renderStartScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 my-4 flex flex-col items-center text-center animate-fade-in">
+                    <!-- Vertical Omani official header -->
+                    <div class="flex flex-col items-center mb-6 space-y-2">
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار الخنجر العُماني" class="w-16 h-16 sm:w-20 sm:h-20 object-contain floating" onerror="this.src='https://placehold.co/80x80/1e3a8a/ffffff?text=عمان'">
+                        <h2 class="text-sm sm:text-base font-bold text-sky-300">سلطنة عمان</h2>
+                        <h3 class="text-xs sm:text-sm font-semibold text-slate-200">وزارة التعليم</h3>
+                        <p class="text-xs text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-xs font-medium text-emerald-300">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+                    </div>
+
+                    <!-- Teacher photo & profile info with perfect crop ensuring full head and shoulders -->
+                    <div class="mb-6 flex flex-col items-center">
+                        <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-sky-400 shadow-xl mb-3 bg-slate-800">
+                            <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="صورة المعلم أ. فيصل الشبلي" class="w-full h-full object-cover object-top" onerror="this.src='https://placehold.co/160x160/334155/ffffff?text=المعلم'">
+                        </div>
+                        <h3 class="text-lg font-bold text-white">أ. فيصل الشبلي</h3>
+                        <p class="text-xs sm:text-sm text-sky-200">هاتف: 99812126 | Instagram: faalll8</p>
+                        <p class="text-xs text-slate-400 mt-1">مدير المدرسة: أ. سعود الشيزاوي</p>
+                    </div>
+
+                    <div class="mb-8">
+                        <h1 class="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-emerald-300 to-teal-400 mb-2">
+                            📦🧠 صندوق المعرفة
+                        </h1>
+                        <h2 class="text-lg sm:text-2xl font-bold text-teal-200">💧 دورة الماء • مادة العلوم • الصف الخامس</h2>
+                        <p class="text-sm text-slate-300 mt-3 max-w-xl mx-auto">
+                            ادخل قاعة المعرفة التفاعلية وافتح أي صندوق بحرية لاستكشاف أسرار دورة الماء والتجارب العلمية الاستنتاجية!
+                        </p>
+                    </div>
+
+                    <button onclick="sound.playClick(); appState.screen='MODE_SELECTION'; render();" class="bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-bold text-lg sm:text-xl px-10 py-4 rounded-2xl shadow-xl transition transform hover:scale-105 active:scale-95">
+                        🚀 ابدأ رحلة الاستكشاف
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderModeSelectionScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 my-auto flex flex-col items-center text-center">
+                    <h2 class="text-2xl sm:text-4xl font-black text-sky-300 mb-6">اختر نمط اللعب في قاعة المعرفة</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl my-6">
+                        <button onclick="sound.playClick(); appState.gameMode='solo'; appState.screen='PLAYER_SETUP'; render();" class="glass-panel p-6 rounded-2xl hover:bg-sky-500/20 border-2 border-sky-400/50 transition flex flex-col items-center group">
+                            <span class="text-4xl mb-3 group-hover:scale-110 transition">👤</span>
+                            <h3 class="text-xl font-bold text-white mb-2">لعب فردي</h3>
+                            <p class="text-sm text-slate-300">سجل باسمك وتحدَ نفسك لفتح كافة الصناديق بحرية وجمع النجوم.</p>
+                        </button>
+                        <button onclick="sound.playClick(); appState.gameMode='teams'; appState.screen='PLAYER_SETUP'; render();" class="glass-panel p-6 rounded-2xl hover:bg-emerald-500/20 border-2 border-emerald-400/50 transition flex flex-col items-center group">
+                            <span class="text-4xl mb-3 group-hover:scale-110 transition">👥</span>
+                            <h3 class="text-xl font-bold text-white mb-2">لعب جماعي (فرق)</h3>
+                            <p class="text-sm text-slate-300">تنافس مع زملائك عبر فرق متعددة لفتح صناديق المعرفة.</p>
+                        </button>
+                    </div>
+                    <button onclick="sound.playClick(); appState.screen='START'; render();" class="text-slate-400 hover:text-white mt-4 underline text-sm">
+                        ← العودة للقائمة الرئيسية
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderPlayerSetupScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 my-auto flex flex-col items-center text-center max-w-xl mx-auto w-full">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-sky-300 mb-4">
+                        ${appState.gameMode === 'solo' ? '👤 أدخل اسم المستكشف' : '👥 إعداد الفرق المشاركة'}
+                    </h2>
+                    
+                    ${appState.gameMode === 'solo' ? `
+                        <input type="text" id="soloNameInput" placeholder="اكتب اسم الطالب هنا..." class="w-full bg-slate-900/60 border border-slate-600 rounded-xl px-4 py-3 text-white text-lg text-center mb-6 focus:outline-none focus:border-sky-400" value="${appState.soloPlayerName}">
+                    ` : `
+                        <div class="w-full space-y-3 mb-6">
+                            <p class="text-sm text-slate-300">حدد عدد الفرق (من 2 إلى 4 فرق):</p>
+                            <div class="flex justify-center gap-3">
+                                <button onclick="setTeamCount(2)" class="px-4 py-2 rounded-xl bg-slate-800 border border-sky-400 font-bold hover:bg-sky-600 transition">2 فرق</button>
+                                <button onclick="setTeamCount(3)" class="px-4 py-2 rounded-xl bg-slate-800 border border-sky-400 font-bold hover:bg-sky-600 transition">3 فرق</button>
+                                <button onclick="setTeamCount(4)" class="px-4 py-2 rounded-xl bg-slate-800 border border-sky-400 font-bold hover:bg-sky-600 transition">4 فرق</button>
+                            </div>
+                            <div id="teamInputsContainer" class="space-y-2 mt-4">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+                    `}
+
+                    <button onclick="startSession()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg px-8 py-3 rounded-2xl shadow-lg transition w-full">
+                        🚪 دخول قاعة صندوق المعرفة
+                    </button>
+                    <button onclick="sound.playClick(); appState.screen='MODE_SELECTION'; render();" class="text-slate-400 hover:text-white mt-4 underline text-sm">
+                        ← رجوع
+                    </button>
+                </div>
+            `;
+        }
+
+        let tempTeamCount = 2;
+        function setTeamCount(count) {
+            tempTeamCount = count;
+            const container = document.getElementById('teamInputsContainer');
+            if(!container) return;
+            let html = '';
+            for(let i=0; i<count; i++) {
+                html += `<input type="text" placeholder="اسم الفريق ${i+1}" class="team-input w-full bg-slate-900/60 border border-slate-600 rounded-xl px-4 py-2 text-white text-center focus:outline-none focus:border-emerald-400" value="فريق ${i+1}">`;
+            }
+            container.innerHTML = html;
+        }
+
+        document.addEventListener('input', (e) => {
+            if(e.target && e.target.id === 'soloNameInput') {
+                appState.soloPlayerName = e.target.value;
+            }
+        });
+
+        function startSession() {
+            sound.playClick();
+            if(appState.gameMode === 'solo') {
+                const input = document.getElementById('soloNameInput');
+                appState.soloPlayerName = input && input.value.trim() ? input.value.trim() : 'المستكشف الذكي';
+            } else {
+                const inputs = document.querySelectorAll('.team-input');
+                appState.teams = [];
+                inputs.forEach((inp, idx) => {
+                    appState.teams.push({
+                        name: inp.value.trim() || `فريق ${idx+1}`,
+                        score: 0,
+                        stars: 0
+                    });
+                });
+                if(appState.teams.length === 0) {
+                    appState.teams = [{ name: 'الفريق الأول', score: 0, stars: 0 }, { name: 'الفريق الثاني', score: 0, stars: 0 }];
+                }
+                appState.currentTeamIndex = 0;
+            }
+
+            // Shuffle 10 questions from the 12 question bank
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            appState.selectedQuestions = shuffled.slice(0, 10);
+            appState.score = 0;
+            appState.stars = 0;
+            appState.currentQuestionIndex = 0;
+            appState.openedBoxesStatus = {};
+            appState.userAnswersLog = [];
+            
+            appState.screen = 'BOX_SELECTION';
+            render();
+        }
+
+        function renderBoxSelectionScreen() {
+            const openedCount = Object.keys(appState.openedBoxesStatus).length;
+
+            let headerInfo = '';
+            if(appState.gameMode === 'solo') {
+                headerInfo = `👤 المستكشف: <span class="text-sky-300 font-bold">${appState.soloPlayerName}</span> | النقاط: <span class="text-emerald-300 font-bold">${appState.score}</span> | النجوم: ⭐ ${appState.stars}`;
+            } else {
+                const currentTeam = appState.teams[appState.currentTeamIndex];
+                headerInfo = `👥 الدور لـ: <span class="text-emerald-300 font-bold">${currentTeam.name}</span> | النقاط: <span class="text-sky-300 font-bold">${currentTeam.score}</span> | النجوم: ⭐ ${currentTeam.stars}`;
+            }
+
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-8 my-auto flex flex-col items-center">
+                    <div class="flex flex-wrap justify-between items-center w-full mb-6 border-b border-slate-700 pb-4">
+                        <h2 class="text-xl sm:text-2xl font-black text-sky-300">🏛️ قاعة صناديق المعرفة (اختر أي صندوق بحرية تامة)</h2>
+                        <div class="text-sm sm:text-base bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700">
+                            ${headerInfo}
+                        </div>
+                    </div>
+
+                    <p class="text-slate-300 text-center mb-6">
+                        تم فتح <span class="text-emerald-400 font-bold">${openedCount} من 10</span> صناديق. يمكنك النقر على <span class="text-sky-300 font-bold">أي صندوق</span> بحرية لاختيار التحدي العلمي التالي:
+                    </p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 w-full max-w-4xl my-4">
+                        ${Array.from({length: 10}, (_, i) => {
+                            const boxNum = i + 1;
+                            const isOpened = appState.openedBoxesStatus[i] === true;
+                            return `
+                                <div onclick="openBox(${i})" 
+                                     class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center transition relative group box-hover ${isOpened ? 'opened bg-emerald-950/50 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)] cursor-pointer' : 'cursor-pointer border-slate-700 hover:border-sky-400 bg-sky-950/20'}">
+                                    <span class="text-4xl sm:text-5xl mb-2 group-hover:scale-110 transition">
+                                        ${isOpened ? '🔓✨' : '📦'}
+                                    </span>
+                                    <span class="font-bold text-sm text-white">صندوق ${boxNum}</span>
+                                    <span class="text-xs ${isOpened ? 'text-emerald-300 font-bold bg-emerald-900/60 px-2 py-0.5 rounded-md mt-1' : 'text-sky-300 mt-1'}">
+                                        ${isOpened ? '✅ تم فتحه (إعادة فتح)' : '🔍 متاح للاستكشاف'}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="mt-8 text-center flex gap-4 justify-center">
+                        <button onclick="sound.playClick(); appState.screen='FINISHED'; render();" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm px-6 py-2 rounded-xl shadow transition">
+                            🏆 إنهاء الرحلة وعرض النتائج
+                        </button>
+                        <button onclick="sound.playClick(); appState.screen='START'; render();" class="text-slate-400 hover:text-white underline text-xs">
+                            العودة للبداية
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openBox(index) {
+            sound.playBoxOpen();
+            appState.currentQuestionIndex = index;
+            appState.currentQuestion = appState.selectedQuestions[index];
+            appState.selectedOptionId = null;
+            appState.matchingState = { selectedTerm: null, pairsMade: {} };
+            
+            if (appState.currentQuestion.type === 'ordering') {
+                appState.orderingState = [...appState.currentQuestion.items].sort(() => 0.5 - Math.random());
+            }
+
+            appState.screen = 'QUESTION';
+            render();
+        }
+
+        function renderQuestionScreen() {
+            const q = appState.currentQuestion;
+            let questionContent = '';
+
+            if (q.type === 'image_analysis' || q.type === 'cloud_analysis' || q.type === 'true_false' || q.type === 'interactive_plant_exp' || q.type === 'stone_purpose' || q.type === 'fresh_water' || q.type === 'runoff_analysis' || q.type === 'freezing_melting' || q.type === 'sun_role' || q.type === 'spot_error') {
+                const shuffledOptions = [...q.options].sort(() => 0.5 - Math.random());
+                questionContent = `
+                    ${q.image ? `<div class="mb-4 rounded-xl overflow-hidden max-h-60 mx-auto border border-slate-700 shadow-md"><img src="${q.image}" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=صورة+تعليمية'"></div>` : ''}
+                    <p class="text-base sm:text-lg text-slate-100 font-medium mb-6 leading-relaxed">${q.prompt}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                        ${shuffledOptions.map(opt => `
+                            <button onclick="selectOption('${opt.id}')" id="opt_${opt.id}" class="option-btn text-right p-4 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-sky-400 hover:bg-sky-950/40 transition text-sm sm:text-base font-medium">
+                                ${opt.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'matching') {
+                questionContent = `
+                    <p class="text-base sm:text-lg text-slate-100 font-medium mb-4">${q.prompt}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full my-4">
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-bold text-sky-300">المصطلحات العملية:</h4>
+                            ${q.pairs.map(p => {
+                                const isSelected = appState.matchingState.selectedTerm === p.qId;
+                                const isConnected = appState.matchingState.pairsMade[p.qId] !== undefined;
+                                const targetId = appState.matchingState.pairsMade[p.qId];
+                                const targetObj = q.pairs.find(item => item.targetId === targetId);
+                                
+                                return `
+                                    <div class="p-3 rounded-xl border flex items-center justify-between ${isSelected ? 'border-sky-400 bg-sky-950/80 shadow-[0_0_12px_rgba(56,189,248,0.5)]' : isConnected ? 'border-emerald-500 bg-emerald-950/40' : 'border-slate-700 bg-slate-900/60'}">
+                                        <div onclick="selectMatchingTerm('${p.qId}')" class="cursor-pointer font-bold flex-grow text-right">
+                                            ${p.term} ${isConnected ? ` <span class="text-emerald-300 text-xs mr-2 font-normal">➡️ (${targetObj ? targetObj.targetText : ''})</span>` : ''}
+                                        </div>
+                                        ${isConnected ? `
+                                            <button onclick="undoMatch('${p.qId}')" class="text-xs bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/50 px-2.5 py-1 rounded-lg transition ml-2 font-bold">
+                                                ❌ إلغاء التوصيل
+                                            </button>
+                                        ` : `
+                                            <button onclick="selectMatchingTerm('${p.qId}')" class="text-xs bg-sky-500/20 text-sky-300 px-2 py-1 rounded-lg">
+                                                ${isSelected ? 'قيد التوصيل...' : 'اختر للتوصيل'}
+                                            </button>
+                                        `}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-bold text-emerald-300">التعريفات والتحولات (انقر بعد اختيار المصطلح):</h4>
+                            ${[...q.pairs].sort(() => 0.5 - Math.random()).map(p => {
+                                const isMatched = Object.values(appState.matchingState.pairsMade).includes(p.targetId);
+                                return `
+                                    <div onclick="selectMatchingTarget('${p.targetId}')" id="target_${p.targetId}" class="p-3 rounded-xl border ${isMatched ? 'border-emerald-500 bg-emerald-900/30 text-emerald-300' : 'border-slate-700 bg-slate-900/60'} cursor-pointer hover:border-emerald-400 transition text-center font-medium">
+                                        ${p.targetText} ${isMatched ? ' (✓ موصول)' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <p class="text-xs text-sky-200 text-center mt-2 bg-sky-950/40 p-2 rounded-lg border border-sky-800/50">💡 تظهر خيارات التوصيل أمامك مباشرة مع إمكانية إلغاء وتعديل أي توصيلة في أي وقت قبل التأكيد النهائي.</p>
+                `;
+            } else if (q.type === 'ordering') {
+                questionContent = `
+                    <p class="text-base sm:text-lg text-slate-100 font-medium mb-4">${q.prompt}</p>
+                    <div class="space-y-3 w-full max-w-xl mx-auto my-4">
+                        ${appState.orderingState.map((item, idx) => `
+                            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-900/80">
+                                <span class="font-bold text-sky-300 mr-3">#${idx + 1}</span>
+                                <span class="flex-grow text-right text-sm sm:text-base">${item.text}</span>
+                                <div class="flex gap-1 ml-2">
+                                    <button onclick="moveOrderItem(${idx}, -1)" class="p-1 bg-slate-800 hover:bg-slate-700 rounded text-xs px-2">⬆️</button>
+                                    <button onclick="moveOrderItem(${idx}, 1)" class="p-1 bg-slate-800 hover:bg-slate-700 rounded text-xs px-2">⬇️</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            let currentTeamOrPlayer = appState.gameMode === 'solo' ? appState.soloPlayerName : appState.teams[appState.currentTeamIndex].name;
+
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 my-auto flex flex-col items-center max-w-3xl mx-auto w-full">
+                    <div class="flex justify-between items-center w-full mb-4 border-b border-slate-700 pb-3 text-sm">
+                        <span class="text-sky-300 font-bold">📦 صندوق المعرفة المفتوح</span>
+                        <span class="text-emerald-300 font-bold">${currentTeamOrPlayer}</span>
+                        <span class="text-slate-400">التحدي العلمي</span>
+                    </div>
+
+                    <h3 class="text-xl sm:text-2xl font-black text-white mb-4 text-center">${q.title}</h3>
+
+                    ${questionContent}
+
+                    <div class="mt-8 flex justify-between w-full">
+                        <button onclick="sound.playClick(); appState.screen='BOX_SELECTION'; render();" class="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">
+                            ← العودة للقاعة والصناديق
+                        </button>
+                        <button onclick="confirmAnswer()" class="bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition">
+                            تأكيد الإجابة ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectOption(id) {
+            sound.playClick();
+            appState.selectedOptionId = id;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('border-sky-400', 'bg-sky-950/60');
+                btn.classList.add('border-slate-700', 'bg-slate-900/60');
+            });
+            const selectedBtn = document.getElementById(`opt_${id}`);
+            if(selectedBtn) {
+                selectedBtn.classList.remove('border-slate-700', 'bg-slate-900/60');
+                selectedBtn.classList.add('border-sky-400', 'bg-sky-950/60');
+            }
+        }
+
+        function selectMatchingTerm(qId) {
+            sound.playClick();
+            appState.matchingState.selectedTerm = qId;
+            render();
+        }
+
+        function selectMatchingTarget(targetId) {
+            sound.playClick();
+            if(appState.matchingState.selectedTerm) {
+                appState.matchingState.pairsMade[appState.matchingState.selectedTerm] = targetId;
+                appState.matchingState.selectedTerm = null;
+                render();
+            }
+        }
+
+        function undoMatch(qId) {
+            sound.playClick();
+            delete appState.matchingState.pairsMade[qId];
+            render();
+        }
+
+        function moveOrderItem(index, direction) {
+            sound.playClick();
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < appState.orderingState.length) {
+                const item = appState.orderingState.splice(index, 1)[0];
+                appState.orderingState.splice(newIndex, 0, item);
+                render();
+            }
+        }
+
+        function confirmAnswer() {
+            const q = appState.currentQuestion;
+            let isCorrect = false;
+
+            if (q.type === 'matching') {
+                let correctCount = 0;
+                q.pairs.forEach(p => {
+                    if (appState.matchingState.pairsMade[p.qId] === p.targetId) correctCount++;
+                });
+                isCorrect = (correctCount === q.pairs.length);
+            } else if (q.type === 'ordering') {
+                let correctOrder = true;
+                for(let i=0; i<appState.orderingState.length; i++) {
+                    if(appState.orderingState[i].id !== q.correctOrder[i]) {
+                        correctOrder = false;
+                        break;
+                    }
+                }
+                isCorrect = correctOrder;
+            } else {
+                isCorrect = (appState.selectedOptionId === q.correctId);
+            }
+
+            if (isCorrect) {
+                sound.playSuccess();
+                appState.score += 100;
+                appState.stars += 1;
+                if(appState.gameMode === 'teams') {
+                    appState.teams[appState.currentTeamIndex].score += 100;
+                    appState.teams[appState.currentTeamIndex].stars += 1;
+                }
+            } else {
+                sound.playError();
+            }
+
+            // Mark this box as successfully opened/completed
+            appState.openedBoxesStatus[appState.currentQuestionIndex] = true;
+
+            appState.userAnswersLog.push({
+                title: q.title,
+                prompt: q.prompt,
+                isCorrect: isCorrect,
+                explanation: q.explanation
+            });
+
+            appState.screen = 'FEEDBACK';
+            render();
+        }
+
+        function renderFeedbackScreen() {
+            const lastLog = appState.userAnswersLog[appState.userAnswersLog.length - 1];
+            const isCorrect = lastLog.isCorrect;
+
+            return `
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 my-auto flex flex-col items-center text-center max-w-2xl mx-auto w-full animate-fade-in">
+                    <div class="text-6xl mb-4">${isCorrect ? '🎉' : '❌'}</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-400'} mb-2">
+                        ${isCorrect ? 'أحسنت! إجابة صحيحة' : 'ليست الإجابة الصحيحة تماماً'}
+                    </h2>
+                    <p class="text-lg font-semibold text-white mb-6">
+                        ${isCorrect ? '+100 نقطة ⭐ نجمة جديدة' : 'لا تقلق، استمر في الاستكشاف وتعلم المفهوم العلمي'}
+                    </p>
+
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 text-right w-full mb-8">
+                        <h4 class="text-sky-300 font-bold mb-2 flex items-center gap-2">💡 التفسير العلمي (لماذا؟):</h4>
+                        <p class="text-slate-200 text-sm sm:text-base leading-relaxed">${lastLog.explanation}</p>
+                    </div>
+
+                    <button onclick="proceedAfterFeedback()" class="bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-bold px-10 py-3 rounded-2xl shadow-xl transition">
+                        ➡️ العودة للقاعة لاختيار صندوق آخر
+                    </button>
+                </div>
+            `;
+        }
+
+        function proceedAfterFeedback() {
+            sound.playClick();
+            if(appState.gameMode === 'teams') {
+                appState.currentTeamIndex = (appState.currentTeamIndex + 1) % appState.teams.length;
+            }
+
+            const openedCount = Object.keys(appState.openedBoxesStatus).length;
+            if(openedCount >= 10) {
+                appState.screen = 'FINISHED';
+            } else {
+                appState.screen = 'BOX_SELECTION';
+            }
+            render();
+        }
+
+        function renderFinishedScreen() {
+            let topUserOrTeam = '';
+            let finalScore = appState.score;
+            let finalStars = appState.stars;
+
+            if(appState.gameMode === 'teams') {
+                let bestTeam = appState.teams[0];
+                appState.teams.forEach(t => {
+                    if(t.score > bestTeam.score) bestTeam = t;
+                });
+                topUserOrTeam = `الفريق الفائز: ${bestTeam.name}`;
+                finalScore = bestTeam.score;
+                finalStars = bestTeam.stars;
+            } else {
+                topUserOrTeam = `المستكشف: ${appState.soloPlayerName}`;
+            }
+
+            const percentage = (finalScore / 1000) * 100;
+            let rankTitle = '';
+            if (percentage >= 90) rankTitle = '🏆 عبقري المعرفة';
+            else if (percentage >= 80) rankTitle = '🥇 خبير المعرفة';
+            else if (percentage >= 70) rankTitle = '🔬 مستكشف متميز';
+            else if (percentage >= 60) rankTitle = '🧠 باحث واعد';
+            else rankTitle = '🚀 واصل الاستكشاف';
+
+            return `
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 my-auto flex flex-col items-center text-center max-w-3xl mx-auto w-full">
+                    <div class="text-6xl mb-3">🎉🏆</div>
+                    <h2 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-300 mb-2">
+                        انتهت رحلة فتح صناديق المعرفة!
+                    </h2>
+                    <h3 class="text-xl font-bold text-white mb-6">${topUserOrTeam}</h3>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full mb-8">
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-2xl">
+                            <p class="text-xs text-slate-400 mb-1">النقاط الكلية</p>
+                            <p class="text-2xl font-black text-sky-300">${finalScore} / 1000</p>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-2xl">
+                            <p class="text-xs text-slate-400 mb-1">النجوم المكتسبة</p>
+                            <p class="text-2xl font-black text-amber-300">⭐ ${finalStars}</p>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-2xl">
+                            <p class="text-xs text-slate-400 mb-1">النسبة المئوية</p>
+                            <p class="text-2xl font-black text-emerald-300">${percentage}%</p>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-2xl">
+                            <p class="text-xs text-slate-400 mb-1">الرتبة العلمية</p>
+                            <p class="text-base font-bold text-teal-200 mt-1">${rankTitle}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="sound.playClick(); appState.screen='REVIEW'; render();" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold px-6 py-3 rounded-xl transition">
+                            📖 مراجعة الإجابات والمفاهيم
+                        </button>
+                        <button onclick="sound.playClick(); startSession();" class="bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition">
+                            🔄 العب من جديد (تحدي وصناديق جديدة)
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 my-auto flex flex-col items-center max-w-3xl mx-auto w-full">
+                    <h2 class="text-2xl font-black text-sky-300 mb-6">📖 مراجعة الإجابات والمفاهيم العلمية</h2>
+                    
+                    <div class="space-y-4 w-full max-h-[60vh] overflow-y-auto pr-2 mb-6">
+                        ${appState.userAnswersLog.map((log, idx) => `
+                            <div class="bg-slate-900/70 border ${log.isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'} rounded-2xl p-4 text-right">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold text-white text-sm">تحدي ${idx + 1}: ${log.title}</span>
+                                    <span class="text-xs px-3 py-1 rounded-full ${log.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                                        ${log.isCorrect ? '✔ تم الحل بنجاح' : '✘ حاجة للمراجعة'}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-300 mb-2">${log.prompt}</p>
+                                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs text-sky-200">
+                                    <span class="font-bold text-emerald-400">التفسير العلمي:</span> ${log.explanation}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button onclick="sound.playClick(); appState.screen='FINISHED'; render();" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-8 py-3 rounded-xl transition">
+                        ← العودة لشاشة النتائج
+                    </button>
+                </div>
+            `;
+        }
+
+        window.onload = () => {
+            render();
+        };
+    </script>
+</body>
+</html>

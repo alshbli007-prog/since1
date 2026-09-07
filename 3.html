@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏱️🌱 سباق الزمن العلمي – استقصاء عملية الإنبات</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        /* Custom Glowing & Laboratory Animations */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), 0 0 10px rgba(59, 130, 246, 0.6); }
+        }
+        @keyframes alert-pulse {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.6); transform: scale(1); }
+            50% { border-color: rgba(239, 68, 68, 1); transform: scale(1.02); }
+        }
+        @keyframes bubble {
+            0% { transform: translateY(0) scale(0.8); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+            100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+        }
+        .animate-glow { animation: pulse-glow 3s infinite; }
+        .animate-danger { animation: alert-pulse 1s infinite; }
+        .bubble-particle { animation: bubble 2.5s infinite ease-in-out; }
+        
+        /* Custom Scrollbar for review */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #059669; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+
+        .lab-glass {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden relative selection:bg-emerald-500 selection:text-white">
+
+    <!-- خلفية المختبر العلمي المستقبلي التفاعلية -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        <!-- خطوط القياس وشبكة المختبر -->
+        <div class="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] opacity-40"></div>
+        <div class="absolute top-10 left-10 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/3 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- شريط التحكم العلوي السريع (الصوت، ملء الشاشة) -->
+    <div class="relative z-50 flex justify-between items-center px-4 py-2 bg-slate-900/60 border-b border-slate-800 text-xs sm:text-sm">
+        <div class="flex items-center space-x-2 space-x-reverse font-bold text-emerald-400">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>🧪 مركز أبحاث الإنبات | استقصاء الصف الخامس</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="soundToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 transition text-slate-200">
+                <span id="soundIcon">🔊</span>
+                <span class="hidden sm:inline">الصوت</span>
+            </button>
+            <button id="fullscreenBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 transition text-slate-200">
+                <span>⛶</span>
+                <span class="hidden sm:inline">الشاشة كاملة</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- الحاوية الرئيسية للتطبيقات والشاشات -->
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-3 sm:p-6 w-full max-w-5xl mx-auto">
+        <div id="gameApp" class="w-full">
+            <!-- سيتم توليد الشاشات التفاعلية هنا عبر محرك JavaScript -->
+        </div>
+    </main>
+
+    <!-- شريط الإحصائيات العلمي السفلي لمختبر الإنبات (يظهر أثناء اللعب فقط) -->
+    <div id="labStatusBar" class="hidden relative z-20 w-full bg-slate-900/90 border-t border-slate-800 py-2.5 px-4">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-2 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+                <span class="text-slate-400">تطور أجهزة المختبر:</span>
+                <div id="labIndicators" class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- 10 مؤشرات لتطور التجربة والمختبر -->
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-slate-300">طاقة الزمن العلمي: <span id="timeBoostTotal" class="text-amber-400 font-bold">100%</span></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+/**
+ * -------------------------------------------------------------
+ * 1. بنية الصوت التوليدية المدمجة (Web Audio API)
+ * لا تتطلب أي ملفات خارجية MP3 أو WAV
+ * -------------------------------------------------------------
+ */
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.muted = false;
+    }
+
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    playTone(freq, type, duration, gainVal = 0.15) {
+        if (this.muted) return;
+        this.init();
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+            gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+            console.warn("Audio error:", e);
+        }
+    }
+
+    playStart() {
+        if (this.muted) return;
+        const notes = [330, 440, 554, 659];
+        notes.forEach((n, idx) => {
+            setTimeout(() => this.playTone(n, 'triangle', 0.35, 0.2), idx * 120);
+        });
+    }
+
+    playTick() {
+        this.playTone(800, 'sine', 0.05, 0.05);
+    }
+
+    playAlertTick() {
+        this.playTone(1000, 'square', 0.12, 0.12);
+    }
+
+    playCorrect() {
+        if (this.muted) return;
+        const chord = [523.25, 659.25, 783.99, 1046.50]; // C Major
+        chord.forEach((n, idx) => {
+            setTimeout(() => this.playTone(n, 'sine', 0.45, 0.18), idx * 80);
+        });
+    }
+
+    playWrong() {
+        if (this.muted) return;
+        this.playTone(220, 'sawtooth', 0.35, 0.2);
+        setTimeout(() => this.playTone(180, 'sawtooth', 0.4, 0.25), 180);
+    }
+
+    playTimeBoost() {
+        if (this.muted) return;
+        const notes = [400, 600, 800, 1200];
+        notes.forEach((n, i) => {
+            setTimeout(() => this.playTone(n, 'triangle', 0.2, 0.15), i * 70);
+        });
+    }
+
+    playTimeOut() {
+        this.playTone(250, 'square', 0.6, 0.2);
+    }
+
+    playVictory() {
+        if (this.muted) return;
+        const victoryTune = [523, 659, 784, 1046, 784, 1046];
+        victoryTune.forEach((freq, idx) => {
+            setTimeout(() => this.playTone(freq, 'triangle', 0.4, 0.25), idx * 150);
+        });
+    }
+
+    toggle() {
+        this.muted = !this.muted;
+        return this.muted;
+    }
+}
+
+const sounds = new SoundEngine();
+
+/**
+ * -------------------------------------------------------------
+ * 2. بنك الأسئلة المعتمد - الدرس الثالث: استقصاء عملية الإنبات
+ * قاعدة علمية صارمة: 10 أسئلة محددة نصاً وعلمياً بدون أي خروج عن المرجع
+ * -------------------------------------------------------------
+ */
+const QUESTIONS_DATA = [
+    {
+        id: 1,
+        timeLimit: 30,
+        title: "الظروف الملائمة لنمو البذور",
+        subtitle: "الركائز الأساسية لبدء عملية الإنبات",
+        svgType: "cards_three",
+        question: "ما الظروف الملائمة الثلاثة لنمو البذور؟",
+        options: [
+            { id: "A", text: "الهواء والماء والدفء" },
+            { id: "B", text: "الضوء والتربة والدفء" },
+            { id: "C", text: "التربة والضوء والماء" },
+            { id: "D", text: "الماء والضوء والبرودة" }
+        ],
+        correctId: "A",
+        explanation: "الظروف الملائمة لنمو البذور هي الهواء والأكسجين، والماء والرطوبة، والدفء ودرجة الحرارة.",
+        labUpgrade: "💨 تم تفعيل وتنشيط تدفق الهواء والأكسجين بمحطة الاستقصاء!"
+    },
+    {
+        id: 2,
+        timeLimit: 30,
+        title: "سرعة نمو البذور (الصغيرة والكبيرة)",
+        subtitle: "مقارنة معدل الإنبات ومخزون الغذاء",
+        svgType: "seeds_size",
+        question: "أي البذور تنمو أسرع؟",
+        options: [
+            { id: "A", text: "البذور الكبيرة." },
+            { id: "B", text: "البذور الصغيرة." },
+            { id: "C", text: "كلاهما بالسرعة نفسها." },
+            { id: "D", text: "لا تنمو أي منهما." }
+        ],
+        correctId: "B",
+        explanation: "البذور الصغيرة أسرع نموًا من البذور الكبيرة، لأن كمية مخزون الغذاء بداخلها قليلة، فتنمو بسرعة لتخرج بعدها الأوراق لتوفر الغذاء اللازم للنبات.",
+        labUpgrade: "🌱 بدأت البذور الصغيرة بالإنبات السريع في حاضنة المختبر!"
+    },
+    {
+        id: 3,
+        timeLimit: 35,
+        title: "بيئات الإنبات والتربة",
+        subtitle: "سؤال بصري استقصائي تطبيقي",
+        svgType: "three_environments",
+        question: "ماذا نستنتج من هذه الأمثلة (محارم ورقية - قطن - ماء)؟",
+        options: [
+            { id: "A", text: "لا تستطيع البذور النمو إلا في التربة." },
+            { id: "B", text: "تحتاج البذور إلى الضوء والتربة معًا." },
+            { id: "C", text: "لا تحتاج البذور إلى التربة لكي تنمو." },
+            { id: "D", text: "لا تنمو البذور إلا داخل الأوعية الزجاجية." }
+        ],
+        correctId: "C",
+        explanation: "يمكن أن تنمو البذور في المحارم الورقية والقطن والماء، لذلك لا تعتبر التربة من الاحتياجات الأساسية للبذور.",
+        labUpgrade: "💧 نظام إمداد الرطوبة والمحاليل يعمل بكفاءة تامة دون تربة!"
+    },
+    {
+        id: 4,
+        timeLimit: 35,
+        title: "الضوء والظلام في الإنبات",
+        subtitle: "سؤال بصري مقارن",
+        svgType: "light_vs_dark",
+        question: "هل تحتاج البذور إلى الضوء لكي تنمو؟",
+        options: [
+            { id: "A", text: "نعم، لا تنمو بدونه." },
+            { id: "B", text: "نعم، ولكن فقط في النهار." },
+            { id: "C", text: "لا، يمكن أن تنمو البذور في الظلام." },
+            { id: "D", text: "تحتاج إلى ضوء شديد." }
+        ],
+        correctId: "C",
+        explanation: "لا تحتاج البذور إلى الضوء لكي تنمو، فمن الممكن أن تنمو البذور في الظلام.",
+        labUpgrade: "🌑 تفعيل غرفة العزل المظلمة؛ البذور تنمو بنجاح تام في العتمة!"
+    },
+    {
+        id: 5,
+        timeLimit: 30,
+        title: "درجة الحرارة والبيئات القاسية",
+        subtitle: "تأثير درجات الحرارة القصوى",
+        svgType: "temp_three",
+        question: "في أي البيئات لا تنمو البذور؟",
+        options: [
+            { id: "A", text: "الباردة جدًا والحارة جدًا." },
+            { id: "B", text: "الدافئة فقط." },
+            { id: "C", text: "جميع البيئات." },
+            { id: "D", text: "الدافئة والباردة فقط." }
+        ],
+        correctId: "A",
+        explanation: "الأماكن شديدة البرودة والأماكن شديدة الحرارة لا تنمو فيها البذور.",
+        labUpgrade: "🌡️ تم ضبط منظم الحرارة المركزي في المختبر وتجنب درجات الحرارة القاتلة!"
+    },
+    {
+        id: 6,
+        timeLimit: 40,
+        title: "البرودة والدفء",
+        subtitle: "سرعة النمو وعدد البذور النامية",
+        svgType: "cold_vs_warm",
+        question: "ماذا يحدث للبذور في المكان البارد مقارنة بالمكان الدافئ؟",
+        options: [
+            { id: "A", text: "تنمو أسرع وأكثر." },
+            { id: "B", text: "لا يمكن أن تنمو أبدًا." },
+            { id: "C", text: "يمكن أن تنمو ولكن بشكل أبطأ وينمو عدد قليل منها." },
+            { id: "D", text: "تنمو بالطريقة نفسها." }
+        ],
+        correctId: "C",
+        explanation: "إذا كان المكان باردًا يمكن أن تنمو البذور، لكن بشكل أبطأ وينمو عدد قليل منها، أما المكان الدافئ فيكون فيه النمو أسرع وأكثر.",
+        labUpgrade: "⏱️ تسارع وتيرة الإنبات داخل الحاضنة الدافئة بمقدار الضعف!"
+    },
+    {
+        id: 7,
+        timeLimit: 45,
+        title: "تجربة مريم: هل الاختبار عادل؟",
+        subtitle: "سؤال الاستقصاء العلمي والتصميم العادل",
+        svgType: "maryam_experiment",
+        question: "هل اختبار مريم عادل؟",
+        options: [
+            { id: "A", text: "نعم، لأنها غيرت الضوء فقط وأبقت العوامل الأخرى نفسها." },
+            { id: "B", text: "لا، لأنها استخدمت بذورًا مختلفة." },
+            { id: "C", text: "لا، لأنها لم تعطِ البذور ماء." },
+            { id: "D", text: "نعم، لأن الضوء هو الاحتياج الوحيد للبذور." }
+        ],
+        correctId: "A",
+        explanation: "الاختبار عادل لأنها وضعت نفس العدد والحجم من البذور، ونفس كمية التربة، وعرضتها للهواء وأعطتها الماء، وغيرت عامل الضوء فقط.",
+        labUpgrade: "🔬 بطاقة الاعتماد: 'تصميم تجريبي عادل ونموذجي 100%'!"
+    },
+    {
+        id: 8,
+        timeLimit: 40,
+        title: "تحديد العامل المتغير",
+        subtitle: "التحليل الاستقصائي الدقيق لتجربة مريم",
+        svgType: "maryam_experiment",
+        question: "ما العامل المتغير في تجربة مريم؟",
+        options: [
+            { id: "A", text: "كمية الماء." },
+            { id: "B", text: "حجم البذور." },
+            { id: "C", text: "الضوء." },
+            { id: "D", text: "كمية التربة." }
+        ],
+        correctId: "C",
+        explanation: "العامل المتغير هو تأثير الضوء على نمو البذور.",
+        labUpgrade: "🎯 تم تحديد العامل المتغير بدقة متناهية في حاسوب المختبر!"
+    },
+    {
+        id: 9,
+        timeLimit: 40,
+        title: "توقع النتيجة العلمية",
+        subtitle: "العلبة (أ) بعد مرور 8 أيام في الظلام",
+        svgType: "prediction_box",
+        question: "ماذا تتوقع أن يحدث للبذور الموجودة في العلبة (أ) بعد ثمانية أيام؟",
+        options: [
+            { id: "A", text: "لن تنمو لأنها في الظلام." },
+            { id: "B", text: "ستنمو لأن الضوء لا يعتبر من احتياجات نمو البذور." },
+            { id: "C", text: "ستتحول إلى نباتات ميتة مباشرة." },
+            { id: "D", text: "ستحتاج إلى ضوء صناعي لكي تبدأ النمو." }
+        ],
+        correctId: "B",
+        explanation: "ستنمو البذور في الظلام؛ لأن الضوء لا يعتبر من احتياجات نمو البذور.",
+        labUpgrade: "📈 تأكيد صحة الفرضية العلمية: إنبات ناجح في العلبة المظلمة!"
+    },
+    {
+        id: 10,
+        timeLimit: 45,
+        title: "التحدي النهائي – الخلاصة العلمية",
+        subtitle: "لوحة الاستقصاء العلمي الشاملة لعملية الإنبات",
+        svgType: "grand_summary",
+        question: "أي عبارة تلخص نتائج استقصاء عملية الإنبات بشكل صحيح؟",
+        options: [
+            {
+                id: "A",
+                text: "تنمو البذور إذا توفر الهواء والماء والدفء وكان الجنين حيًا، والبذور الصغيرة أسرع نموًا من الكبيرة، ولا تحتاج البذور إلى التربة أو الضوء لكي تنمو، ولا تنمو في الأماكن شديدة البرودة أو شديدة الحرارة."
+            },
+            {
+                id: "B",
+                text: "تحتاج البذور إلى الضوء والتربة دائمًا، والبذور الكبيرة أسرع نموًا من الصغيرة."
+            },
+            {
+                id: "C",
+                text: "لا تنمو البذور في الظلام، وتحتاج إلى التربة لكي تنمو."
+            },
+            {
+                id: "D",
+                text: "تنمو البذور في جميع درجات الحرارة، والضوء هو الاحتياج الأساسي للإنبات."
+            }
+        ],
+        correctId: "A",
+        explanation: "تلخص هذه العبارة نتائج الاستقصاء: الظروف الملائمة هي الهواء والماء والدفء مع وجود جنين حي، والبذور الصغيرة أسرع نموًا، ولا تحتاج البذور إلى التربة أو الضوء لكي تنمو، كما أن البرودة الشديدة والحرارة الشديدة لا تسمحان بنموها.",
+        labUpgrade: "🏆 اكتملت محطة الاستقصاء العلمي بنجاح خارق! لقد أصبحت بطلاً للإنبات!"
+    }
+];
+
+/**
+ * -------------------------------------------------------------
+ * 3. مولد الرسوم التعليمية الاستقصائية المخصصة (SVG Renderer)
+ * رسومات واضحة وشاملة لكافة تفاصيل التجربة والظروف
+ * -------------------------------------------------------------
+ */
+function renderQuestionSVG(type) {
+    switch (type) {
+        case "cards_three":
+            return `
+            <div class="grid grid-cols-3 gap-3 w-full max-w-lg mx-auto my-2">
+                <div class="p-3 bg-cyan-950/60 border-2 border-cyan-400/50 rounded-xl flex flex-col items-center justify-center text-center shadow-md">
+                    <span class="text-4xl mb-1 filter drop-shadow">💨</span>
+                    <span class="font-bold text-cyan-300 text-sm">الهواء</span>
+                    <span class="text-[11px] text-cyan-100/70">(الأكسجين)</span>
+                </div>
+                <div class="p-3 bg-blue-950/60 border-2 border-blue-400/50 rounded-xl flex flex-col items-center justify-center text-center shadow-md">
+                    <span class="text-4xl mb-1 filter drop-shadow">💧</span>
+                    <span class="font-bold text-blue-300 text-sm">الماء</span>
+                    <span class="text-[11px] text-blue-100/70">(الرطوبة)</span>
+                </div>
+                <div class="p-3 bg-amber-950/60 border-2 border-amber-400/50 rounded-xl flex flex-col items-center justify-center text-center shadow-md">
+                    <span class="text-4xl mb-1 filter drop-shadow">🌡️</span>
+                    <span class="font-bold text-amber-300 text-sm">الدفء</span>
+                    <span class="text-[11px] text-amber-100/70">(درجة الحرارة)</span>
+                </div>
+            </div>`;
+
+        case "seeds_size":
+            return `
+            <div class="flex items-center justify-around w-full max-w-md mx-auto my-2 p-3 bg-slate-900/80 rounded-2xl border border-emerald-500/30">
+                <div class="flex flex-col items-center">
+                    <svg width="70" height="70" viewBox="0 0 100 100">
+                        <ellipse cx="50" cy="50" rx="16" ry="12" fill="#10b981" />
+                        <path d="M50,38 Q65,15 75,10" stroke="#34d399" stroke-width="4" fill="none" stroke-linecap="round" />
+                        <circle cx="75" cy="10" r="4" fill="#a7f3d0"/>
+                    </svg>
+                    <span class="font-bold text-emerald-300 text-sm mt-1">بذرة صغيرة 🌱</span>
+                    <span class="text-[11px] text-emerald-200/70">مخزون غذاء قليل</span>
+                </div>
+                <div class="text-2xl font-bold text-slate-500">VS</div>
+                <div class="flex flex-col items-center">
+                    <svg width="70" height="70" viewBox="0 0 100 100">
+                        <ellipse cx="50" cy="55" rx="34" ry="26" fill="#b45309" />
+                        <ellipse cx="45" cy="50" rx="30" ry="22" fill="#d97706" />
+                        <path d="M50,30 Q55,20 58,16" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round" />
+                    </svg>
+                    <span class="font-bold text-amber-300 text-sm mt-1">بذرة كبيرة 🌰</span>
+                    <span class="text-[11px] text-amber-200/70">مخزون غذاء وفير</span>
+                </div>
+            </div>`;
+
+        case "three_environments":
+            return `
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-lg mx-auto my-2">
+                <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl flex flex-col items-center text-center">
+                    <div class="w-14 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-2xl border border-slate-600">
+                        📄🌱
+                    </div>
+                    <span class="font-bold text-slate-200 text-xs mt-1.5">① محارم ورقية</span>
+                    <span class="text-[10px] text-emerald-400">تنمو بنجاح</span>
+                </div>
+                <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl flex flex-col items-center text-center">
+                    <div class="w-14 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-2xl border border-slate-600">
+                        ☁️🌱
+                    </div>
+                    <span class="font-bold text-slate-200 text-xs mt-1.5">② قطن مبلل</span>
+                    <span class="text-[10px] text-emerald-400">تنمو بنجاح</span>
+                </div>
+                <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl flex flex-col items-center text-center">
+                    <div class="w-14 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-2xl border border-slate-600">
+                        🧪💧
+                    </div>
+                    <span class="font-bold text-slate-200 text-xs mt-1.5">③ ماء</span>
+                    <span class="text-[10px] text-emerald-400">تنمو بنجاح</span>
+                </div>
+            </div>`;
+
+        case "light_vs_dark":
+            return `
+            <div class="grid grid-cols-2 gap-3 w-full max-w-md mx-auto my-2">
+                <div class="p-3 bg-amber-950/40 border-2 border-amber-400/50 rounded-xl flex flex-col items-center text-center">
+                    <span class="text-3xl mb-1">☀️🌱</span>
+                    <span class="font-bold text-amber-300 text-sm">صندوق مضاء</span>
+                    <span class="text-[11px] text-slate-300 mt-1">البذور تنمو</span>
+                </div>
+                <div class="p-3 bg-indigo-950/60 border-2 border-indigo-400/50 rounded-xl flex flex-col items-center text-center">
+                    <span class="text-3xl mb-1">🌑🌱</span>
+                    <span class="font-bold text-indigo-300 text-sm">صندوق مظلم</span>
+                    <span class="text-[11px] text-emerald-400 font-bold mt-1">البذور تنمو أيضاً!</span>
+                </div>
+            </div>`;
+
+        case "temp_three":
+            return `
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-lg mx-auto my-2">
+                <div class="p-2.5 bg-sky-950/60 border-2 border-sky-400/50 rounded-xl flex flex-col items-center text-center">
+                    <span class="text-3xl mb-1">❄️</span>
+                    <span class="font-bold text-sky-300 text-xs">باردة جدًا</span>
+                    <span class="text-[10px] text-red-400 font-bold mt-1">❌ لا تنمو</span>
+                </div>
+                <div class="p-2.5 bg-emerald-950/60 border-2 border-emerald-400/50 rounded-xl flex flex-col items-center text-center">
+                    <span class="text-3xl mb-1">🌤️</span>
+                    <span class="font-bold text-emerald-300 text-xs">دافئة</span>
+                    <span class="text-[10px] text-emerald-400 font-bold mt-1">✅ تنمو بنشاط</span>
+                </div>
+                <div class="p-2.5 bg-rose-950/60 border-2 border-rose-400/50 rounded-xl flex flex-col items-center text-center">
+                    <span class="text-3xl mb-1">🔥</span>
+                    <span class="font-bold text-rose-300 text-xs">حارة جدًا</span>
+                    <span class="text-[10px] text-red-400 font-bold mt-1">❌ لا تنمو</span>
+                </div>
+            </div>`;
+
+        case "cold_vs_warm":
+            return `
+            <div class="grid grid-cols-2 gap-3 w-full max-w-md mx-auto my-2">
+                <div class="p-3 bg-blue-950/50 border border-blue-400/40 rounded-xl flex flex-col items-center text-center">
+                    <div class="text-2xl mb-1">❄️ ⏳ 🌱</div>
+                    <span class="font-bold text-blue-300 text-sm">المكان البارد (A)</span>
+                    <span class="text-xs text-slate-300 mt-1">نمو بطيء جدًا</span>
+                    <span class="text-[11px] text-amber-300">وعدد قليل من البذور</span>
+                </div>
+                <div class="p-3 bg-amber-950/50 border border-amber-400/40 rounded-xl flex flex-col items-center text-center">
+                    <div class="text-2xl mb-1">🌤️ ⚡ 🌱🌱🌱</div>
+                    <span class="font-bold text-amber-300 text-sm">المكان الدافئ (B)</span>
+                    <span class="text-xs text-slate-300 mt-1">نمو سريع وقوي</span>
+                    <span class="text-[11px] text-emerald-400 font-bold">وعدد أكبر من البذور</span>
+                </div>
+            </div>`;
+
+        case "maryam_experiment":
+            return `
+            <div class="w-full max-w-xl mx-auto my-2 p-3 bg-slate-900/90 rounded-xl border border-cyan-500/40 shadow-lg">
+                <div class="text-center font-bold text-cyan-300 text-xs mb-2 border-b border-slate-700 pb-1 flex items-center justify-center gap-2">
+                    <span>🔬 مخطط تجربة مريم العلمية (استقصاء أثر الضوء)</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- علبة أ -->
+                    <div class="p-2.5 bg-slate-950 rounded-lg border-2 border-purple-500/60 flex flex-col items-center text-center">
+                        <span class="px-2 py-0.5 rounded bg-purple-900/80 text-purple-200 text-xs font-bold mb-1">العلبة (أ)</span>
+                        <div class="text-3xl mb-1">🌑</div>
+                        <span class="text-xs font-bold text-purple-300">موضوعة في الظلام</span>
+                        <div class="w-full text-[10px] text-slate-400 space-y-0.5 mt-2 text-right bg-slate-900 p-1.5 rounded">
+                            <div>• 5 بذور نفس الحجم</div>
+                            <div>• نفس كمية التربة</div>
+                            <div>• نفس كمية الماء</div>
+                            <div>• معرضة للهواء</div>
+                        </div>
+                    </div>
+                    <!-- علبة ب -->
+                    <div class="p-2.5 bg-slate-950 rounded-lg border-2 border-amber-500/60 flex flex-col items-center text-center">
+                        <span class="px-2 py-0.5 rounded bg-amber-900/80 text-amber-200 text-xs font-bold mb-1">العلبة (ب)</span>
+                        <div class="text-3xl mb-1">☀️</div>
+                        <span class="text-xs font-bold text-amber-300">موضوعة في الضوء</span>
+                        <div class="w-full text-[10px] text-slate-400 space-y-0.5 mt-2 text-right bg-slate-900 p-1.5 rounded">
+                            <div>• 5 بذور نفس الحجم</div>
+                            <div>• نفس كمية التربة</div>
+                            <div>• نفس كمية الماء</div>
+                            <div>• معرضة للهواء</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-[11px] text-emerald-400 mt-2 font-medium">
+                    ثوابت متطابقة تمامًا: (العدد، الحجم، التربة، الماء، الهواء) | المتغير الوحيد: الضوء
+                </div>
+            </div>`;
+
+        case "prediction_box":
+            return `
+            <div class="w-full max-w-md mx-auto my-2 p-3 bg-indigo-950/40 rounded-xl border border-indigo-500/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-14 h-14 bg-slate-900 border-2 border-indigo-400 rounded-lg flex items-center justify-center text-3xl">
+                        🌑🌱
+                    </div>
+                    <div>
+                        <div class="font-bold text-indigo-300 text-sm">العلبة (أ) - في الظلام</div>
+                        <div class="text-xs text-slate-400">مرور 8 أيام متتالية مع توفر (الماء، الهواء، الدفء)</div>
+                    </div>
+                </div>
+                <span class="text-2xl animate-pulse">❓</span>
+            </div>`;
+
+        case "grand_summary":
+            return `
+            <div class="w-full max-w-xl mx-auto my-2 p-3 bg-slate-900/90 rounded-xl border-2 border-emerald-500/40 flex flex-wrap justify-around items-center gap-2 text-xs">
+                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-cyan-500/30">
+                    <span>💨💧🌡️</span>
+                    <span class="text-cyan-300 font-bold">هواء + ماء + دفء</span>
+                </div>
+                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-emerald-500/30">
+                    <span>🌱 > 🌰</span>
+                    <span class="text-emerald-300 font-bold">الصغيرة أسرع</span>
+                </div>
+                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-amber-500/30">
+                    <span>🚫☀️ 🚫🪴</span>
+                    <span class="text-amber-300 font-bold">لا حاجة لتربة أو ضوء</span>
+                </div>
+            </div>`;
+
+        default:
+            return '';
+    }
+}
+
+/**
+ * -------------------------------------------------------------
+ * 4. إدارة حالة اللعبة ونظام الفرق (State Management)
+ * تضمن بدقة منع أي نقر مزدوج أو تكرار بالنقاط أو المؤقتات
+ * -------------------------------------------------------------
+ */
+const GameState = {
+    mode: 'SINGLE', // 'SINGLE' | 'TEAMS'
+    playerName: 'بطل الاستقصاء',
+    teams: [
+        { id: 1, name: 'فريق الأكسجين 💨', score: 0, stars: 0 },
+        { id: 2, name: 'فريق الرطوبة 💧', score: 0, stars: 0 }
+    ],
+    currentTeamIdx: 0,
+    currentQuestionIdx: 0,
+    selectedOption: null,
+    isConfirmed: false,
+    answeredCount: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    unansweredCount: 0,
+    totalScore: 0,
+    startTime: 0,
+    totalTimeSpent: 0,
+    isPaused: false,
+    timer: null,
+    timeLeft: 30,
+    isAnsweringPhase: false,
+    history: [] // لحفظ إجابات المراجعة
+};
+
+const appContainer = document.getElementById('gameApp');
+const statusBar = document.getElementById('labStatusBar');
+const labIndicators = document.getElementById('labIndicators');
+
+/**
+ * تهيئة مؤشرات المختبر العشرة
+ */
+function initLabIndicators() {
+    labIndicators.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+        const dot = document.createElement('div');
+        dot.id = `lab-dot-${i}`;
+        dot.className = 'w-4 h-4 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-500 transition-all duration-500';
+        dot.textContent = (i + 1);
+        labIndicators.appendChild(dot);
+    }
+}
+
+function updateLabDot(index, status) {
+    const dot = document.getElementById(`lab-dot-${index}`);
+    if (!dot) return;
+    if (status === 'active') {
+        dot.className = 'w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black border-2 border-emerald-300 animate-pulse flex items-center justify-center text-[10px] shadow-[0_0_10px_#10b981]';
+    } else if (status === 'passed') {
+        dot.className = 'w-4 h-4 rounded-full bg-emerald-900 border border-emerald-500 text-emerald-300 flex items-center justify-center text-[9px] font-bold';
+    } else if (status === 'failed') {
+        dot.className = 'w-4 h-4 rounded-full bg-rose-950 border border-rose-600 text-rose-300 flex items-center justify-center text-[9px] font-bold';
+    }
+}
+
+/**
+ * -------------------------------------------------------------
+ * 5. شاشة البداية الرسمية المعتمدة
+ * تتضمن شعار سلطنة عمان، الوزارة، مدرسة محمد بن محبوب الرحيلي،
+ * وصورة الأستاذ فيصل الشبلي الحقيقية غير المعدلة
+ * -------------------------------------------------------------
+ */
+function renderStartScreen() {
+    statusBar.classList.add('hidden');
+    clearInterval(GameState.timer);
+
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto text-center border-2 border-emerald-500/40 shadow-2xl relative overflow-hidden animate-glow">
+            
+            <!-- الهوية الرسمية لسلطنة عمان -->
+            <div class="flex flex-col items-center mb-5">
+                <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" 
+                     alt="[شعار الخنجر العماني]" 
+                     class="h-20 sm:h-24 w-auto object-contain mb-3 drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]" 
+                     onerror="this.style.display='none'">
+                
+                <div class="space-y-1 text-slate-200">
+                    <h2 class="text-sm sm:text-base font-bold text-amber-400">سلطنة عمان</h2>
+                    <h3 class="text-xs sm:text-sm font-semibold">وزارة التعليم</h3>
+                    <p class="text-xs sm:text-sm text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                    <p class="text-xs sm:text-sm text-emerald-400 font-bold">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+                </div>
+            </div>
+
+            <!-- بطاقة المعلم الحقيقية المعتمدة -->
+            <div class="my-5 p-3 sm:p-4 bg-slate-900/90 rounded-2xl border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto shadow-inner">
+                <div class="relative">
+                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" 
+                         alt="[صورة الأستاذ فيصل الشبلي]" 
+                         class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover object-top border-2 border-emerald-400 shadow-lg"
+                         onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%2310b981\'><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'14\' fill=\'white\'>أ. فيصل الشبلي</text></svg>'">
+                    <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">معلم المادة</span>
+                </div>
+                <div class="text-center sm:text-right space-y-1 text-xs sm:text-sm">
+                    <h4 class="font-extrabold text-white text-base">أ. فيصل الشبلي</h4>
+                    <p class="text-emerald-400 font-mono font-bold" dir="ltr">99812126</p>
+                    <p class="text-slate-300 text-xs font-mono" dir="ltr">Instagram: @faalll8</p>
+                    <div class="pt-1 text-[11px] text-amber-300 border-t border-slate-800">
+                        مدير المدرسة: <span class="font-bold">أ. سعود الشيزاوي</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- عنوان اللعبة الرئيسي والفكرة -->
+            <div class="my-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-2">
+                    <span>الصف الخامس - الفصل الدراسي الأول</span>
+                    <span>•</span>
+                    <span>استقصاء عملية الإنبات</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-wide flex items-center justify-center gap-2 flex-wrap">
+                    <span>⏱️🌱</span>
+                    <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">سباق الزمن العلمي</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">
+                    ادخل إلى <span class="text-emerald-400 font-bold">«مركز أبحاث الإنبات»</span> وتحدَّ مؤقت السباق العلمي عبر 10 محطات استقصائية حاسمة!
+                </p>
+            </div>
+
+            <!-- زر بدء اللعبة -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <button id="startRaceBtn" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-lg rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.5)] transform hover:scale-105 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🚀</span>
+                    <span>دخول مركز الأبحاث وبدء السباق</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('startRaceBtn').addEventListener('click', () => {
+        sounds.init();
+        sounds.playStart();
+        renderModeSelection();
+    });
+}
+
+/**
+ * -------------------------------------------------------------
+ * 6. شاشة اختيار النمط (فردي أو فرق)
+ * -------------------------------------------------------------
+ */
+function renderModeSelection() {
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 sm:p-8 max-w-xl mx-auto text-center border border-emerald-500/30 shadow-2xl animate-fade-in">
+            <h2 class="text-xl sm:text-2xl font-black text-emerald-400 mb-2">اختر نمط السباق العلمي 🔬</h2>
+            <p class="text-slate-300 text-xs sm:text-sm mb-6">هل تخوض التحدي منفرداً لمنافسة الزمن أم ضمن فرق بحثية استقصائية؟</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+                <!-- النمط الفردي -->
+                <button id="selectSingleBtn" class="p-5 bg-slate-900/90 hover:bg-slate-850 border-2 border-emerald-500/40 hover:border-emerald-400 rounded-2xl text-center group transition transform hover:-translate-y-1">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        👤
+                    </div>
+                    <h3 class="font-extrabold text-white text-base mb-1">النمط الفردي</h3>
+                    <p class="text-slate-400 text-xs">تحدي الزمن بمفردك لتسجيل أعلى رتبة علمية.</p>
+                </button>
+
+                <!-- نمط الفرق -->
+                <button id="selectTeamsBtn" class="p-5 bg-slate-900/90 hover:bg-slate-850 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-2xl text-center group transition transform hover:-translate-y-1">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-3xl mb-3 group-hover:scale-110 transition">
+                        👥
+                    </div>
+                    <h3 class="font-extrabold text-white text-base mb-1">النمط الجماعي (فرق)</h3>
+                    <p class="text-slate-400 text-xs">تنافس حماسي بين 2 إلى 4 فرق بحثية بالتناوب العادل.</p>
+                </button>
+            </div>
+
+            <button id="backToStartBtn" class="mt-4 text-xs text-slate-400 hover:text-white transition">
+                ← العودة إلى شاشة البداية
+            </button>
+        </div>
+    `;
+
+    document.getElementById('selectSingleBtn').addEventListener('click', () => {
+        sounds.playTick();
+        renderPlayerSetup();
+    });
+
+    document.getElementById('selectTeamsBtn').addEventListener('click', () => {
+        sounds.playTick();
+        renderTeamSetup();
+    });
+
+    document.getElementById('backToStartBtn').addEventListener('click', () => {
+        renderStartScreen();
+    });
+}
+
+/**
+ * -------------------------------------------------------------
+ * 7. شاشات الإعداد (إدخال الأسماء والفرق)
+ * -------------------------------------------------------------
+ */
+function renderPlayerSetup() {
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 sm:p-8 max-w-md mx-auto text-center border border-emerald-500/30 shadow-2xl">
+            <div class="text-3xl mb-2">👤🌱</div>
+            <h2 class="text-lg sm:text-xl font-black text-white mb-2">تسجيل بيانات الباحث المستقصي</h2>
+            <p class="text-slate-400 text-xs mb-5">أدخل اسمك ليظهر على شاشة المحطة الزمنية وشهادة الإنجاز:</p>
+
+            <div class="space-y-4">
+                <input type="text" id="playerNameInput" value="${GameState.playerName}" placeholder="اكتب اسم الطالب..." 
+                       class="w-full px-4 py-3 bg-slate-900 border-2 border-emerald-500/50 rounded-xl text-center text-emerald-300 font-bold focus:outline-none focus:border-emerald-400 text-sm">
+                
+                <div class="flex gap-3">
+                    <button id="cancelSetupBtn" class="w-1/3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+                        إلغاء
+                    </button>
+                    <button id="confirmPlayerBtn" class="w-2/3 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-black rounded-xl shadow-lg transition">
+                        بدء العد التنازلي ⏱️
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('cancelSetupBtn').addEventListener('click', renderModeSelection);
+    document.getElementById('confirmPlayerBtn').addEventListener('click', () => {
+        const inputVal = document.getElementById('playerNameInput').value.trim();
+        GameState.playerName = inputVal || 'بطل الاستقصاء';
+        GameState.mode = 'SINGLE';
+        sounds.playStart();
+        startCountdown();
+    });
+}
+
+function renderTeamSetup() {
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 sm:p-8 max-w-lg mx-auto text-center border border-cyan-500/30 shadow-2xl">
+            <div class="text-3xl mb-2">👥🧪</div>
+            <h2 class="text-lg sm:text-xl font-black text-cyan-400 mb-2">تجهيز الفرق البحثية</h2>
+            <p class="text-slate-400 text-xs mb-4">اختر عدد الفرق وأدخل أسماءها لبدء التنافس:</p>
+
+            <div class="flex justify-center items-center gap-3 mb-4">
+                <span class="text-xs text-slate-300">عدد الفرق:</span>
+                <div class="flex gap-2">
+                    <button class="team-count-btn px-3 py-1 rounded-lg bg-cyan-600 text-white font-bold text-xs" data-count="2">2</button>
+                    <button class="team-count-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs" data-count="3">3</button>
+                    <button class="team-count-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs" data-count="4">4</button>
+                </div>
+            </div>
+
+            <div id="teamInputsContainer" class="space-y-2 mb-5">
+                <!-- مولد حقول الفرق -->
+            </div>
+
+            <div class="flex gap-3">
+                <button id="cancelTeamBtn" class="w-1/3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+                    إلغاء
+                </button>
+                <button id="confirmTeamsBtn" class="w-2/3 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-black rounded-xl shadow-lg transition">
+                    جاهزون للسباق! 🚀
+                </button>
+            </div>
+        </div>
+    `;
+
+    let activeCount = 2;
+    const container = document.getElementById('teamInputsContainer');
+
+    function updateTeamInputs(count) {
+        activeCount = count;
+        container.innerHTML = '';
+        const defaultNames = [
+            'فريق الأكسجين 💨',
+            'فريق الرطوبة 💧',
+            'فريق الدفء 🌡️',
+            'فريق الجنين الحي 🌱'
+        ];
+        for (let i = 0; i < count; i++) {
+            const row = document.createElement('div');
+            row.innerHTML = `
+                <input type="text" class="team-name-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-center font-bold text-cyan-300"
+                       value="${defaultNames[i]}" placeholder="اسم الفريق ${i + 1}">
+            `;
+            container.appendChild(row);
+        }
+    }
+
+    updateTeamInputs(2);
+
+    document.querySelectorAll('.team-count-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.team-count-btn').forEach(b => {
+                b.className = 'team-count-btn px-3 py-1 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs';
+            });
+            e.target.className = 'team-count-btn px-3 py-1 rounded-lg bg-cyan-600 text-white font-bold text-xs';
+            updateTeamInputs(parseInt(e.target.dataset.count));
+        });
+    });
+
+    document.getElementById('cancelTeamBtn').addEventListener('click', renderModeSelection);
+    document.getElementById('confirmTeamsBtn').addEventListener('click', () => {
+        const inputs = document.querySelectorAll('.team-name-input');
+        GameState.teams = [];
+        inputs.forEach((inp, idx) => {
+            GameState.teams.push({
+                id: idx + 1,
+                name: inp.value.trim() || `فريق ${idx + 1}`,
+                score: 0,
+                stars: 0
+            });
+        });
+        GameState.mode = 'TEAMS';
+        GameState.currentTeamIdx = 0;
+        sounds.playStart();
+        startCountdown();
+    });
+}
+
+/**
+ * -------------------------------------------------------------
+ * 8. شاشة العد التنازلي الحماسي للسباق
+ * -------------------------------------------------------------
+ */
+function startCountdown() {
+    let count = 3;
+    appContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center p-8 text-center">
+            <div class="text-sm font-bold text-emerald-400 mb-2">استعد لدخول مضمار الاستقصاء العلمي!</div>
+            <div id="cdNumber" class="text-7xl sm:text-9xl font-black text-white transform scale-100 transition-all duration-300 drop-shadow-[0_0_25px_rgba(16,185,129,0.8)]">
+                ${count}
+            </div>
+            <div class="mt-4 text-slate-400 text-xs">جارٍ تهيئة أجهزة القياس ومؤقتات الإنبات...</div>
+        </div>
+    `;
+
+    sounds.playTick();
+
+    const cdInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            const el = document.getElementById('cdNumber');
+            if (el) {
+                el.textContent = count;
+                el.classList.add('scale-125');
+                setTimeout(() => el.classList.remove('scale-125'), 150);
+            }
+            sounds.playTick();
+        } else {
+            clearInterval(cdInterval);
+            initGameSession();
+        }
+    }, 900);
+}
+
+/**
+ * -------------------------------------------------------------
+ * 9. تهيئة جلسة اللعب
+ * -------------------------------------------------------------
+ */
+function initGameSession() {
+    GameState.currentQuestionIdx = 0;
+    GameState.answeredCount = 0;
+    GameState.correctCount = 0;
+    GameState.wrongCount = 0;
+    GameState.unansweredCount = 0;
+    GameState.totalScore = 0;
+    GameState.startTime = Date.now();
+    GameState.history = [];
+
+    statusBar.classList.remove('hidden');
+    initLabIndicators();
+    loadQuestion(0);
+}
+
+/**
+ * -------------------------------------------------------------
+ * 10. تحميل وعرض السؤال (مع نظام الحماية من التكرار)
+ * -------------------------------------------------------------
+ */
+function loadQuestion(qIndex) {
+    if (qIndex >= QUESTIONS_DATA.length) {
+        finishGame();
+        return;
+    }
+
+    const q = QUESTIONS_DATA[qIndex];
+    GameState.currentQuestionIdx = qIndex;
+    GameState.selectedOption = null;
+    GameState.isConfirmed = false;
+    GameState.isAnsweringPhase = true;
+    GameState.timeLeft = q.timeLimit;
+
+    updateLabDot(qIndex, 'active');
+
+    // معلومات الفريق الحالي أو الطالب
+    let playerHeaderHTML = '';
+    if (GameState.mode === 'TEAMS') {
+        const team = GameState.teams[GameState.currentTeamIdx];
+        playerHeaderHTML = `
+            <div class="flex items-center justify-between bg-slate-900/90 px-4 py-2 rounded-xl border border-cyan-500/40 mb-3 shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🏆</span>
+                    <div>
+                        <span class="text-xs text-slate-400">الدور الحالي:</span>
+                        <h4 class="font-extrabold text-cyan-300 text-sm sm:text-base">${team.name}</h4>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400">نقاط الفريق:</span>
+                    <span class="font-black text-amber-400 text-base sm:text-lg mr-1">${team.score}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        playerHeaderHTML = `
+            <div class="flex items-center justify-between bg-slate-900/90 px-4 py-2 rounded-xl border border-emerald-500/40 mb-3 shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">👤</span>
+                    <div>
+                        <span class="text-xs text-slate-400">الباحث العلمي:</span>
+                        <h4 class="font-extrabold text-emerald-300 text-sm sm:text-base">${GameState.playerName}</h4>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400">إجمالي النقاط:</span>
+                    <span class="font-black text-amber-400 text-base sm:text-lg mr-1">${GameState.totalScore}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // خيارات الإجابة
+    const optionsHTML = q.options.map(opt => `
+        <button type="button" data-opt-id="${opt.id}" class="option-btn w-full p-3.5 sm:p-4 bg-slate-900/80 hover:bg-slate-800/90 border-2 border-slate-700/80 rounded-2xl flex items-center justify-between text-right transition cursor-pointer text-slate-200">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center font-bold text-sm text-emerald-400 shrink-0">
+                    ${opt.id}
+                </span>
+                <span class="text-xs sm:text-sm font-bold leading-snug">${opt.text}</span>
+            </div>
+            <div class="opt-indicator w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center shrink-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 opacity-0 transition-opacity"></div>
+            </div>
+        </button>
+    `).join('');
+
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-4 sm:p-6 w-full border border-emerald-500/30 shadow-2xl relative">
+            
+            ${playerHeaderHTML}
+
+            <!-- شريط معلومات السؤال والمؤقت العلمي -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-black text-xs">
+                        تحدي ${q.id} من 10
+                    </span>
+                    <span class="text-xs text-amber-400 font-bold hidden sm:inline">100 نقطة</span>
+                </div>
+
+                <!-- مؤقت السباق البارز -->
+                <div id="raceTimerBox" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border-2 border-emerald-500/40 shadow-inner">
+                    <span class="text-base animate-pulse">⏱️</span>
+                    <span id="timerDigits" class="font-mono font-black text-base sm:text-lg text-emerald-400">
+                        00:${q.timeLimit < 10 ? '0' + q.timeLimit : q.timeLimit}
+                    </span>
+                </div>
+            </div>
+
+            <!-- عنوان السؤال الفرعي والرسم العلمي -->
+            <div class="mb-3 text-center">
+                <h3 class="text-xs font-semibold text-slate-400 mb-1">${q.subtitle}</h3>
+                <h2 class="text-base sm:text-lg font-black text-white leading-snug max-w-2xl mx-auto">
+                    ${q.question}
+                </h2>
+                ${renderQuestionSVG(q.svgType)}
+            </div>
+
+            <!-- قائمة الخيارات -->
+            <div class="grid grid-cols-1 gap-2.5 my-3" id="optionsContainer">
+                ${optionsHTML}
+            </div>
+
+            <!-- زر تأكيد الإجابة المشروط -->
+            <div class="mt-4 pt-2 border-t border-slate-800 flex justify-center">
+                <button id="confirmAnswerBtn" disabled class="w-full sm:w-2/3 py-3 rounded-xl bg-slate-800 text-slate-500 font-extrabold text-sm sm:text-base border border-slate-700 transition cursor-not-allowed">
+                    اختر إجابة لتأكيدها ✅
+                </button>
+            </div>
+        </div>
+    `;
+
+    // تفعيل تفاعل الاختيارات
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!GameState.isAnsweringPhase || GameState.isConfirmed) return;
+            sounds.playTick();
+            GameState.selectedOption = btn.dataset.optId;
+
+            // تحديث المظهر المرئي للاختيار
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('border-emerald-400', 'bg-emerald-950/40');
+                b.classList.add('border-slate-700/80', 'bg-slate-900/80');
+                b.querySelector('.opt-indicator div').classList.add('opacity-0');
+            });
+
+            btn.classList.remove('border-slate-700/80', 'bg-slate-900/80');
+            btn.classList.add('border-emerald-400', 'bg-emerald-950/40');
+            btn.querySelector('.opt-indicator div').classList.remove('opacity-0');
+
+            // تفعيل زر التأكيد
+            const confBtn = document.getElementById('confirmAnswerBtn');
+            confBtn.disabled = false;
+            confBtn.className = 'w-full sm:w-2/3 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm sm:text-base shadow-[0_0_15px_rgba(16,185,129,0.5)] transition transform hover:scale-102 active:scale-98 cursor-pointer';
+            confBtn.textContent = '✅ تأكيد الإجابة وحسم النقاط';
+        });
+    });
+
+    // تفعيل زر التأكيد
+    document.getElementById('confirmAnswerBtn').addEventListener('click', () => {
+        if (!GameState.selectedOption || GameState.isConfirmed) return;
+        confirmAndEvaluate(false);
+    });
+
+    // تشغيل مؤقت السؤال
+    startTimer();
+}
+
+/**
+ * -------------------------------------------------------------
+ * 11. إدارة المؤقت الزمني الحقيقي
+ * -------------------------------------------------------------
+ */
+function startTimer() {
+    clearInterval(GameState.timer);
+    const timerBox = document.getElementById('raceTimerBox');
+    const timerDigits = document.getElementById('timerDigits');
+
+    GameState.timer = setInterval(() => {
+        GameState.timeLeft--;
+
+        if (timerDigits) {
+            timerDigits.textContent = `00:${GameState.timeLeft < 10 ? '0' + GameState.timeLeft : GameState.timeLeft}`;
+        }
+
+        // آخر 5 ثوانٍ: مؤثرات بصرية وصوتية غير مزعجة
+        if (GameState.timeLeft <= 5 && GameState.timeLeft > 0) {
+            sounds.playAlertTick();
+            if (timerBox) {
+                timerBox.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-950/80 border-2 border-rose-500 animate-danger shadow-lg';
+            }
+            if (timerDigits) {
+                timerDigits.className = 'font-mono font-black text-base sm:text-lg text-rose-400';
+            }
+        }
+
+        // انتهاء الوقت المحدد
+        if (GameState.timeLeft <= 0) {
+            clearInterval(GameState.timer);
+            sounds.playTimeOut();
+            confirmAndEvaluate(true);
+        }
+    }, 1000);
+}
+
+/**
+ * -------------------------------------------------------------
+ * 12. تقييم الإجابة وعرض التغذية الراجعة الفورية و"لماذا؟"
+ * -------------------------------------------------------------
+ */
+function confirmAndEvaluate(isTimeout = false) {
+    if (GameState.isConfirmed) return; // منع التكرار الصارم
+    GameState.isConfirmed = true;
+    GameState.isAnsweringPhase = false;
+    clearInterval(GameState.timer); // إيقاف المؤقت فوراً
+
+    const q = QUESTIONS_DATA[GameState.currentQuestionIdx];
+    const isCorrect = (!isTimeout && GameState.selectedOption === q.correctId);
+
+    // تحديث الإحصائيات
+    if (isTimeout) {
+        GameState.unansweredCount++;
+        updateLabDot(GameState.currentQuestionIdx, 'failed');
+    } else if (isCorrect) {
+        GameState.correctCount++;
+        GameState.totalScore += 100;
+        if (GameState.mode === 'TEAMS') {
+            GameState.teams[GameState.currentTeamIdx].score += 100;
+            GameState.teams[GameState.currentTeamIdx].stars++;
+        }
+        sounds.playCorrect();
+        sounds.playTimeBoost();
+        updateLabDot(GameState.currentQuestionIdx, 'passed');
+    } else {
+        GameState.wrongCount++;
+        sounds.playWrong();
+        updateLabDot(GameState.currentQuestionIdx, 'failed');
+    }
+
+    // حفظ في سجل المراجعة
+    GameState.history.push({
+        questionId: q.id,
+        question: q.question,
+        userOption: isTimeout ? 'غير مجاب' : GameState.selectedOption,
+        correctOption: q.correctId,
+        isCorrect: isCorrect,
+        isTimeout: isTimeout,
+        explanation: q.explanation
+    });
+
+    // تلوين الخيارات وقفلها
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('cursor-default');
+        const optId = btn.dataset.optId;
+        if (optId === q.correctId) {
+            btn.className = 'option-btn w-full p-3.5 sm:p-4 bg-emerald-950/70 border-2 border-emerald-400 rounded-2xl flex items-center justify-between text-right text-emerald-200';
+        } else if (optId === GameState.selectedOption && !isCorrect) {
+            btn.className = 'option-btn w-full p-3.5 sm:p-4 bg-rose-950/70 border-2 border-rose-500 rounded-2xl flex items-center justify-between text-right text-rose-200';
+        } else {
+            btn.className = 'option-btn w-full p-3.5 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl flex items-center justify-between text-right opacity-40 text-slate-400';
+        }
+    });
+
+    // استبدال زر التأكيد بنافذة التغذية الراجعة والتفسير العلمي
+    const bottomActionContainer = document.getElementById('confirmAnswerBtn').parentElement;
+    
+    let feedbackBanner = '';
+    if (isTimeout) {
+        feedbackBanner = `
+            <div class="p-4 rounded-2xl bg-amber-950/60 border-2 border-amber-500 text-center mb-3">
+                <div class="text-xl mb-1">⏰ انتهى وقت السؤال!</div>
+                <div class="font-bold text-amber-300 text-sm">لم تسجل إجابة بالوقت المحدد (0 نقطة)</div>
+                <div class="text-xs text-slate-300 mt-1">الإجابة الصحيحة هي: <strong class="text-emerald-400">(${q.correctId}) ${q.options.find(o => o.id === q.correctId).text}</strong></div>
+            </div>
+        `;
+    } else if (isCorrect) {
+        feedbackBanner = `
+            <div class="p-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-400 text-center mb-3">
+                <div class="text-xl mb-1">🎉 أحسنت صنعاً! إجابة علمية دقيقة</div>
+                <div class="font-black text-emerald-300 text-base">⚡ +100 نقطة | ⏱️ دفعة زمنية لمختبر الإنبات</div>
+                <div class="text-xs text-emerald-200/90 mt-1">${q.labUpgrade}</div>
+            </div>
+        `;
+    } else {
+        feedbackBanner = `
+            <div class="p-4 rounded-2xl bg-rose-950/60 border-2 border-rose-500 text-center mb-3">
+                <div class="text-xl mb-1">❌ إجابة غير صحيحة</div>
+                <div class="text-xs text-slate-300">الإجابة الصحيحة هي: <strong class="text-emerald-400">(${q.correctId}) ${q.options.find(o => o.id === q.correctId).text}</strong></div>
+            </div>
+        `;
+    }
+
+    bottomActionContainer.innerHTML = `
+        <div class="w-full flex flex-col items-center">
+            ${feedbackBanner}
+
+            <!-- التفسير العلمي المعتمد: لماذا؟ -->
+            <div class="w-full p-4 bg-slate-900/90 rounded-2xl border border-slate-700 text-right mb-4">
+                <div class="flex items-center gap-2 text-amber-400 font-extrabold text-sm mb-1.5">
+                    <span>💡</span>
+                    <span>لماذا؟ (التفسير العلمي المعتمد للدرس):</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                    ${q.explanation}
+                </p>
+            </div>
+
+            <!-- زر متابعة السباق (يمنع الانتقال التلقائي الصامت) -->
+            <button id="nextQuestionBtn" class="w-full sm:w-2/3 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-base shadow-[0_0_20px_rgba(16,185,129,0.4)] transition transform hover:scale-102 active:scale-98 cursor-pointer flex items-center justify-center gap-2">
+                <span>🏁</span>
+                <span>متابعة السباق العلمي ←</span>
+            </button>
+        </div>
+    `;
+
+    document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+        sounds.playTick();
+        if (GameState.mode === 'TEAMS') {
+            // الانتقال للفريق التالي بأمان
+            GameState.currentTeamIdx = (GameState.currentTeamIdx + 1) % GameState.teams.length;
+        }
+        loadQuestion(GameState.currentQuestionIdx + 1);
+    }, { once: true }); // ضمان الضغط لمرة واحدة فقط
+}
+
+/**
+ * -------------------------------------------------------------
+ * 13. شاشة النتيجة النهائية والرتب الاستقصائية
+ * -------------------------------------------------------------
+ */
+function finishGame() {
+    clearInterval(GameState.timer);
+    sounds.playVictory();
+    statusBar.classList.add('hidden');
+
+    const totalQuestions = QUESTIONS_DATA.length;
+    const maxScore = totalQuestions * 100;
+    const percent = Math.round((GameState.totalScore / maxScore) * 100);
+    const totalDurationSec = Math.round((Date.now() - GameState.startTime) / 1000);
+    const minutes = Math.floor(totalDurationSec / 60);
+    const seconds = totalDurationSec % 60;
+    const timeFormatted = `${minutes > 0 ? minutes + ' دقيقة و ' : ''}${seconds} ثانية`;
+
+    // الرتب الاستقصائية المخصصة بدقة للعبة
+    let rankTitle = "";
+    let rankBadge = "";
+    let rankDesc = "";
+
+    if (percent >= 90) {
+        rankBadge = "⚡🏆";
+        rankTitle = "بطل استقصاء الإنبات";
+        rankDesc = "إتقان فائق وشامل لكل مفاهيم وظروف الإنبات، وقدرة استثنائية على تصميم واستنتاج الاختبارات العادلة!";
+    } else if (percent >= 80) {
+        rankBadge = "🌱🔬";
+        rankTitle = "خبير البذور المستقصي";
+        rankDesc = "فهم متقدم لسرعة الإنبات واحتياجات البذور الأساسية واستنتاج نتائج الظلام والضوء بدقة!";
+    } else if (percent >= 70) {
+        rankBadge = "🔬✨";
+        rankTitle = "محقق علمي متميز";
+        rankDesc = "أداء ممتاز في استقصاء عملية الإنبات، مع استيعاب جيد للعوامل المؤثرة وضبط المتغيرات!";
+    } else if (percent >= 60) {
+        rankBadge = "⏱️🌱";
+        rankTitle = "متسابق علمي واعد";
+        rankDesc = "بداية جيدة وواعدة في فهم أساسيات نمو البذور ودرجات الحرارة الملائمة للإنبات!";
+    } else {
+        rankBadge = "🌱📚";
+        rankTitle = "واصل الاستقصاء وستتقدم أكثر!";
+        rankDesc = "راجع شروط نمو البذور الثلاثة وتجربة مريم للضوء والظلام، ثم خض السباق مجدداً للتفوق!";
+    }
+
+    // تجهيز نتائج الفرق في حال النمط الجماعي
+    let teamsSummaryHTML = '';
+    if (GameState.mode === 'TEAMS') {
+        const sortedTeams = [...GameState.teams].sort((a, b) => b.score - a.score);
+        teamsSummaryHTML = `
+            <div class="my-4 p-4 bg-slate-900/90 rounded-2xl border border-cyan-500/40">
+                <h4 class="font-bold text-cyan-300 text-sm mb-3">ترتيب الفرق البحثية في السباق:</h4>
+                <div class="space-y-2">
+                    ${sortedTeams.map((t, idx) => `
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs sm:text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-cyan-900/80 text-cyan-300 flex items-center justify-center font-bold text-xs">${idx + 1}</span>
+                                <span class="font-extrabold text-white">${t.name}</span>
+                            </div>
+                            <div class="font-black text-amber-400 text-base">${t.score} نقطة</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto text-center border-2 border-emerald-500/40 shadow-2xl animate-glow">
+            
+            <div class="text-4xl mb-2">${rankBadge}</div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white mb-1">نتيجة سباق الزمن العلمي</h1>
+            <p class="text-xs sm:text-sm text-emerald-400 font-bold mb-4">مركز أبحاث استقصاء الإنبات - الصف الخامس</p>
+
+            <!-- بطاقة الرتبة العلمية -->
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-emerald-500/30 mb-5">
+                <div class="text-xs text-slate-400 mb-1">الرتبة العلمية المستحقة:</div>
+                <h2 class="text-xl sm:text-2xl font-black text-amber-400 mb-1">${rankTitle}</h2>
+                <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">${rankDesc}</p>
+            </div>
+
+            ${teamsSummaryHTML}
+
+            <!-- شبكة الإحصائيات -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-xs text-slate-400 block mb-1">مجموع النقاط</span>
+                    <span class="text-xl sm:text-2xl font-black text-amber-400">${GameState.totalScore}</span>
+                    <span class="text-[10px] text-slate-500 block">من 1000</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-xs text-slate-400 block mb-1">النسبة المئوية</span>
+                    <span class="text-xl sm:text-2xl font-black text-emerald-400">${percent}%</span>
+                    <span class="text-[10px] text-slate-500 block">إتقان استقصائي</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-xs text-slate-400 block mb-1">الإجابات الصحيحة</span>
+                    <span class="text-xl sm:text-2xl font-black text-teal-300">✅ ${GameState.correctCount}</span>
+                    <span class="text-[10px] text-slate-500 block">خاطئة: ${GameState.wrongCount}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <span class="text-xs text-slate-400 block mb-1">الزمن الإجمالي</span>
+                    <span class="text-xs sm:text-sm font-black text-cyan-300 block my-1">⏱️ ${timeFormatted}</span>
+                    <span class="text-[10px] text-slate-500 block">زمن حقيقي</span>
+                </div>
+            </div>
+
+            <!-- أزرار الإجراءات (مراجعة السباق، إعادة اللعب) -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center items-center mt-6">
+                <button id="reviewRaceBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🔎</span>
+                    <span>مراجعة الأسئلة والتفسيرات</span>
+                </button>
+                <button id="restartRaceBtn" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-[0_0_15px_rgba(16,185,129,0.4)] transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🔄</span>
+                    <span>سباق استقصائي جديد</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('reviewRaceBtn').addEventListener('click', renderReviewScreen);
+    document.getElementById('restartRaceBtn').addEventListener('click', resetAllAndRestart);
+}
+
+/**
+ * -------------------------------------------------------------
+ * 14. شاشة مراجعة الإجابات والمفاهيم العلمية
+ * -------------------------------------------------------------
+ */
+function renderReviewScreen() {
+    const historyHTML = GameState.history.map((item, idx) => {
+        const qObj = QUESTIONS_DATA.find(q => q.id === item.questionId);
+        const correctText = qObj ? qObj.options.find(o => o.id === item.correctOption).text : '';
+        const userText = item.isTimeout ? 'لم يتم الإجابة في الوقت' : (qObj ? (qObj.options.find(o => o.id === item.userOption)?.text || item.userOption) : item.userOption);
+
+        return `
+            <div class="p-4 rounded-2xl bg-slate-900/90 border ${item.isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'} text-right">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-xs ${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">
+                        تحدي #${item.questionId} ${item.isCorrect ? '✅ صحيح' : (item.isTimeout ? '⏰ انتهى الوقت' : '❌ خاطئ')}
+                    </span>
+                    <span class="text-xs text-slate-400">100 نقطة</span>
+                </div>
+                <h4 class="font-bold text-white text-xs sm:text-sm mb-2">${item.question}</h4>
+                <div class="text-xs space-y-1 mb-2 bg-slate-950 p-2 rounded-lg">
+                    <div>إجابتك: <span class="font-bold ${item.isCorrect ? 'text-emerald-300' : 'text-rose-300'}">${userText}</span></div>
+                    ${!item.isCorrect ? `<div>الإجابة الصحيحة: <span class="font-bold text-emerald-300">(${item.correctOption}) ${correctText}</span></div>` : ''}
+                </div>
+                <div class="text-xs text-slate-300 border-t border-slate-800 pt-2 leading-relaxed">
+                    <strong class="text-amber-400">التفسير العلمي:</strong> ${item.explanation}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    appContainer.innerHTML = `
+        <div class="lab-glass rounded-3xl p-6 max-w-3xl mx-auto border border-emerald-500/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔎</span>
+                    <h2 class="text-lg sm:text-xl font-black text-white">مراجعة تقرير السباق العلمي</h2>
+                </div>
+                <button id="backToResultBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg transition">
+                    ← العودة للنتيجة
+                </button>
+            </div>
+
+            <!-- بطاقة المفاهيم المعتمدة للمراجعة -->
+            <div class="mb-5 p-4 bg-emerald-950/30 border border-emerald-500/30 rounded-2xl text-right">
+                <h3 class="font-extrabold text-emerald-300 text-xs sm:text-sm mb-2 flex items-center gap-1.5">
+                    <span>📚</span>
+                    <span>ملخص المفاهيم الأساسية لاستقصاء الإنبات:</span>
+                </h3>
+                <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                    <li>الظروف الملائمة الأساسية: <strong class="text-cyan-300">الهواء (الأكسجين)، الماء (الرطوبة)، الدفء (الحرارة)</strong> بشرط أن يكون الجنين حيًا.</li>
+                    <li>البذور الصغيرة تنمو <strong class="text-emerald-300">أسرع</strong> من الكبيرة لقلة مخزون غذائها وسرعة إخراج الأوراق.</li>
+                    <li>لا تحتاج البذور إلى <strong class="text-amber-300">التربة</strong> (تنمو في الورق، القطن، الماء)، ولا تحتاج إلى <strong class="text-amber-300">الضوء</strong> لكي تنمو.</li>
+                    <li>الأماكن <strong class="text-rose-300">شديدة البرودة وشديدة الحرارة</strong> لا تنمو فيها البذور أبداً.</li>
+                    <li>في تجربة مريم: الاختبار عادل بتثبيت جميع العوامل وتغيير عامل الضوء فقط.</li>
+                </ul>
+            </div>
+
+            <!-- قائمة مراجعة الأسئلة -->
+            <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+                ${historyHTML}
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-800 text-center">
+                <button id="restartFromReviewBtn" class="px-8 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm shadow-lg transition">
+                    🔄 بدء سباق جديد الآن
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('backToResultBtn').addEventListener('click', finishGame);
+    document.getElementById('restartFromReviewBtn').addEventListener('click', resetAllAndRestart);
+}
+
+/**
+ * -------------------------------------------------------------
+ * 15. إعادة التعيين الكاملة للعبة (Reset)
+ * -------------------------------------------------------------
+ */
+function resetAllAndRestart() {
+    clearInterval(GameState.timer);
+    GameState.currentQuestionIdx = 0;
+    GameState.currentTeamIdx = 0;
+    GameState.selectedOption = null;
+    GameState.isConfirmed = false;
+    GameState.answeredCount = 0;
+    GameState.correctCount = 0;
+    GameState.wrongCount = 0;
+    GameState.unansweredCount = 0;
+    GameState.totalScore = 0;
+    GameState.history = [];
+    if (GameState.mode === 'TEAMS') {
+        GameState.teams.forEach(t => {
+            t.score = 0;
+            t.stars = 0;
+        });
+    }
+    sounds.playStart();
+    renderModeSelection();
+}
+
+/**
+ * -------------------------------------------------------------
+ * 16. عناصر التحكم العامة (الصوت وملء الشاشة)
+ * -------------------------------------------------------------
+ */
+document.getElementById('soundToggleBtn').addEventListener('click', () => {
+    const isMuted = sounds.toggle();
+    document.getElementById('soundIcon').textContent = isMuted ? '🔇' : '🔊';
+});
+
+document.getElementById('fullscreenBtn').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+});
+
+// بدء التشغيل عند جاهزية الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+    renderStartScreen();
+});
+</script>
+</body>
+</html>

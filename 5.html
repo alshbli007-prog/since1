@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏃‍♂️⏱️ سباق الزمن العلمي – النبات والضوء</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Three.js CDN for 3D Lab Simulation & Character -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        lab: {
+                            dark: '#0a0f1d',
+                            panel: '#11192e',
+                            border: '#1e2d4a',
+                            glow: '#00f2fe',
+                            accent: '#4facfe',
+                            plantGreen: '#10b981',
+                            sunYellow: '#f59e0b',
+                            danger: '#ef4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #060913;
+            color: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1527;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e3a8a;
+            border-radius: 9999px;
+        }
+        /* Custom Glowing and Futuristic UI styles */
+        .neon-border {
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.25), inset 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+        }
+        .plant-glow {
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatAnim 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Sound Control & Header Controls Bar -->
+    <header class="w-full bg-slate-900/80 backdrop-blur border-b border-slate-800 py-2.5 px-4 z-40 sticky top-0 flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl animate-float">🏃‍♂️</span>
+            <div>
+                <h1 class="text-sm md:text-base font-extrabold text-emerald-400 leading-tight">سباق الزمن العلمي</h1>
+                <p class="text-[11px] text-slate-400 hidden sm:block">العلوم للصف الخامس - الدرس الخامس: النبات والضوء</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Audio Toggle Button -->
+            <button id="soundToggleBtn" onclick="toggleMute()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition active:scale-95 shadow">
+                <span id="soundIcon">🔊</span>
+                <span id="soundText" class="hidden sm:inline">الصوت مُفعل</span>
+            </button>
+            <!-- Fullscreen Toggle -->
+            <button onclick="toggleFullscreen()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1 transition active:scale-95 shadow" title="ملء الشاشة">
+                <span>⛶</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 flex flex-col relative w-full max-w-5xl mx-auto p-2 sm:p-4">
+
+        <!-- SCREEN: START SCREEN WITH OFFICIAL OMAN IDENTITY -->
+        <section id="screenStart" class="flex flex-col items-center justify-center min-h-[85vh] py-6 px-3">
+            <div class="w-full max-w-2xl bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-emerald-500/30 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden text-center">
+                <!-- Background ambient lights -->
+                <div class="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- OMAN KHANJAR EMBLEM -->
+                <div class="flex justify-center mb-3">
+                    <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" 
+                         alt="شعار الخنجر العُماني" 
+                         onerror="this.src='https://placehold.co/120x120/0f172a/10b981?text=شعار+عُمان'"
+                         class="h-20 sm:h-24 w-auto object-contain drop-shadow-[0_4px_12px_rgba(255,255,255,0.15)]">
+                </div>
+
+                <!-- OFFICIAL TEXT IDENTIFIERS -->
+                <div class="space-y-1 mb-5 text-slate-200 font-bold">
+                    <p class="text-base sm:text-lg text-emerald-400 font-black tracking-wide">سلطنة عُمان</p>
+                    <p class="text-sm sm:text-base">وزارة التعليم</p>
+                    <p class="text-xs sm:text-sm text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                    <p class="text-xs sm:text-sm text-emerald-300 font-extrabold mt-1">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+                </div>
+
+                <!-- TEACHER PHOTO & DETAILS -->
+                <div class="flex flex-col items-center justify-center my-4 p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80">
+                    <div class="relative mb-3">
+                        <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" 
+                             alt="صورة المعلم أ. فيصل الشبلي"
+                             onerror="this.src='https://placehold.co/160x160/1e293b/38bdf8?text=أ.+فيصل+الشبلي'"
+                             class="w-28 h-28 sm:w-32 sm:h-32 object-cover object-top rounded-full border-4 border-emerald-400 shadow-xl">
+                        <div class="absolute bottom-0 right-1 bg-emerald-500 text-white rounded-full p-1 shadow">
+                            🌱
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg sm:text-xl font-black text-white">أ. فيصل الشبلي</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 font-mono mt-0.5" dir="ltr">📞 99812126</p>
+                    <p class="text-xs text-sky-400 font-medium" dir="ltr">Instagram: faalll8</p>
+                    
+                    <div class="w-24 h-[1px] bg-slate-600 my-2.5"></div>
+                    <p class="text-xs text-slate-300 font-semibold">مدير المدرسة: <span class="text-emerald-300 font-bold">أ. سعود الشيزاوي</span></p>
+                </div>
+
+                <!-- GAME TITLE & LESSON IDENTIFIER -->
+                <div class="mt-4 mb-6">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40 mb-2">
+                        <span>🧪</span> مختبر نمو النبات والضوء - الصف الخامس
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-sky-400">
+                        🏃‍♂️⏱️ سباق الزمن العلمي – النبات والضوء
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-md mx-auto">
+                        خض تحدي السباق المخبري، واقرأ المنحنيات البيانية العلمية لتكتشف أثر الضوء على نمو النبات!
+                    </p>
+                </div>
+
+                <!-- START BUTTON -->
+                <button onclick="goToModeSelection()" class="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:shadow-emerald-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 mx-auto">
+                    <span>انطلق إلى السباق</span>
+                    <span>🚀</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN: MODE SELECTION & SETTINGS -->
+        <section id="screenMode" class="hidden flex-col items-center justify-center min-h-[80vh] py-6 px-3">
+            <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl">
+                <div class="text-center mb-6">
+                    <span class="text-4xl">🎮</span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-emerald-400 mt-2">إعدادات السباق العلمي</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">اختر نمط اللعب ونظام المؤقت للبدء</p>
+                </div>
+
+                <!-- Step 1: Game Mode (Solo or Teams) -->
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-slate-300 mb-2">1. نمط المشاركة:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="modeSoloBtn" onclick="selectPlayMode('solo')" class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 text-emerald-300 font-black text-base flex flex-col items-center gap-2 transition active:scale-95">
+                            <span class="text-3xl">👤</span>
+                            <span>سباق فردي</span>
+                            <span class="text-[11px] text-slate-400 font-normal">طالب واحد يخوض التحدي</span>
+                        </button>
+                        <button type="button" id="modeTeamBtn" onclick="selectPlayMode('team')" class="p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/60 text-slate-300 font-black text-base flex flex-col items-center gap-2 transition active:scale-95">
+                            <span class="text-3xl">👥</span>
+                            <span>سباق جماعي (فرق)</span>
+                            <span class="text-[11px] text-slate-400 font-normal">تنافس شيق بالدور بين المجموعات</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Fields for Solo -->
+                <div id="soloInputs" class="mb-6 bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                    <label for="soloPlayerName" class="block text-xs sm:text-sm font-bold text-slate-300 mb-2">اسم العالم البطل (الطالب):</label>
+                    <input type="text" id="soloPlayerName" placeholder="أدخل اسمك هنا..." value="عالم النبات الصغير" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-bold text-sm focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <!-- Input Fields for Teams -->
+                <div id="teamInputs" class="hidden mb-6 bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                    <label class="block text-xs sm:text-sm font-bold text-slate-300 mb-2">عدد الفرق المشاركة:</label>
+                    <div class="flex gap-2 mb-3">
+                        <button onclick="setTeamCount(2)" id="teamCount2" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">فريقان (2)</button>
+                        <button onclick="setTeamCount(3)" id="teamCount3" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 font-bold text-sm">3 فرق</button>
+                        <button onclick="setTeamCount(4)" id="teamCount4" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 font-bold text-sm">4 فرق</button>
+                    </div>
+
+                    <div id="teamNamesContainer" class="space-y-2">
+                        <!-- Dynamic team inputs will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Step 2: Timer Mode (Practice or Challenge) -->
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-slate-300 mb-2">2. نظام المؤقت:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="timerChallengeBtn" onclick="selectTimerMode('challenge')" class="p-3.5 rounded-2xl border-2 border-amber-500 bg-amber-500/10 text-amber-300 font-bold text-sm flex flex-col items-center gap-1 transition active:scale-95">
+                            <span class="text-2xl">⏱️</span>
+                            <span>وضع التحدي</span>
+                            <span class="text-[11px] text-slate-400">30ث للأسئلة و40ث للمنحنيات</span>
+                        </button>
+                        <button type="button" id="timerPracticeBtn" onclick="selectTimerMode('practice')" class="p-3.5 rounded-2xl border-2 border-slate-700 bg-slate-800/60 text-slate-300 font-bold text-sm flex flex-col items-center gap-1 transition active:scale-95">
+                            <span class="text-2xl">🧘‍♂️</span>
+                            <span>وضع التدريب</span>
+                            <span class="text-[11px] text-slate-400">بدون وقت - تفكير على مهل</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3">
+                    <button onclick="goToStartScreen()" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm">رجوع</button>
+                    <button onclick="startCountdownAndRace()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-base shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                        <span>جاهز، ابدأ السباق!</span>
+                        <span>⚡</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN: COUNTDOWN OVERLAY -->
+        <div id="countdownOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-4">
+            <p class="text-emerald-400 text-lg sm:text-xl font-extrabold mb-2">استعد لدخول مختبر النبات والضوء...</p>
+            <div id="countdownNumber" class="text-7xl sm:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-amber-500 animate-bounce">
+                3
+            </div>
+            <p id="countdownMessage" class="text-slate-300 text-sm mt-4 font-bold">جهّز معلوماتك واستعد لقراءة المنحنيات!</p>
+        </div>
+
+        <!-- SCREEN: MAIN RACING ARENA -->
+        <section id="screenRace" class="hidden flex-col flex-1 pb-8">
+            <!-- Game HUD: Track info, Active Team, Score, Stars, Timer -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-3 shadow-lg flex flex-wrap items-center justify-between gap-2">
+                <!-- Left: Question & Active Team indicator -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-3 py-1 rounded-xl text-xs font-black">
+                        المرحلة <span id="hudQuestionNumber">1</span> / 10
+                    </div>
+                    <!-- Team indicator (visible in team mode) -->
+                    <div id="hudTeamBadge" class="hidden bg-sky-500/20 border border-sky-500/40 text-sky-300 px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1">
+                        <span>👥 دور:</span>
+                        <span id="hudActiveTeamName">الفريق 1</span>
+                    </div>
+                </div>
+
+                <!-- Middle: Robot Status Badge -->
+                <div id="robotStatusBadge" class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+                    <span id="robotStatusIcon">🤖</span>
+                    <span id="robotStatusText">الروبوت يستعد للتفكير...</span>
+                </div>
+
+                <!-- Right: Timer & Score -->
+                <div class="flex items-center gap-3">
+                    <!-- Timer Badge -->
+                    <div id="timerContainer" class="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-xl text-xs font-black">
+                        <span>⏱️</span>
+                        <span id="timerText">30 ثانية</span>
+                    </div>
+                    <!-- Total Score -->
+                    <div class="flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-xl border border-slate-700 text-xs font-black text-white">
+                        <span class="text-amber-400">⭐</span>
+                        <span id="hudScore">0</span>
+                        <span class="text-slate-400 text-[10px]">نقطة</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Plant Lab Canvas Simulation -->
+            <div class="relative w-full h-44 sm:h-56 md:h-64 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 mb-3">
+                <canvas id="threeLabCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Lab Track Milestone Markers Overlay -->
+                <div class="absolute bottom-2 inset-x-3 flex justify-between pointer-events-none text-[10px] font-black text-slate-400">
+                    <span class="bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700">🏁 البداية 15cm</span>
+                    <span id="milestoneIndicator" class="bg-slate-900/80 px-2 py-0.5 rounded border border-emerald-500 text-emerald-300">محطة 1</span>
+                    <span class="bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700">🏆 خط النهاية (1000 نقطة)</span>
+                </div>
+
+                <!-- Ambient Lab Indicator Badge -->
+                <div class="absolute top-2 left-3 bg-slate-900/80 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-800 text-[10px] font-bold text-slate-300 flex items-center gap-1 pointer-events-none">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>مختبر النبات والضوء الحي</span>
+                </div>
+            </div>
+
+            <!-- QUESTION CARD CONTAINER -->
+            <div id="questionCard" class="bg-slate-900/95 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl flex-1 flex flex-col justify-between transition-all">
+                
+                <!-- Question Type and Description Header -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="qTypeBadge" class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-extrabold">
+                            اختيار من متعدد
+                        </span>
+                        <span id="qPointsBadge" class="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                            100 نقطة
+                        </span>
+                    </div>
+
+                    <!-- Question Text -->
+                    <h3 id="qText" class="text-base sm:text-xl font-black text-white leading-relaxed mb-4">
+                        نص السؤال يظهر هنا...
+                    </h3>
+                </div>
+
+                <!-- Dynamic Visual Aid Zone (Line Graph, Plant Comparison, Data Table) -->
+                <div id="qVisualContainer" class="my-3 hidden">
+                    <!-- Graph or illustration dynamically inserted here -->
+                </div>
+
+                <!-- Answer Options Grid -->
+                <div id="qOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 my-2">
+                    <!-- Dynamic option buttons -->
+                </div>
+
+                <!-- Movement & Thinking Status Message -->
+                <div id="characterMovementNotice" class="hidden my-3 p-3 rounded-2xl bg-sky-950/60 border border-sky-500/40 text-center flex items-center justify-center gap-2">
+                    <span class="animate-spin">⚙️</span>
+                    <span class="text-xs sm:text-sm text-sky-200 font-bold">الروبوت يتقدم على مسار المختبر نحو المحطة التالية...</span>
+                </div>
+
+                <!-- FEEDBACK & "لماذا؟" (WHY?) CONTAINER -->
+                <div id="feedbackContainer" class="hidden mt-4 p-4 sm:p-5 rounded-2xl border bg-slate-950/90 transition-all">
+                    <!-- Status Header (Correct / Incorrect) -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="feedbackIcon" class="text-2xl">✅</span>
+                        <h4 id="feedbackTitle" class="text-lg font-black text-emerald-400">إجابة صحيحة! أحسنت!</h4>
+                    </div>
+
+                    <!-- "لماذا؟" Scientific Explanation Box -->
+                    <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed mb-4">
+                        <div class="flex items-center gap-1.5 text-amber-400 font-bold mb-1">
+                            <span>💡</span>
+                            <span>لماذا؟ (التفسير العلمي المعتمد):</span>
+                        </div>
+                        <p id="feedbackExplanation">التفسير العلمي يظهر هنا بناءً على محتوى الدرس الخامس...</p>
+                    </div>
+
+                    <!-- "متابعة السباق" Button (STRICTLY NO AUTOMATIC PROGRESSION) -->
+                    <div class="flex justify-end">
+                        <button id="btnContinueRace" onclick="continueToNextStep()" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                            <span>متابعة السباق</span>
+                            <span>▶</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCREEN: FINAL RESULTS & CEREMONY -->
+        <section id="screenResult" class="hidden flex-col items-center justify-center min-h-[85vh] py-6 px-3">
+            <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl text-center">
+                <!-- Trophy & Rank Header -->
+                <div class="mb-4">
+                    <div id="finalRankBadge" class="inline-block p-4 rounded-3xl bg-amber-500/10 border-2 border-amber-500/40 text-4xl sm:text-5xl animate-bounce">
+                        🏆
+                    </div>
+                    <h2 id="finalRankTitle" class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-emerald-400 mt-2">
+                        🌟 عبقري النبات
+                    </h2>
+                    <p id="finalPlayerGreeting" class="text-xs sm:text-sm text-slate-300 mt-1 font-bold">تهانينا يا بطل العلوم على إتمام سباق المختبر!</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-5 text-center">
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">النقاط الإجمالية</span>
+                        <span id="finalScore" class="text-xl sm:text-2xl font-black text-amber-400">1000</span>
+                        <span class="text-[10px] text-slate-500 block">من 1000</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">النسبة المئوية</span>
+                        <span id="finalPercentage" class="text-xl sm:text-2xl font-black text-emerald-400">100%</span>
+                        <span class="text-[10px] text-slate-500 block">إتقان المفاهيم</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">الإجابات الصحيحة</span>
+                        <span id="finalCorrectCount" class="text-xl sm:text-2xl font-black text-emerald-400">10</span>
+                        <span class="text-[10px] text-slate-500 block">✅ متقنة</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">خاطئة / غير مجابة</span>
+                        <span id="finalWrongCount" class="text-xl sm:text-2xl font-black text-rose-400">0</span>
+                        <span class="text-[10px] text-slate-500 block">❌ للمراجعة</span>
+                    </div>
+                </div>
+
+                <!-- Multi-Team Standings Table (Only if team mode) -->
+                <div id="teamsLeaderboard" class="hidden my-4 bg-slate-800/60 p-4 rounded-2xl border border-slate-700 text-right">
+                    <h4 class="text-sm font-black text-sky-400 mb-3 flex items-center gap-1.5">
+                        <span>📊</span> ترتيب الفرق في السباق:
+                    </h4>
+                    <div id="teamsStandingsList" class="space-y-2 text-xs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+                    <button onclick="openReviewScreen()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-sm border border-slate-700 flex items-center justify-center gap-2 shadow">
+                        <span>📋 مراجعة الإجابات والمنحنيات</span>
+                    </button>
+                    <button onclick="restartGame()" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2">
+                        <span>🔄 إعادة السباق</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN: DETAILED REVIEW OF ALL 10 QUESTIONS -->
+        <section id="screenReview" class="hidden flex-col min-h-[85vh] py-6 px-3">
+            <div class="w-full max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black text-emerald-400">📋 مراجعة الإجابات والمنحنيات البيانية</h2>
+                        <p class="text-xs text-slate-400">تفاصيل جميع أسئلة درس «النبات والضوء» والتفسير العلمي</p>
+                    </div>
+                    <button onclick="closeReviewScreen()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">
+                        إغلاق ✕
+                    </button>
+                </div>
+
+                <!-- Questions Review Container -->
+                <div id="reviewList" class="space-y-4 mb-6">
+                    <!-- Generated dynamically -->
+                </div>
+
+                <!-- Concepts needing review box -->
+                <div id="reviewConceptsBox" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm">
+                    <h4 class="font-black text-amber-300 mb-1 flex items-center gap-1.5">
+                        <span>💡</span> المفاهيم التي تحتاج إلى مراجعة وتأكيد:
+                    </h4>
+                    <ul id="reviewConceptsList" class="list-disc list-inside space-y-1 text-slate-300 text-xs">
+                        <li>أهمية الضوء لنمو النبات الأخضر القوي.</li>
+                        <li>شروط الاختبار العادل: تثبيت النوع، الحجم، والماء وتغيير الضوء فقط.</li>
+                        <li>قراءة طول النبات بالسنتمتر من المحور الرأسي ومقارنة النبات A بالنبات B.</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-6">
+                    <button onclick="restartGame()" class="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow">
+                        خوض السباق مرة أخرى 🚀
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* =========================================================================
+           STATE MANAGEMENT & LESSON 5 DATABASE (PAGE 6 STRICTLY)
+           ========================================================================= */
+
+        const GAME_STATES = {
+            START: 'START',
+            MODE_SELECTION: 'MODE_SELECTION',
+            READY: 'READY',
+            THINKING: 'THINKING',
+            ANSWER_SELECTED: 'ANSWER_SELECTED',
+            MOVING: 'MOVING',
+            ARRIVED: 'ARRIVED',
+            FEEDBACK: 'FEEDBACK',
+            PAUSED: 'PAUSED',
+            NEXT_QUESTION: 'NEXT_QUESTION',
+            FINISHED: 'FINISHED',
+            REVIEW: 'REVIEW'
+        };
+
+        let currentState = GAME_STATES.START;
+
+        // Configuration and tracking
+        let gameConfig = {
+            mode: 'solo', // 'solo' or 'team'
+            timerMode: 'challenge', // 'challenge' or 'practice'
+            teamCount: 2,
+            teams: [
+                { name: 'فريق الضوء الأخضر', score: 0, stars: 0 },
+                { name: 'فريق مستكشفي النبات', score: 0, stars: 0 }
+            ],
+            soloName: 'عالم النبات الصغير'
+        };
+
+        let currentQuestionIndex = 0;
+        let activeTeamTurnIndex = 0;
+        let totalScore = 0;
+        let timerSecondsRemaining = 30;
+        let timerIntervalId = null;
+        let isTimerActive = false;
+        let audioMuted = false;
+
+        // User answers log for review
+        let userResponsesLog = [];
+
+        /* =========================================================================
+           STRICT LESSON 5 (PAGE 6) QUESTIONS (EXACTLY 10 QUESTIONS)
+           ========================================================================= */
+        const QUESTIONS_DB = [
+            {
+                id: 1,
+                type: 'mcq',
+                typeLabel: 'اختيار من متعدد',
+                isGraph: false,
+                duration: 30,
+                question: 'أي عامل يحتاج إليه النبات وفقًا للدرس؟',
+                options: [
+                    { id: 'A', text: 'أ) الضوء' },
+                    { id: 'B', text: 'ب) الظلام' },
+                    { id: 'C', text: 'ج) منع الماء' },
+                    { id: 'D', text: 'د) منع الهواء' }
+                ],
+                correctId: 'A',
+                explanation: 'يحتاج النبات إلى الضوء للنمو بصورة صحيحة وقوية.'
+            },
+            {
+                id: 2,
+                type: 'true_false',
+                typeLabel: 'صح أم خطأ',
+                isGraph: false,
+                duration: 30,
+                question: 'إذا لم يحصل النبات على الضوء، فقد تتحول أوراقه إلى اللون الأصفر وتسقط.',
+                options: [
+                    { id: 'T', text: '✅ صح' },
+                    { id: 'F', text: '❌ خطأ' }
+                ],
+                correctId: 'T',
+                explanation: 'النبات الذي لا يحصل على الضوء يصبح ضعيفًا، ويتحول إلى اللون الأصفر، وساقه نحيفًا، وقد تسقط أوراقه.'
+            },
+            {
+                id: 3,
+                type: 'graph_analysis',
+                typeLabel: 'تحليل منحنى بياني',
+                isGraph: true,
+                duration: 40,
+                question: 'انظر إلى المنحنى البياني لنمو النباتين A وB: أي نبات أظهر نموًا أفضل؟',
+                graphType: 'dual_line',
+                options: [
+                    { id: 'A', text: 'أ) النبات A' },
+                    { id: 'B', text: 'ب) النبات B' },
+                    { id: 'C', text: 'ج) كلاهما بالمعدل نفسه' },
+                    { id: 'D', text: 'د) لا يمكن معرفة ذلك' }
+                ],
+                correctId: 'A',
+                explanation: 'النبات A الذي تعرض للضوء نما بصورة أفضل وارتفع منحناه أكثر مقارنة بالنبات B الذي كان في الظلام.'
+            },
+            {
+                id: 4,
+                type: 'graph_reading',
+                typeLabel: 'قراءة قيمة من منحنى',
+                isGraph: true,
+                duration: 40,
+                question: 'من خلال قراءة الرسم البياني، ما طول النبات B في الأسبوع الثالث؟',
+                graphType: 'dual_line_highlight_b',
+                options: [
+                    { id: 'A', text: 'أ) 10 سم' },
+                    { id: 'B', text: 'ب) 15 سم' },
+                    { id: 'C', text: 'ج) 17 سم' },
+                    { id: 'D', text: 'د) 20 سم' }
+                ],
+                correctId: 'C',
+                explanation: 'بدأ النباتان عند 15 سم، وفي الأسبوع الثالث عند تتبع خط النبات B نجد أن طوله بلغ 17 سم.'
+            },
+            {
+                id: 5,
+                type: 'graph_comparison',
+                typeLabel: 'مقارنة منحنيين',
+                isGraph: true,
+                duration: 40,
+                question: 'أي عبارة تصف البيانات في الرسم البياني بصورة صحيحة؟',
+                graphType: 'dual_line',
+                options: [
+                    { id: 'A', text: 'أ) النبات B نما بصورة أفضل من A' },
+                    { id: 'B', text: 'ب) النبات A نما بصورة أفضل من B' },
+                    { id: 'C', text: 'ج) كلا النباتين لم ينمُ' },
+                    { id: 'D', text: 'د) لا توجد علاقة بين الضوء والنمو في التجربة' }
+                ],
+                correctId: 'B',
+                explanation: 'تظهر البيانات بوضوح أن النبات A نما بصورة أفضل من النبات B، لأن A تعرض للضوء بينما B كان في الظلام.'
+            },
+            {
+                id: 6,
+                type: 'select_correct_graph',
+                typeLabel: 'اختيار الرسم الصحيح',
+                isGraph: true,
+                duration: 40,
+                question: 'أمامك 3 رسومات بيانية صغيرة. أي رسم يمثل نتائج التجربة بدقة؟',
+                graphType: 'mini_graphs_choice',
+                options: [
+                    { id: 'A', text: 'الرسم (أ): النبات A ينمو بصورة أفضل من B' },
+                    { id: 'B', text: 'الرسم (ب): النبات B ينمو بصورة أفضل من A' },
+                    { id: 'C', text: 'الرسم (ج): لا يوجد فرق بين A وB' }
+                ],
+                correctId: 'A',
+                explanation: 'الرسم (أ) هو الصحيح لأن خط النبات A يرتفع بشكل أكبر ليوضح نموه الأفضل بالضوء، بينما B في الظلام نما قليلًا فقط.'
+            },
+            {
+                id: 7,
+                type: 'fair_test',
+                typeLabel: 'الاختبار العادل',
+                isGraph: false,
+                duration: 30,
+                question: 'يريد طالب دراسة تأثير الضوء في نمو النباتات. أي تصميم للتجربة يمثل اختبارًا عادلًا؟',
+                options: [
+                    { id: 'A', text: 'أ) نباتات من النوع نفسه والحجم نفسه، والكمية نفسها من الماء، مع تغيير الضوء فقط.' },
+                    { id: 'B', text: 'ب) نباتات مختلفة الأحجام مع كميات مختلفة من الماء والضوء.' },
+                    { id: 'C', text: 'ج) تغيير نوع النبات والماء والضوء معًا.' },
+                    { id: 'D', text: 'د) استخدام نبات واحد وتغيير جميع الظروف.' }
+                ],
+                correctId: 'A',
+                explanation: 'في الاختبار العادل نثبت جميع العوامل (النوع، الحجم، كمية الماء)، ونغير فقط العامل المراد دراسته وهو الضوء.'
+            },
+            {
+                id: 8,
+                type: 'situation_analysis',
+                typeLabel: 'تحليل موقف علمي',
+                isGraph: false,
+                duration: 30,
+                question: 'لديك نباتان: النبات A في الضوء أخضر وقوي، والنبات B في الظلام أصفر وساقه نحيف. أي نتيجة تتوافق مع الدرس؟',
+                hasPlantVisual: true,
+                options: [
+                    { id: 'A', text: 'أ) النبات B حصل على ضوء أكثر.' },
+                    { id: 'B', text: 'ب) النبات A نما بصورة أفضل.' },
+                    { id: 'C', text: 'ج) الظلام يجعل النبات أقوى.' },
+                    { id: 'D', text: 'د) لا علاقة للضوء بحالة النبات.' }
+                ],
+                correctId: 'B',
+                explanation: 'النبات A نما بصورة أفضل لأنه حصل على الضوء اللازم، بينما الظلام جعل النبات B أصفر وضعيفًا وساقه نحيفًا.'
+            },
+            {
+                id: 9,
+                type: 'data_deduction',
+                typeLabel: 'استنتاج من البيانات',
+                isGraph: false,
+                duration: 30,
+                question: 'بدأ النباتان A وB عند طول 15 سم. في الأسبوع الثالث كان B = 17 سم وA نما بصورة أفضل. لماذا تعد مقارنة A وB مفيدة؟',
+                hasDataTable: true,
+                options: [
+                    { id: 'A', text: 'أ) لأن النباتات بدأت بالطول نفسه، مع اختلاف تعرضها للضوء.' },
+                    { id: 'B', text: 'ب) لأن النبات A كان في الظلام.' },
+                    { id: 'C', text: 'ج) لأن النباتين لم يتعرضا للماء.' },
+                    { id: 'D', text: 'د) لأن طول البداية كان مختلفًا جدًا.' }
+                ],
+                correctId: 'A',
+                explanation: 'المقارنة مفيدة وعادلة لأن النباتين بدآ بالطول نفسه (15 سم) وتم تغيير عامل واحد فقط وهو التعرض للضوء.'
+            },
+            {
+                id: 10,
+                type: 'final_challenge',
+                typeLabel: 'التحدي النهائي 🏆',
+                isGraph: false,
+                duration: 35,
+                question: 'أي عبارة تلخص درس «النبات والضوء» بصورة علمية صحيحة وشاملة؟',
+                hasSummaryCard: true,
+                options: [
+                    { id: 'A', text: 'أ) الضوء غير مهم للنبات، والنبات ينمو أفضل في الظلام.' },
+                    { id: 'B', text: 'ب) يحتاج النبات إلى الضوء، والنبات الذي لا يحصل على ضوء يصبح ضعيفًا وقد يتحول إلى الأصفر وتسقط أوراقه، ويمكن دراسة تأثير الضوء باختبار عادل ومنحنيات بيانية.' },
+                    { id: 'C', text: 'ج) لا يمكن مقارنة نمو النباتات باستخدام البيانات.' },
+                    { id: 'D', text: 'د) يجب تغيير جميع عوامل التجربة في الوقت نفسه.' }
+                ],
+                correctId: 'B',
+                explanation: 'هذه العبارة تلخص جميع أسس الدرس الخامس: حاجة النبات للضوء، أعراض غيابه، شروط الاختبار العادل، والتمثيل بالمنحنيات.'
+            }
+        ];
+
+        /* =========================================================================
+           SYNTHESIZED SOUND EFFECTS VIA WEB AUDIO API (NO EXTERNAL ASSETS)
+           ========================================================================= */
+        const AudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) {
+                        this.ctx = new AudioContextClass();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.15, volume = 0.2) {
+                if (audioMuted) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    console.warn('Audio play error:', e);
+                }
+            },
+            playCountdown() {
+                this.playTone(440, 'triangle', 0.2, 0.25);
+            },
+            playStartChime() {
+                if (audioMuted) return;
+                try {
+                    this.init();
+                    const now = this.ctx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                        gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + i * 0.08);
+                        osc.stop(now + i * 0.08 + 0.3);
+                    });
+                } catch(e) {}
+            },
+            playSelect() {
+                this.playTone(600, 'sine', 0.08, 0.15);
+            },
+            playCorrect() {
+                if (audioMuted) return;
+                try {
+                    this.init();
+                    const now = this.ctx.currentTime;
+                    [587.33, 880, 1174.66].forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                        gain.gain.setValueAtTime(0.25, now + idx * 0.09);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.25);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + idx * 0.09);
+                        osc.stop(now + idx * 0.09 + 0.25);
+                    });
+                } catch(e) {}
+            },
+            playWrong() {
+                if (audioMuted) return;
+                try {
+                    this.init();
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } catch(e) {}
+            },
+            playStepMove() {
+                this.playTone(320, 'sine', 0.1, 0.1);
+            },
+            playVictory() {
+                if (audioMuted) return;
+                try {
+                    this.init();
+                    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                    const now = this.ctx.currentTime;
+                    notes.forEach((note, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(note, now + i * 0.12);
+                        gain.gain.setValueAtTime(0.3, now + i * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.5);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + i * 0.12);
+                        osc.stop(now + i * 0.12 + 0.5);
+                    });
+                } catch(e) {}
+            }
+        };
+
+        function toggleMute() {
+            audioMuted = !audioMuted;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (audioMuted) {
+                icon.textContent = '🔇';
+                text.textContent = 'الصوت مكتوم';
+            } else {
+                icon.textContent = '🔊';
+                text.textContent = 'الصوت مُفعل';
+                AudioEngine.playSelect();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+        }
+
+        /* =========================================================================
+           THREE.JS 3D PLANT & LIGHT LABORATORY SCENE & ROBOT CHARACTER
+           ========================================================================= */
+        let scene, camera, renderer, robotGroup, labLighting, plantsGroup;
+        let robotTargetX = -6;
+        let isRobotMoving = false;
+        let robotState = 'thinking'; // 'thinking', 'moving', 'happy', 'puzzled'
+
+        function initThreeLab() {
+            const canvas = document.getElementById('threeLabCanvas');
+            if (!canvas) return;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x070b16);
+            scene.fog = new THREE.FogExp2(0x070b16, 0.04);
+
+            const width = canvas.clientWidth || 600;
+            const height = canvas.clientHeight || 240;
+
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+            camera.position.set(0, 3.2, 9);
+            camera.lookAt(0, 1.2, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(width, height, false);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+
+            // Lights
+            const ambient = new THREE.AmbientLight(0x223355, 1.2);
+            scene.add(ambient);
+
+            labLighting = new THREE.PointLight(0x10b981, 2.5, 20);
+            labLighting.position.set(0, 4, 2);
+            scene.add(labLighting);
+
+            const sunLight = new THREE.DirectionalLight(0xfef08a, 1.0);
+            sunLight.position.set(5, 7, 4);
+            scene.add(sunLight);
+
+            // Laboratory Floor with Futuristic Grid Track
+            const floorGeo = new THREE.PlaneGeometry(35, 10);
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x0a1122, 
+                roughness: 0.4, 
+                metalness: 0.8 
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = 0;
+            scene.add(floor);
+
+            // Glowing Track Centerline
+            const trackGeo = new THREE.PlaneGeometry(32, 0.4);
+            const trackMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+            const track = new THREE.Mesh(trackGeo, trackMat);
+            track.rotation.x = -Math.PI / 2;
+            track.position.set(0, 0.01, 0);
+            scene.add(track);
+
+            // 10 Station Pillars along the track
+            for (let i = 0; i < 10; i++) {
+                const posX = -6.5 + (i * 1.45);
+                const pillarGeo = new THREE.CylinderGeometry(0.12, 0.15, 0.4, 16);
+                const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 });
+                const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+                pillar.position.set(posX, 0.2, -0.6);
+                scene.add(pillar);
+
+                // Glowing node on each pillar
+                const nodeGeo = new THREE.SphereGeometry(0.08, 8, 8);
+                const nodeMat = new THREE.MeshBasicMaterial({ color: i === 0 ? 0x10b981 : 0x38bdf8 });
+                const node = new THREE.Mesh(nodeGeo, nodeMat);
+                node.position.set(posX, 0.45, -0.6);
+                scene.add(node);
+            }
+
+            // Build Procedural Scientific 3D Robot
+            createScientificRobot();
+
+            // Background Scientific Plant Pods
+            createLabPlantPods();
+
+            // Window Resize handling
+            window.addEventListener('resize', onWindowResize);
+
+            // Start animation loop
+            animateThreeLab();
+        }
+
+        function createScientificRobot() {
+            robotGroup = new THREE.Group();
+
+            // Body (Laboratory Capsule)
+            const bodyGeo = new THREE.CylinderGeometry(0.35, 0.38, 0.8, 16);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.3 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.8;
+            robotGroup.add(body);
+
+            // Glass screen on chest
+            const chestGeo = new THREE.BoxGeometry(0.3, 0.25, 0.1);
+            const chestMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+            const chest = new THREE.Mesh(chestGeo, chestMat);
+            chest.position.set(0, 0.85, 0.35);
+            robotGroup.add(chest);
+
+            // Robot Head
+            const headGeo = new THREE.SphereGeometry(0.32, 16, 16);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.7, roughness: 0.2 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.4;
+            head.name = 'robotHead';
+            robotGroup.add(head);
+
+            // Glowing Visor / Eyes
+            const visorGeo = new THREE.BoxGeometry(0.34, 0.12, 0.1);
+            const visorMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+            const visor = new THREE.Mesh(visorGeo, visorMat);
+            visor.position.set(0, 1.42, 0.28);
+            visor.name = 'robotVisor';
+            robotGroup.add(visor);
+
+            // Floating Antenna with Sensor Light
+            const antGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25);
+            const antMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
+            const antenna = new THREE.Mesh(antGeo, antMat);
+            antenna.position.set(0, 1.8, 0);
+            robotGroup.add(antenna);
+
+            const bulbGeo = new THREE.SphereGeometry(0.06, 8, 8);
+            const bulbMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+            const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+            bulb.position.set(0, 1.95, 0);
+            bulb.name = 'antennaBulb';
+            robotGroup.add(bulb);
+
+            // Robot Hover Base (Antigravity ring)
+            const ringGeo = new THREE.TorusGeometry(0.32, 0.08, 12, 24);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 0.35;
+            robotGroup.add(ring);
+
+            robotGroup.position.set(-6.5, 0, 0);
+            scene.add(robotGroup);
+        }
+
+        function createLabPlantPods() {
+            plantsGroup = new THREE.Group();
+
+            // Background hydroponic tubes with growing plants
+            for (let i = -3; i <= 3; i++) {
+                const podX = i * 4;
+                // Glass Pod
+                const glassGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.6, 16);
+                const glassMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x38bdf8, 
+                    transparent: true, 
+                    opacity: 0.3,
+                    metalness: 0.1,
+                    roughness: 0.1 
+                });
+                const glass = new THREE.Mesh(glassGeo, glassMat);
+                glass.position.set(podX, 1.2, -3);
+                plantsGroup.add(glass);
+
+                // Plant Stem inside
+                const stemGeo = new THREE.CylinderGeometry(0.04, 0.06, 0.9, 8);
+                const stemMat = new THREE.MeshStandardMaterial({ color: 0x15803d });
+                const stem = new THREE.Mesh(stemGeo, stemMat);
+                stem.position.set(podX, 1.0, -3);
+                stem.name = `plantStem_${i}`;
+                plantsGroup.add(stem);
+
+                // Leaves
+                const leafGeo = new THREE.SphereGeometry(0.12, 6, 6);
+                leafGeo.scale(1.8, 0.4, 1);
+                const leafMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
+                const leaf = new THREE.Mesh(leafGeo, leafMat);
+                leaf.position.set(podX, 1.4, -3);
+                plantsGroup.add(leaf);
+
+                // Overhead Grow Lamp
+                const lampGeo = new THREE.ConeGeometry(0.3, 0.2, 12);
+                const lampMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+                const lamp = new THREE.Mesh(lampGeo, lampMat);
+                lamp.position.set(podX, 2.1, -3);
+                lamp.rotation.x = Math.PI;
+                plantsGroup.add(lamp);
+            }
+
+            scene.add(plantsGroup);
+        }
+
+        function onWindowResize() {
+            const canvas = document.getElementById('threeLabCanvas');
+            if (!canvas || !renderer || !camera) return;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height, false);
+        }
+
+        let clock = 0;
+        function animateThreeLab() {
+            requestAnimationFrame(animateThreeLab);
+            clock += 0.03;
+
+            if (robotGroup) {
+                // Hover floating motion
+                robotGroup.position.y = 0.1 + Math.sin(clock * 2) * 0.06;
+
+                // Smooth movement along track to target
+                if (Math.abs(robotGroup.position.x - robotTargetX) > 0.03) {
+                    robotGroup.position.x += (robotTargetX - robotGroup.position.x) * 0.06;
+                    // slight lean while moving
+                    robotGroup.rotation.z = (robotGroup.position.x - robotTargetX) * 0.15;
+                } else {
+                    robotGroup.position.x = robotTargetX;
+                    robotGroup.rotation.z = 0;
+                }
+
+                // Head behavior based on state
+                const head = robotGroup.getObjectByName('robotHead');
+                const visor = robotGroup.getObjectByName('robotVisor');
+                const bulb = robotGroup.getObjectByName('antennaBulb');
+
+                if (robotState === 'thinking') {
+                    if (head) head.rotation.y = Math.sin(clock * 1.5) * 0.25;
+                    if (visor) visor.material.color.setHex(0x00f2fe);
+                    if (bulb) bulb.material.color.setHex(0xf59e0b);
+                } else if (robotState === 'happy') {
+                    if (head) head.rotation.y = Math.sin(clock * 5) * 0.2;
+                    if (visor) visor.material.color.setHex(0x10b981);
+                    if (bulb) bulb.material.color.setHex(0x10b981);
+                } else if (robotState === 'puzzled') {
+                    if (head) head.rotation.z = 0.2;
+                    if (visor) visor.material.color.setHex(0xef4444);
+                    if (bulb) bulb.material.color.setHex(0xef4444);
+                } else if (robotState === 'moving') {
+                    if (head) head.rotation.set(0, 0, 0);
+                    if (visor) visor.material.color.setHex(0x38bdf8);
+                }
+            }
+
+            // Gentle pulsing of laboratory lights
+            if (labLighting) {
+                labLighting.intensity = 2.2 + Math.sin(clock) * 0.4;
+            }
+
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function setRobotStation(questionIndex) {
+            // Map 0..9 to track X positions: from -6.5 to +6.5
+            robotTargetX = -6.5 + (questionIndex * 1.44);
+        }
+
+        /* =========================================================================
+           HIGH-CLARITY ARABIC LINE GRAPH RENDERER FOR GRADE 5
+           ========================================================================= */
+        function renderGraphSVG(type = 'dual_line') {
+            // Data based strictly on page 6:
+            // Initial height = 15 cm at week 0 for both.
+            // At week 3: Plant B = 17 cm.
+            // Plant A grew much better in light (reaches 24 cm).
+            
+            // Scaled coordinate mappings for viewBox: 0 0 540 280
+            // X-axis: Week 0 -> x=80, Week 1 -> x=180, Week 2 -> x=280, Week 3 -> x=380, Week 4 -> x=480
+            // Y-axis: 10cm -> y=230, 15cm -> y=180, 17cm -> y=160, 20cm -> y=130, 25cm -> y=80
+            
+            if (type === 'mini_graphs_choice') {
+                return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-3">
+                    <!-- Graph A (CORRECT): A grows better than B -->
+                    <div class="bg-slate-950 p-2.5 rounded-2xl border-2 border-emerald-500/60 text-center shadow">
+                        <div class="text-xs font-black text-emerald-400 mb-1">الرسم (أ)</div>
+                        <svg viewBox="0 0 200 130" class="w-full h-28 mx-auto">
+                            <!-- Axes -->
+                            <line x1="35" y1="15" x2="35" y2="105" stroke="#64748b" stroke-width="2" />
+                            <line x1="35" y1="105" x2="185" y2="105" stroke="#64748b" stroke-width="2" />
+                            <text x="30" y="25" fill="#94a3b8" font-size="8" text-anchor="end">الطول</text>
+                            <text x="180" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">الأسابيع</text>
+                            <!-- Plant A line (Grows high, solid line with circle markers) -->
+                            <polyline points="45,85 85,65 125,45 165,25" fill="none" stroke="#10b981" stroke-width="3" />
+                            <circle cx="165" cy="25" r="4" fill="#10b981" />
+                            <text x="175" y="25" fill="#10b981" font-size="10" font-weight="bold">A (ضوء)</text>
+                            <!-- Plant B line (Grows slightly, dashed with square markers) -->
+                            <polyline points="45,85 85,82 125,78 165,74" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,3" />
+                            <rect x="162" y="71" width="6" height="6" fill="#f59e0b" />
+                            <text x="175" y="78" fill="#f59e0b" font-size="10" font-weight="bold">B (ظلام)</text>
+                            <!-- Starting 15 cm note -->
+                            <text x="25" y="88" fill="#cbd5e1" font-size="8">15</text>
+                        </svg>
+                        <p class="text-[11px] text-slate-300 font-bold mt-1">النبات A نما بصورة أفضل من B</p>
+                    </div>
+
+                    <!-- Graph B (INCORRECT): B grows better than A -->
+                    <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 text-center opacity-80">
+                        <div class="text-xs font-black text-slate-400 mb-1">الرسم (ب)</div>
+                        <svg viewBox="0 0 200 130" class="w-full h-28 mx-auto">
+                            <!-- Axes -->
+                            <line x1="35" y1="15" x2="35" y2="105" stroke="#64748b" stroke-width="2" />
+                            <line x1="35" y1="105" x2="185" y2="105" stroke="#64748b" stroke-width="2" />
+                            <!-- Plant B high -->
+                            <polyline points="45,85 85,65 125,45 165,25" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,3" />
+                            <text x="175" y="25" fill="#f59e0b" font-size="10" font-weight="bold">B</text>
+                            <!-- Plant A low -->
+                            <polyline points="45,85 85,82 125,78 165,74" fill="none" stroke="#10b981" stroke-width="3" />
+                            <text x="175" y="78" fill="#10b981" font-size="10" font-weight="bold">A</text>
+                        </svg>
+                        <p class="text-[11px] text-slate-400 font-bold mt-1">B ينمو أفضل من A (خاطئ)</p>
+                    </div>
+
+                    <!-- Graph C (INCORRECT): Equal growth -->
+                    <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 text-center opacity-80">
+                        <div class="text-xs font-black text-slate-400 mb-1">الرسم (ج)</div>
+                        <svg viewBox="0 0 200 130" class="w-full h-28 mx-auto">
+                            <!-- Axes -->
+                            <line x1="35" y1="15" x2="35" y2="105" stroke="#64748b" stroke-width="2" />
+                            <line x1="35" y1="105" x2="185" y2="105" stroke="#64748b" stroke-width="2" />
+                            <!-- Overlapping identical lines -->
+                            <polyline points="45,85 85,75 125,65 165,55" fill="none" stroke="#38bdf8" stroke-width="3" />
+                            <text x="175" y="55" fill="#38bdf8" font-size="10" font-weight="bold">A و B معًا</text>
+                        </svg>
+                        <p class="text-[11px] text-slate-400 font-bold mt-1">لا يوجد فرق بينهما (خاطئ)</p>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Standard High-Clarity Main Graph for Questions 3, 4, 5
+            const highlightB = (type === 'dual_line_highlight_b');
+
+            return `
+            <div class="bg-slate-950 p-3 sm:p-4 rounded-3xl border border-slate-700/80 shadow-inner">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800">
+                    <span class="text-xs sm:text-sm font-extrabold text-emerald-300 flex items-center gap-1.5">
+                        <span>📈</span> منحنى نمو النباتات خلال الأسابيع (تجربة الضوء والظلام)
+                    </span>
+                    <!-- Distinction Legend without relying only on color -->
+                    <div class="flex items-center gap-3 text-xs font-bold">
+                        <span class="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                            <span class="inline-block w-4 h-1 bg-emerald-400"></span>
+                            <span>● النبات A (في الضوء)</span>
+                        </span>
+                        <span class="flex items-center gap-1.5 text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40">
+                            <span class="inline-block w-4 border-b-2 border-dashed border-amber-400"></span>
+                            <span>▲ النبات B (في الظلام)</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SVG Graph -->
+                <div class="relative w-full overflow-x-auto">
+                    <svg viewBox="0 0 540 270" class="w-full h-auto min-w-[340px] select-none">
+                        <!-- Grid Lines -->
+                        <g stroke="#1e293b" stroke-width="1" stroke-dasharray="3,3">
+                            <line x1="75" y1="40" x2="490" y2="40" />
+                            <line x1="75" y1="90" x2="490" y2="90" />
+                            <line x1="75" y1="140" x2="490" y2="140" />
+                            <line x1="75" y1="170" x2="490" y2="170" />
+                            <line x1="75" y1="190" x2="490" y2="190" />
+                            <line x1="75" y1="230" x2="490" y2="230" />
+                            
+                            <!-- Vertical grid lines for weeks -->
+                            <line x1="90" y1="40" x2="90" y2="230" />
+                            <line x1="200" y1="40" x2="200" y2="230" />
+                            <line x1="310" y1="40" x2="310" y2="230" />
+                            <line x1="420" y1="40" x2="420" y2="230" />
+                        </g>
+
+                        <!-- Y-Axis (طول النبات بالسنتمتر) -->
+                        <line x1="75" y1="30" x2="75" y2="230" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arrow)" />
+                        <!-- X-Axis (الأسابيع) -->
+                        <line x1="75" y1="230" x2="505" y2="230" stroke="#94a3b8" stroke-width="2.5" />
+
+                        <!-- Axis Labels in Arabic -->
+                        <text x="75" y="20" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">طول النبات (سم)</text>
+                        <text x="495" y="255" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="end">الأسابيع →</text>
+
+                        <!-- Y-Axis Values -->
+                        <text x="65" y="44" fill="#cbd5e1" font-size="11" text-anchor="end" font-weight="bold">25 سم</text>
+                        <text x="65" y="94" fill="#cbd5e1" font-size="11" text-anchor="end" font-weight="bold">20 سم</text>
+                        <text x="65" y="174" fill="#f59e0b" font-size="12" text-anchor="end" font-weight="extrabold">17 سم</text>
+                        <text x="65" y="194" fill="#10b981" font-size="12" text-anchor="end" font-weight="extrabold">15 سم (البداية)</text>
+                        <text x="65" y="234" fill="#94a3b8" font-size="11" text-anchor="end">10 سم</text>
+
+                        <!-- X-Axis Values (الأسابيع) -->
+                        <text x="90" y="250" fill="#e2e8f0" font-size="12" text-anchor="middle" font-weight="bold">البداية (0)</text>
+                        <text x="200" y="250" fill="#e2e8f0" font-size="12" text-anchor="middle" font-weight="bold">الأسبوع 1</text>
+                        <text x="310" y="250" fill="#e2e8f0" font-size="12" text-anchor="middle" font-weight="bold">الأسبوع 2</text>
+                        <text x="420" y="250" fill="#38bdf8" font-size="13" text-anchor="middle" font-weight="black">الأسبوع 3</text>
+
+                        <!-- PLANT A CURVE: Grew better in light (Solid, Emerald, Circle markers) -->
+                        <!-- Points: W0(90, 190) -> W1(200, 150) -> W2(310, 100) -> W3(420, 50) -->
+                        <polyline points="90,190 200,150 310,100 420,50" 
+                                  fill="none" 
+                                  stroke="#10b981" 
+                                  stroke-width="4" 
+                                  stroke-linecap="round" />
+                        
+                        <!-- Plant A markers -->
+                        <circle cx="90" cy="190" r="5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="200" cy="150" r="5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="310" cy="100" r="5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="420" cy="50" r="7" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+                        
+                        <!-- Plant A Text Label right on curve -->
+                        <text x="435" y="52" fill="#34d399" font-size="13" font-weight="900">النبات A (نما بصورة أفضل ☀️)</text>
+
+                        <!-- PLANT B CURVE: In darkness (Dashed, Amber, Triangle markers) -->
+                        <!-- Points: W0(90, 190 [15cm]) -> W1(200, 182) -> W2(310, 176) -> W3(420, 170 [17cm]) -->
+                        <polyline points="90,190 200,182 310,176 420,170" 
+                                  fill="none" 
+                                  stroke="#f59e0b" 
+                                  stroke-width="3.5" 
+                                  stroke-dasharray="6,4" 
+                                  stroke-linecap="round" />
+
+                        <!-- Plant B markers (Triangles) -->
+                        <polygon points="90,185 85,195 95,195" fill="#f59e0b" />
+                        <polygon points="200,177 195,187 205,187" fill="#f59e0b" />
+                        <polygon points="310,171 305,181 315,181" fill="#f59e0b" />
+                        <polygon points="420,165 413,176 427,176" fill="#f59e0b" stroke="#ffffff" stroke-width="1" />
+
+                        <!-- Plant B Text Label right on curve -->
+                        <text x="435" y="174" fill="#fbbf24" font-size="13" font-weight="900">النبات B (في الظلام 🌑)</text>
+
+                        <!-- Target Readout Pointer for Question 4 -->
+                        ${highlightB ? `
+                        <!-- Focus Box & Guideline on Week 3 for Plant B -->
+                        <line x1="420" y1="230" x2="420" y2="170" stroke="#f43f5e" stroke-width="2" stroke-dasharray="3,3" />
+                        <line x1="75" y1="170" x2="420" y2="170" stroke="#f43f5e" stroke-width="2" stroke-dasharray="3,3" />
+                        <circle cx="420" cy="170" r="12" fill="none" stroke="#f43f5e" stroke-width="2.5" class="animate-pulse" />
+                        <rect x="360" y="125" width="120" height="32" rx="8" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1.5" />
+                        <text x="420" y="145" fill="#ffffff" font-size="11" font-weight="black" text-anchor="middle">الأسبوع 3 = 17 سم</text>
+                        ` : ''}
+
+                        <!-- Initial 15cm highlight badge -->
+                        <rect x="95" y="195" width="130" height="22" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1" />
+                        <text x="160" y="210" fill="#94a3b8" font-size="10" font-weight="bold" text-anchor="middle">بدأ النباتان عند 15 سم</text>
+                    </svg>
+                </div>
+            </div>
+            `;
+        }
+
+        /* Helper to render visual aids for non-graph questions */
+        function renderQuestionVisuals(question) {
+            if (question.isGraph) {
+                return renderGraphSVG(question.graphType);
+            }
+
+            // Question 8: Plant Comparison Visual (Plant A in light vs Plant B in darkness)
+            if (question.hasPlantVisual) {
+                return `
+                <div class="grid grid-cols-2 gap-3 my-3">
+                    <!-- Plant A: Light -->
+                    <div class="bg-emerald-950/40 p-3 rounded-2xl border-2 border-emerald-500/60 text-center">
+                        <div class="text-xs font-black text-emerald-300 mb-1">🌱 النبات A (في الضوء ☀️)</div>
+                        <div class="text-4xl my-2">🌿</div>
+                        <ul class="text-xs text-emerald-200 font-bold space-y-1 text-right">
+                            <li>✔ لونه أخضر يانع</li>
+                            <li>✔ نبات قوي وساق متماسك</li>
+                            <li>✔ نما بصورة أفضل</li>
+                        </ul>
+                    </div>
+
+                    <!-- Plant B: Dark -->
+                    <div class="bg-amber-950/40 p-3 rounded-2xl border-2 border-amber-500/60 text-center">
+                        <div class="text-xs font-black text-amber-300 mb-1">🥀 النبات B (في الظلام 🌑)</div>
+                        <div class="text-4xl my-2">🍂</div>
+                        <ul class="text-xs text-amber-200 font-bold space-y-1 text-right">
+                            <li>✖ تحول إلى اللون الأصفر</li>
+                            <li>✖ تسقط أوراقه</li>
+                            <li>✖ ساقه ضعيف ونحيف</li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Question 9: Data Table Visual
+            if (question.hasDataTable) {
+                return `
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-700 my-3">
+                    <div class="text-xs font-black text-sky-300 mb-2 flex items-center gap-1.5">
+                        <span>📋</span> بطاقة بيانات التجربة (استقصاء نمو النبات):
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-300 font-black">
+                                    <th class="p-2 border border-slate-700">النبات</th>
+                                    <th class="p-2 border border-slate-700">ظروف الضوء</th>
+                                    <th class="p-2 border border-slate-700">طول البداية</th>
+                                    <th class="p-2 border border-slate-700">الطول في الأسبوع 3</th>
+                                    <th class="p-2 border border-slate-700">النتيجة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-emerald-950/30 text-emerald-300 font-bold">
+                                    <td class="p-2 border border-slate-700 font-black">النبات A</td>
+                                    <td class="p-2 border border-slate-700">تعرض للضوء ☀️</td>
+                                    <td class="p-2 border border-slate-700">15 سم</td>
+                                    <td class="p-2 border border-slate-700">أكثر من 20 سم</td>
+                                    <td class="p-2 border border-slate-700 text-emerald-400">نما بصورة أفضل</td>
+                                </tr>
+                                <tr class="bg-amber-950/30 text-amber-300 font-bold">
+                                    <td class="p-2 border border-slate-700 font-black">النبات B</td>
+                                    <td class="p-2 border border-slate-700">كان في الظلام 🌑</td>
+                                    <td class="p-2 border border-slate-700">15 سم</td>
+                                    <td class="p-2 border border-slate-700">17 سم فقط</td>
+                                    <td class="p-2 border border-slate-700 text-amber-400">نمو ضعيف ونحيف</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Question 10: Summary Final Challenge Card
+            if (question.hasSummaryCard) {
+                return `
+                <div class="p-3 bg-gradient-to-r from-emerald-950/60 via-slate-900 to-sky-950/60 rounded-2xl border border-emerald-500/40 my-3 flex flex-wrap items-center justify-around gap-2 text-center text-xs font-black">
+                    <div class="flex items-center gap-1 text-emerald-300">
+                        <span>☀️</span>
+                        <span>الضوء ضروري للنمو</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-sky-300">
+                        <span>💧</span>
+                        <span>كمية ماء متساوية</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-300">
+                        <span>⚖️</span>
+                        <span>اختبار عادل متقن</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-teal-300">
+                        <span>📈</span>
+                        <span>منحنيات بيانية دقيقة</span>
+                    </div>
+                </div>
+                `;
+            }
+
+            return '';
+        }
+
+        /* =========================================================================
+           SCREEN NAVIGATION & UI LOGIC
+           ========================================================================= */
+        function showScreen(screenId) {
+            const screens = ['screenStart', 'screenMode', 'screenRace', 'screenResult', 'screenReview'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === screenId) {
+                        el.classList.remove('hidden');
+                        el.classList.add('flex');
+                    } else {
+                        el.classList.add('hidden');
+                        el.classList.remove('flex');
+                    }
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToStartScreen() {
+            currentState = GAME_STATES.START;
+            showScreen('screenStart');
+        }
+
+        function goToModeSelection() {
+            currentState = GAME_STATES.MODE_SELECTION;
+            AudioEngine.playSelect();
+            showScreen('screenMode');
+            updateTeamInputsUI();
+        }
+
+        function selectPlayMode(mode) {
+            gameConfig.mode = mode;
+            AudioEngine.playSelect();
+
+            const soloBtn = document.getElementById('modeSoloBtn');
+            const teamBtn = document.getElementById('modeTeamBtn');
+            const soloInputs = document.getElementById('soloInputs');
+            const teamInputs = document.getElementById('teamInputs');
+
+            if (mode === 'solo') {
+                soloBtn.classList.replace('border-slate-700', 'border-emerald-500');
+                soloBtn.classList.replace('bg-slate-800/60', 'bg-emerald-500/10');
+                soloBtn.classList.replace('text-slate-300', 'text-emerald-300');
+
+                teamBtn.classList.replace('border-emerald-500', 'border-slate-700');
+                teamBtn.classList.replace('bg-emerald-500/10', 'bg-slate-800/60');
+                teamBtn.classList.replace('text-emerald-300', 'text-slate-300');
+
+                soloInputs.classList.remove('hidden');
+                teamInputs.classList.add('hidden');
+            } else {
+                teamBtn.classList.replace('border-slate-700', 'border-emerald-500');
+                teamBtn.classList.replace('bg-slate-800/60', 'bg-emerald-500/10');
+                teamBtn.classList.replace('text-slate-300', 'text-emerald-300');
+
+                soloBtn.classList.replace('border-emerald-500', 'border-slate-700');
+                soloBtn.classList.replace('bg-emerald-500/10', 'bg-slate-800/60');
+                soloBtn.classList.replace('text-emerald-300', 'text-slate-300');
+
+                soloInputs.classList.add('hidden');
+                teamInputs.classList.remove('hidden');
+                updateTeamInputsUI();
+            }
+        }
+
+        function selectTimerMode(mode) {
+            gameConfig.timerMode = mode;
+            AudioEngine.playSelect();
+
+            const challengeBtn = document.getElementById('timerChallengeBtn');
+            const practiceBtn = document.getElementById('timerPracticeBtn');
+
+            if (mode === 'challenge') {
+                challengeBtn.classList.replace('border-slate-700', 'border-amber-500');
+                challengeBtn.classList.replace('bg-slate-800/60', 'bg-amber-500/10');
+                challengeBtn.classList.replace('text-slate-300', 'text-amber-300');
+
+                practiceBtn.classList.replace('border-amber-500', 'border-slate-700');
+                practiceBtn.classList.replace('bg-amber-500/10', 'bg-slate-800/60');
+                practiceBtn.classList.replace('text-amber-300', 'text-slate-300');
+            } else {
+                practiceBtn.classList.replace('border-slate-700', 'border-amber-500');
+                practiceBtn.classList.replace('bg-slate-800/60', 'bg-amber-500/10');
+                practiceBtn.classList.replace('text-slate-300', 'text-amber-300');
+
+                challengeBtn.classList.replace('border-amber-500', 'border-slate-700');
+                challengeBtn.classList.replace('bg-amber-500/10', 'bg-slate-800/60');
+                challengeBtn.classList.replace('text-amber-300', 'text-slate-300');
+            }
+        }
+
+        function setTeamCount(count) {
+            gameConfig.teamCount = count;
+            AudioEngine.playSelect();
+            [2, 3, 4].forEach(c => {
+                const btn = document.getElementById(`teamCount${c}`);
+                if (btn) {
+                    if (c === count) {
+                        btn.className = "flex-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow";
+                    } else {
+                        btn.className = "flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 font-bold text-sm";
+                    }
+                }
+            });
+            updateTeamInputsUI();
+        }
+
+        function updateTeamInputsUI() {
+            const container = document.getElementById('teamNamesContainer');
+            if (!container) return;
+            const count = gameConfig.teamCount;
+            const defaultNames = ['فريق الضوء الأخضر', 'فريق مستكشفي النبات', 'فريق علماء المختبر', 'فريق رواد العلوم'];
+            
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                const curName = (gameConfig.teams[i] && gameConfig.teams[i].name) ? gameConfig.teams[i].name : defaultNames[i];
+                html += `
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-emerald-400 w-16">الفريق ${i + 1}:</span>
+                    <input type="text" id="teamInput_${i}" value="${curName}" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-emerald-400">
+                </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        /* =========================================================================
+           COUNTDOWN AND QUESTION FLOW
+           ========================================================================= */
+        function startCountdownAndRace() {
+            AudioEngine.init();
+
+            // Store configured names
+            if (gameConfig.mode === 'solo') {
+                const nameInput = document.getElementById('soloPlayerName');
+                gameConfig.soloName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'عالم النبات الصغير';
+            } else {
+                gameConfig.teams = [];
+                for (let i = 0; i < gameConfig.teamCount; i++) {
+                    const inp = document.getElementById(`teamInput_${i}`);
+                    const name = (inp && inp.value.trim()) ? inp.value.trim() : `فريق ${i + 1}`;
+                    gameConfig.teams.push({ name: name, score: 0, stars: 0 });
+                }
+            }
+
+            // Reset match parameters
+            currentQuestionIndex = 0;
+            activeTeamTurnIndex = 0;
+            totalScore = 0;
+            userResponsesLog = [];
+
+            // Show countdown overlay
+            const overlay = document.getElementById('countdownOverlay');
+            const numEl = document.getElementById('countdownNumber');
+            const msgEl = document.getElementById('countdownMessage');
+            overlay.classList.remove('hidden');
+
+            let counter = 3;
+            numEl.textContent = counter;
+            msgEl.textContent = 'جهّز معلوماتك واستعد لقراءة المنحنيات!';
+            AudioEngine.playCountdown();
+
+            const timer = setInterval(() => {
+                counter--;
+                if (counter > 0) {
+                    numEl.textContent = counter;
+                    AudioEngine.playCountdown();
+                } else if (counter === 0) {
+                    numEl.textContent = 'انطلق! 🚀';
+                    AudioEngine.playStartChime();
+                } else {
+                    clearInterval(timer);
+                    overlay.classList.add('hidden');
+                    startRaceArena();
+                }
+            }, 900);
+        }
+
+        function startRaceArena() {
+            showScreen('screenRace');
+            if (!renderer) {
+                initThreeLab();
+            } else {
+                onWindowResize();
+            }
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentState = GAME_STATES.THINKING;
+            stopTimer();
+
+            const question = QUESTIONS_DB[index];
+            currentQuestionIndex = index;
+
+            // Update 3D Robot state to Thinking
+            robotState = 'thinking';
+            setRobotStation(index);
+            updateRobotStatusUI('🤔 الروبوت يتوقف ويفكر في السؤال...', 'text-amber-400');
+
+            // Milestone Indicator
+            const milestone = document.getElementById('milestoneIndicator');
+            if (milestone) {
+                milestone.textContent = `محطة ${index + 1} من 10`;
+            }
+
+            // HUD Badges
+            document.getElementById('hudQuestionNumber').textContent = index + 1;
+            document.getElementById('hudScore').textContent = totalScore;
+
+            // Team badge
+            const teamBadge = document.getElementById('hudTeamBadge');
+            const activeTeamName = document.getElementById('hudActiveTeamName');
+            if (gameConfig.mode === 'team') {
+                teamBadge.classList.remove('hidden');
+                activeTeamName.textContent = gameConfig.teams[activeTeamTurnIndex].name;
+            } else {
+                teamBadge.classList.add('hidden');
+            }
+
+            // Question Card Header
+            document.getElementById('qTypeBadge').textContent = question.typeLabel;
+            document.getElementById('qPointsBadge').textContent = '100 نقطة';
+            document.getElementById('qText').textContent = question.question;
+
+            // Visual container (Graphs or Plant illustrations)
+            const visualContainer = document.getElementById('qVisualContainer');
+            const visualHTML = renderQuestionVisuals(question);
+            if (visualHTML) {
+                visualContainer.innerHTML = visualHTML;
+                visualContainer.classList.remove('hidden');
+            } else {
+                visualContainer.innerHTML = '';
+                visualContainer.classList.add('hidden');
+            }
+
+            // Render Options
+            const optionsContainer = document.getElementById('qOptionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `w-full text-right p-3.5 sm:p-4 rounded-2xl bg-slate-800 hover:bg-slate-700/80 active:scale-[0.98] border border-slate-700 transition flex items-center justify-between text-xs sm:text-sm font-bold text-slate-100 shadow-sm`;
+                btn.setAttribute('data-id', opt.id);
+                btn.onclick = () => onSelectAnswer(opt.id);
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <span class="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400">●</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            // Hide feedback and movement banner
+            document.getElementById('feedbackContainer').classList.add('hidden');
+            document.getElementById('characterMovementNotice').classList.add('hidden');
+
+            // Timer handling
+            setupQuestionTimer(question);
+        }
+
+        function updateRobotStatusUI(text, colorClass = 'text-slate-300') {
+            const badge = document.getElementById('robotStatusBadge');
+            const textEl = document.getElementById('robotStatusText');
+            if (badge && textEl) {
+                textEl.textContent = text;
+                textEl.className = colorClass;
+            }
+        }
+
+        /* =========================================================================
+           TIMER SYSTEM (STRICT RULES)
+           ========================================================================= */
+        function setupQuestionTimer(question) {
+            const timerContainer = document.getElementById('timerContainer');
+            const timerText = document.getElementById('timerText');
+
+            if (gameConfig.timerMode === 'practice') {
+                timerContainer.classList.add('hidden');
+                return;
+            }
+
+            timerContainer.classList.remove('hidden');
+            timerSecondsRemaining = question.isGraph ? 40 : 30;
+            timerText.textContent = `${timerSecondsRemaining} ثانية`;
+            timerContainer.classList.remove('bg-rose-500/20', 'border-rose-500/40', 'text-rose-300');
+            timerContainer.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+
+            isTimerActive = true;
+            timerIntervalId = setInterval(() => {
+                // Pause timer during non-answering states
+                if (currentState !== GAME_STATES.THINKING) return;
+
+                timerSecondsRemaining--;
+                timerText.textContent = `${timerSecondsRemaining} ثانية`;
+
+                if (timerSecondsRemaining <= 5 && timerSecondsRemaining > 0) {
+                    AudioEngine.playCountdown();
+                    timerContainer.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+                    timerContainer.classList.add('bg-rose-500/20', 'border-rose-500/40', 'text-rose-300');
+                }
+
+                if (timerSecondsRemaining <= 0) {
+                    stopTimer();
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+                timerIntervalId = null;
+            }
+            isTimerActive = false;
+        }
+
+        function handleTimeOut() {
+            if (currentState !== GAME_STATES.THINKING) return;
+            onSelectAnswer(null, true);
+        }
+
+        /* =========================================================================
+           ANSWER SELECTION, SLOW 3D ROBOT MOVEMENT, AND SCIENTIFIC EXPLANATION
+           ========================================================================= */
+        function onSelectAnswer(selectedId, isTimeout = false) {
+            if (currentState !== GAME_STATES.THINKING) return; // Prevent double answering
+
+            currentState = GAME_STATES.ANSWER_SELECTED;
+            stopTimer(); // TIMER STOPS COMPLETELY
+            AudioEngine.playSelect();
+
+            const question = QUESTIONS_DB[currentQuestionIndex];
+            const isCorrect = (selectedId === question.correctId);
+
+            // Disable all option buttons immediately
+            const buttons = document.querySelectorAll('#qOptionsContainer button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+                const optId = btn.getAttribute('data-id');
+                if (optId === selectedId) {
+                    btn.classList.add('ring-2', 'ring-sky-400');
+                }
+            });
+
+            // Trigger Character Movement Phase (1.5 seconds)
+            currentState = GAME_STATES.MOVING;
+            robotState = 'moving';
+            updateRobotStatusUI('🏃‍♂️ الروبوت يتحرك ببطء نحو المرحلة التالية...', 'text-sky-300');
+            
+            const movementNotice = document.getElementById('characterMovementNotice');
+            movementNotice.classList.remove('hidden');
+
+            AudioEngine.playStepMove();
+
+            // After 1.5 seconds, arrive at milestone, celebrate/puzzle, and reveal explanation
+            setTimeout(() => {
+                movementNotice.classList.add('hidden');
+                currentState = GAME_STATES.ARRIVED;
+
+                // Color code option buttons
+                buttons.forEach(btn => {
+                    const optId = btn.getAttribute('data-id');
+                    if (optId === question.correctId) {
+                        btn.classList.remove('bg-slate-800');
+                        btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400');
+                    } else if (optId === selectedId && !isCorrect) {
+                        btn.classList.remove('bg-slate-800');
+                        btn.classList.add('bg-rose-600', 'text-white', 'border-rose-400');
+                    }
+                });
+
+                // Points and Celebration handling
+                if (isCorrect) {
+                    robotState = 'happy';
+                    AudioEngine.playCorrect();
+                    totalScore += 100;
+
+                    if (gameConfig.mode === 'team') {
+                        gameConfig.teams[activeTeamTurnIndex].score += 100;
+                        gameConfig.teams[activeTeamTurnIndex].stars += 1;
+                    }
+
+                    document.getElementById('hudScore').textContent = totalScore;
+                    updateRobotStatusUI('🎉 إجابة صحيحة! أحسنت يا بطل العلوم!', 'text-emerald-400');
+                } else {
+                    robotState = 'puzzled';
+                    AudioEngine.playWrong();
+                    updateRobotStatusUI(isTimeout ? '⏰ انتهى الوقت المحدد للسؤال!' : '💡 إجابة تحتاج إلى مراجعة علمية...', 'text-rose-400');
+                }
+
+                // Log response for detailed review
+                userResponsesLog.push({
+                    questionIndex: currentQuestionIndex,
+                    questionData: question,
+                    selectedId: selectedId,
+                    isTimeout: isTimeout,
+                    isCorrect: isCorrect,
+                    teamName: gameConfig.mode === 'team' ? gameConfig.teams[activeTeamTurnIndex].name : gameConfig.soloName
+                });
+
+                // Display Feedback & "لماذا؟"
+                showFeedbackDialog(isCorrect, isTimeout, question);
+
+            }, 1500);
+        }
+
+        function showFeedbackDialog(isCorrect, isTimeout, question) {
+            currentState = GAME_STATES.FEEDBACK;
+
+            const container = document.getElementById('feedbackContainer');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const explanation = document.getElementById('feedbackExplanation');
+
+            if (isCorrect) {
+                container.className = "mt-4 p-4 sm:p-5 rounded-2xl border border-emerald-500/50 bg-emerald-950/30 transition-all";
+                icon.textContent = '✅';
+                title.textContent = 'إجابة صحيحة! أحسنت يا بطل العلوم! (+100 نقطة ⭐)';
+                title.className = "text-base sm:text-lg font-black text-emerald-400";
+            } else if (isTimeout) {
+                container.className = "mt-4 p-4 sm:p-5 rounded-2xl border border-amber-500/50 bg-amber-950/30 transition-all";
+                icon.textContent = '⏰';
+                title.textContent = 'انتهى الوقت! (0 نقطة)';
+                title.className = "text-base sm:text-lg font-black text-amber-400";
+            } else {
+                container.className = "mt-4 p-4 sm:p-5 rounded-2xl border border-rose-500/50 bg-rose-950/30 transition-all";
+                icon.textContent = '❌';
+                title.textContent = 'إجابة غير صحيحة! (0 نقطة)';
+                title.className = "text-base sm:text-lg font-black text-rose-400";
+            }
+
+            explanation.textContent = question.explanation;
+            container.classList.remove('hidden');
+
+            // Scroll feedback into view smoothly on mobile devices
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        /* STRICT PROGRESSION: NO AUTOMATIC ADVANCE */
+        function continueToNextStep() {
+            AudioEngine.playSelect();
+
+            // Next team turn rotation if multi-team mode
+            if (gameConfig.mode === 'team') {
+                activeTeamTurnIndex = (activeTeamTurnIndex + 1) % gameConfig.teamCount;
+            }
+
+            const nextIndex = currentQuestionIndex + 1;
+
+            if (nextIndex < QUESTIONS_DB.length) {
+                currentState = GAME_STATES.NEXT_QUESTION;
+                loadQuestion(nextIndex);
+            } else {
+                finishGameAndShowResults();
+            }
+        }
+
+        /* =========================================================================
+           GAME COMPLETION, SCIENTIFIC RANKS & CEREMONY
+           ========================================================================= */
+        function finishGameAndShowResults() {
+            currentState = GAME_STATES.FINISHED;
+            stopTimer();
+            AudioEngine.playVictory();
+
+            showScreen('screenResult');
+
+            const totalPossible = QUESTIONS_DB.length * 100;
+            const percentage = Math.round((totalScore / totalPossible) * 100);
+
+            const correctCount = userResponsesLog.filter(r => r.isCorrect).length;
+            const wrongCount = userResponsesLog.filter(r => !r.isCorrect).length;
+
+            document.getElementById('finalScore').textContent = totalScore;
+            document.getElementById('finalPercentage').textContent = `${percentage}%`;
+            document.getElementById('finalCorrectCount').textContent = correctCount;
+            document.getElementById('finalWrongCount').textContent = wrongCount;
+
+            // Determine Rank based on official prompt thresholds
+            const rankBadge = document.getElementById('finalRankBadge');
+            const rankTitle = document.getElementById('finalRankTitle');
+            const greeting = document.getElementById('finalPlayerGreeting');
+
+            if (percentage >= 90) {
+                rankBadge.textContent = '🌟';
+                rankTitle.textContent = '🌟 عبقري النبات';
+                greeting.textContent = `مذهل يا ${gameConfig.soloName}! لقد أثبت إتقانًا استثنائيًا لقراءة المنحنيات وفهم أثر الضوء!`;
+            } else if (percentage >= 80) {
+                rankBadge.textContent = '🏆';
+                rankTitle.textContent = '🏆 خبير الضوء والنبات';
+                greeting.textContent = `رائع جدًا يا ${gameConfig.soloName}! فهمك لتجارب النبات والاختبار العادل ممتاز!`;
+            } else if (percentage >= 70) {
+                rankBadge.textContent = '🌱';
+                rankTitle.textContent = '🌱 مستكشف النبات';
+                greeting.textContent = `أداء طيب يا ${gameConfig.soloName}! أحسنت في تحليل البيانات وقراءة الرسم البياني!`;
+            } else if (percentage >= 60) {
+                rankBadge.textContent = '🔬';
+                rankTitle.textContent = '🔬 باحث واعد';
+                greeting.textContent = `بداية جيدة يا ${gameConfig.soloName}! واصل التدرب على قراءة المنحنيات بدقة!`;
+            } else {
+                rankBadge.textContent = '🚀';
+                rankTitle.textContent = '🚀 واصل سباقك العلمي!';
+                greeting.textContent = `لا بأس يا بطل العلوم، راجع معلومات الدرس الخامس في ملخص الصفحة 6 وخض السباق من جديد!`;
+            }
+
+            // Teams Standings (if multi-team mode)
+            const teamsLeaderboard = document.getElementById('teamsLeaderboard');
+            const teamsList = document.getElementById('teamsStandingsList');
+
+            if (gameConfig.mode === 'team') {
+                teamsLeaderboard.classList.remove('hidden');
+                // Sort teams descending by score
+                const sortedTeams = [...gameConfig.teams].sort((a, b) => b.score - a.score);
+                let listHtml = '';
+                sortedTeams.forEach((t, i) => {
+                    const medal = i === 0 ? '🥇 المركز الأول' : i === 1 ? '🥈 المركز الثاني' : '🥉 المركز الثالث';
+                    listHtml += `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-700">
+                        <span class="font-black text-slate-200">${medal}: ${t.name}</span>
+                        <span class="font-extrabold text-amber-400">${t.score} نقطة (${t.stars} ⭐)</span>
+                    </div>
+                    `;
+                });
+                teamsList.innerHTML = listHtml;
+            } else {
+                teamsLeaderboard.classList.add('hidden');
+            }
+        }
+
+        /* =========================================================================
+           REVIEW SCREEN LOGIC (QUESTION BY QUESTION WITH GRAPHS & EXPLANATIONS)
+           ========================================================================= */
+        function openReviewScreen() {
+            currentState = GAME_STATES.REVIEW;
+            AudioEngine.playSelect();
+            showScreen('screenReview');
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            userResponsesLog.forEach((item, idx) => {
+                const q = item.questionData;
+                const optUser = q.options.find(o => o.id === item.selectedId);
+                const optCorrect = q.options.find(o => o.id === q.correctId);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border ${item.isCorrect ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-rose-500/40 bg-rose-950/20'} text-right`;
+
+                let visualHTML = '';
+                if (q.isGraph) {
+                    visualHTML = `<div class="my-2">${renderGraphSVG(q.graphType)}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-black mb-1">
+                        <span class="text-slate-400">السؤال ${idx + 1} (${q.typeLabel})</span>
+                        <span class="${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${item.isCorrect ? '✅ إجابة صحيحة (+100)' : item.isTimeout ? '⏰ انتهى الوقت (0)' : '❌ إجابة غير صحيحة (0)'}
+                        </span>
+                    </div>
+
+                    <h4 class="text-sm font-bold text-white mb-2">${q.question}</h4>
+
+                    ${visualHTML}
+
+                    <div class="space-y-1 text-xs bg-slate-900/80 p-3 rounded-xl border border-slate-800 my-2">
+                        <p><span class="text-slate-400 font-bold">إجابتك:</span> <span class="${item.isCorrect ? 'text-emerald-300 font-black' : 'text-rose-300 font-bold'}">${optUser ? optUser.text : 'لم تتم الإجابة'}</span></p>
+                        <p><span class="text-slate-400 font-bold">الإجابة الصحيحة:</span> <span class="text-emerald-400 font-black">${optCorrect.text}</span></p>
+                    </div>
+
+                    <div class="text-xs text-amber-200 mt-2 bg-amber-950/30 p-2.5 rounded-xl border border-amber-500/20">
+                        <span class="font-bold">💡 لماذا؟:</span> ${q.explanation}
+                    </div>
+                `;
+                reviewList.appendChild(card);
+            });
+        }
+
+        function closeReviewScreen() {
+            AudioEngine.playSelect();
+            showScreen('screenResult');
+        }
+
+        function restartGame() {
+            AudioEngine.playSelect();
+            goToModeSelection();
+        }
+
+        /* =========================================================================
+           WINDOW INITIALIZATION
+           ========================================================================= */
+        window.addEventListener('load', () => {
+            // Guarantee RTL direction
+            document.documentElement.dir = 'rtl';
+            // Start on Start Screen
+            showScreen('screenStart');
+        });
+    </script>
+</body>
+</html>

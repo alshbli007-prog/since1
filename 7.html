@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي شحن الهاتف – كيف تنتشر البذور؟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .glow-box {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+        }
+        .glow-success {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+        }
+        .glow-battery {
+            box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.6), 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col items-center justify-between p-3 sm:p-6">
+
+    <!-- شاشة التحميل / البداية والهوية الرسمية -->
+    <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center flex-grow">
+        
+        <!-- الهوية الرسمية (فقط في شاشة البداية) -->
+        <div id="official-identity" class="w-full bg-slate-900/80 border border-indigo-500/30 rounded-2xl p-4 mb-6 shadow-xl text-center backdrop-blur-md">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار سلطنة عُمان" class="w-16 h-16 object-contain">
+                    <div class="text-right">
+                        <h2 class="text-xs sm:text-sm font-bold text-slate-300">سلطنة عُمان</h2>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-300">وزارة التعليم</h3>
+                        <p class="text-[11px] text-indigo-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                        <p class="text-[11px] text-slate-400">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 bg-indigo-950/60 p-3 rounded-xl border border-indigo-500/25">
+                    <!-- تم ضبط التصميم لضمان ظهور الرأس والوجه بوضوح كامل ودون أي قص -->
+                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="صورة المعلم أ. فيصل الشبلي" class="w-16 h-16 rounded-full object-cover object-top border-2 border-amber-400 shadow-md">
+                    <div class="text-right text-xs">
+                        <p class="font-bold text-amber-300">أ. فيصل الشبلي</p>
+                        <p class="text-slate-300">📞 99812126</p>
+                        <p class="text-indigo-200 text-[10px]">Instagram: faalll8</p>
+                        <p class="text-slate-400 text-[10px]">مدير المدرسة: أ. سعود الشيزاوي</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- محتوى شاشة البداية -->
+        <div id="start-screen" class="w-full text-center bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-10 shadow-2xl glow-box">
+            <div class="inline-block p-4 bg-indigo-600/20 rounded-full mb-4 animate-float">
+                <span class="text-5xl sm:text-6xl">🔋📱</span>
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-indigo-400 mb-2">
+                تحدي شحن الهاتف – كيف تنتشر البذور؟
+            </h1>
+            <p class="text-sm sm:text-base text-indigo-200 mb-6 font-medium">
+                مادة العلوم | الصف الخامس | الوحدة الثانية: دورة حياة النباتات الزهرية
+            </p>
+
+            <div class="bg-slate-900/60 rounded-2xl p-4 mb-8 max-w-lg mx-auto text-right text-sm text-slate-300 border border-slate-700">
+                <p class="font-bold text-amber-300 mb-2">⚡ تعليمات محطة الشحن:</p>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>أجب عن 10 تحديات علمية من ملخص الدرس.</li>
+                    <li>كل إجابة صحيحة تمنحك <span class="text-emerald-400 font-bold">+10% شحن</span>، <span class="text-amber-400 font-bold">+100 نقطة</span> ونجمة ⭐.</li>
+                    <li>الخطأ لا ينهي لعبتك، هدفنا الاستكشاف والتعلم!</li>
+                </ul>
+            </div>
+
+            <!-- اختيار وضع اللعب -->
+            <div class="mb-6 flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="setGameMode('single')" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl shadow-lg transition transform hover:scale-105">
+                    👤 اللعب الفردي
+                </button>
+                <button onclick="setGameMode('multi')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl shadow-lg transition transform hover:scale-105">
+                    👥 اللعب الجماعي (فرق)
+                </button>
+            </div>
+
+            <!-- خيارات الاسم أو الفرق -->
+            <div id="setup-inputs" class="mb-6 hidden"></div>
+
+            <button id="start-game-btn" onclick="initGame()" class="hidden w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-lg rounded-2xl shadow-xl transition transform hover:scale-105">
+                🚀 ابدأ رحلة الشحن والاستكشاف
+            </button>
+        </div>
+
+        <!-- شاشة اللعب والأسئلة -->
+        <div id="game-container" class="hidden w-full flex flex-col gap-4">
+            
+            <!-- شريط الحالة العلوي -->
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl animate-pulse">📱</div>
+                    <div>
+                        <div class="text-xs text-slate-400" id="player-status-label">اللاعب: <span id="current-player-name" class="text-cyan-300 font-bold"></span></div>
+                        <div class="text-sm font-bold text-amber-300">النقاط: <span id="score-val">0</span> / 1000</div>
+                    </div>
+                </div>
+
+                <!-- شحن البطارية البصري -->
+                <div class="flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-xl border border-emerald-500/30 flex-1 max-w-xs">
+                    <div class="text-emerald-400 font-black text-sm" id="battery-pct">0%</div>
+                    <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden p-0.5 border border-emerald-500/40">
+                        <div id="battery-fill" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs">🔋</div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="text-xs text-slate-300 font-bold">⭐ النجوم: <span id="stars-val" class="text-amber-400">0</span></div>
+                    <div id="timer-box" class="bg-red-950/60 border border-red-500/40 text-red-300 px-3 py-1 rounded-lg text-xs font-bold hidden">
+                        ⏱️ <span id="timer-val">30</span>ث
+                    </div>
+                    <button onclick="toggleAudio()" id="audio-btn" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm">🔊</button>
+                </div>
+            </div>
+
+            <!-- صندوق الروبوت العلمي والشخصية -->
+            <div class="bg-gradient-to-r from-indigo-950/80 to-slate-900/80 border border-indigo-500/30 rounded-2xl p-4 flex items-center gap-4 shadow-md">
+                <div class="w-16 h-16 bg-indigo-600/30 border border-indigo-400 rounded-2xl flex items-center justify-center text-3xl shadow-inner animate-float" id="robot-avatar">
+                    🤖
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">المرشد العلمي الآلي</h4>
+                    <p id="robot-message" class="text-sm sm:text-base text-slate-200 font-medium mt-0.5">
+                        أهلاً بك في محطة الشحن العلمية! هيا نختبر معلوماتك حول انتشار البذور لنشحن الهاتف بالكامل.
+                    </p>
+                </div>
+            </div>
+
+            <!-- منطقة السؤال والخيارات -->
+            <div id="question-card" class="bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold px-3 py-1 bg-indigo-600/40 text-indigo-300 rounded-full border border-indigo-500/30" id="question-counter">السؤال 1 من 10</span>
+                    <span class="text-xs font-bold text-amber-400" id="question-type-badge">اختيار من متعدد</span>
+                </div>
+
+                <h2 id="question-text" class="text-lg sm:text-2xl font-bold text-slate-100 mb-6 leading-relaxed"></h2>
+
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6"></div>
+
+                <div id="action-area" class="hidden text-center mt-4">
+                    <button onclick="submitSpecialQuestion()" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black rounded-xl shadow-lg transition transform hover:scale-105">
+                        ✓ تأكيد الإجابة
+                    </button>
+                </div>
+            </div>
+
+            <!-- شاشة التصحيح الفوري -->
+            <div id="feedback-card" class="hidden bg-slate-900 border-2 rounded-3xl p-6 shadow-2xl animate-pulse-slow">
+                <div id="feedback-header" class="text-xl font-black mb-3"></div>
+                <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700 mb-6 text-sm sm:text-base text-slate-200">
+                    <p class="font-bold text-amber-300 mb-1">💡 لماذا؟</p>
+                    <p id="feedback-explanation"></p>
+                </div>
+                <button onclick="nextQuestion()" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-black rounded-xl shadow-lg transition transform hover:scale-105">
+                    ▶ متابعة الشحن
+                </button>
+            </div>
+
+        </div>
+
+        <!-- شاشة النهاية والنتائج -->
+        <div id="end-screen" class="hidden w-full bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-10 shadow-2xl text-center">
+            <div class="text-5xl mb-3">🎉</div>
+            <h2 class="text-2xl sm:text-4xl font-black text-amber-400 mb-2">تم شحن الهاتف بالكامل! 🔋 100%</h2>
+            <p class="text-slate-300 text-sm sm:text-base mb-6">أتممت رحلة محطة الشحن العلمية بنجاح واستكشفت أسرار انتشار البذور.</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-right">
+                <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                    <div class="text-xs text-slate-400">إجمالي النقاط</div>
+                    <div class="text-xl font-bold text-emerald-400" id="final-score">1000 / 1000</div>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                    <div class="text-xs text-slate-400">النجوم المكتسبة</div>
+                    <div class="text-xl font-bold text-amber-400" id="final-stars">⭐ 10</div>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                    <div class="text-xs text-slate-400">الإجابات الصحيحة</div>
+                    <div class="text-xl font-bold text-cyan-400" id="final-correct">10</div>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                    <div class="text-xs text-slate-400">الرتبة العلمية</div>
+                    <div class="text-sm font-bold text-purple-300 mt-1" id="final-rank">⚡ عبقري العلوم</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="openReviewModal()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl shadow-lg transition">
+                    📋 مراجعة الإجابات
+                </button>
+                <button onclick="restartGame()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl shadow-lg transition">
+                    🔄 إلعِب مرة أخرى
+                </button>
+            </div>
+        </div>
+
+        <!-- شاشة المراجعة -->
+        <div id="review-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl max-h-[90vh] rounded-3xl p-6 overflow-y-auto shadow-2xl flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold text-amber-300">📋 سجل مراجعة الإجابات والتحديات</h3>
+                    <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+                </div>
+                <div id="review-content" class="space-y-4 flex-1"></div>
+                <div class="mt-6 text-center">
+                    <button onclick="closeReviewModal()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl">إغلاق المراجعة</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let audioEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration) {
+            if (!audioEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function soundCorrect() {
+            playTone(587.33, 'sine', 0.15);
+            setTimeout(() => playTone(880, 'sine', 0.25), 150);
+        }
+
+        function soundWrong() {
+            playTone(220, 'sawtooth', 0.25);
+            setTimeout(() => playTone(165, 'sawtooth', 0.3), 200);
+        }
+
+        function soundCharge() {
+            playTone(440, 'triangle', 0.1);
+            setTimeout(() => playTone(554.37, 'triangle', 0.1), 100);
+            setTimeout(() => playTone(659.25, 'triangle', 0.2), 200);
+        }
+
+        function soundWin() {
+            [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                setTimeout(() => playTone(f, 'sine', 0.3), i * 150);
+            });
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-btn').innerText = audioEnabled ? '🔊' : '🔇';
+        }
+
+        const questionsData = [
+            {
+                id: 1, type: 'mcq', title: 'اختيار من متعدد',
+                text: 'لماذا تنمو النباتات في أماكن مختلفة رغم عدم وجود نباتات من النوع نفسه ودون تدخل الإنسان؟',
+                options: [
+                    { text: 'بسبب انتشار البذور', correct: true },
+                    { text: 'بسبب توقف نمو النباتات', correct: false },
+                    { text: 'بسبب اختفاء الثمار', correct: false },
+                    { text: 'بسبب منع الحيوانات من الحركة', correct: false }
+                ],
+                explanation: 'تنمو النباتات في أماكن مختلفة بسبب انتشار البذور بعيدًا عن النبات الأصلي.'
+            },
+            {
+                id: 2, type: 'tf', title: 'صح أم خطأ',
+                text: 'عملية نشر البذور بعيدًا عن النبات الأصلي تسمى «انتشار البذور».',
+                options: [{ text: 'صح', correct: true }, { text: 'خطأ', correct: false }],
+                explanation: 'يسمى نشر البذور بعيدًا عن النبات الأصلي انتشار البذور.'
+            },
+            {
+                id: 3, type: 'mcq', title: 'اختيار من متعدد',
+                text: 'ما الوظيفتان اللتان تؤديهما الثمرة وفقًا للدرس؟',
+                options: [
+                    { text: 'إنتاج الماء وإنتاج الضوء', correct: false },
+                    { text: 'حماية البذور والمساعدة في انتشارها', correct: true },
+                    { text: 'منع البذور من النمو ومنع الحيوانات', correct: false },
+                    { text: 'إنتاج الأوراق وحماية الجذور', correct: false }
+                ],
+                explanation: 'تحمي الثمرة البذور الموجودة بداخلها، وتساعد أيضاً في انتشار البذور.'
+            },
+            {
+                id: 4, type: 'order', title: 'ترتيب تفاعلي 🔄',
+                text: 'رتب مراحل دورة النبات الزهري كما وردت في الدرس بالنقر:',
+                items: ['بذرة', 'نبات جديد', 'زهرة', 'ثمرة', 'بذور'],
+                correctOrder: ['بذرة', 'نبات جديد', 'زهرة', 'ثمرة', 'بذور'],
+                explanation: 'التسلسل الصحيح لدورة النبات الزهري ورد كالتالي: بذرة ➔ نبات جديد ➔ زهرة ➔ ثمرة ➔ بذور.'
+            },
+            {
+                id: 5, type: 'mcq', title: 'اختيار من متعدد',
+                text: 'أي طريقة من طرق انتشار البذور وردت في الدرس؟',
+                options: [
+                    { text: 'البرق', correct: false },
+                    { text: 'النار', correct: false },
+                    { text: 'الماء', correct: true },
+                    { text: 'الضوء', correct: false }
+                ],
+                explanation: 'من طرق انتشار البذور المذكورة: الماء، والإنسان، والحيوان، والرياح.'
+            },
+            {
+                id: 6, type: 'match', title: 'توصيل بالنقر 🧩',
+                text: 'صل كل حالة من حالات البذور بالطريقة المناسبة:',
+                pairs: [
+                    { left: '1️⃣ بذور كبيرة', right: 'ج) أكل الثمرة ورمي البذرة', matchKey: 'c' },
+                    { left: '2️⃣ بذور صغيرة', right: 'ب) أكل البذرة والتخلص منها في الفضلات', matchKey: 'b' },
+                    { left: '3️⃣ بذور لها أشواك أو مسننات أو خطافات', right: 'أ) الالتصاق بالفراء', matchKey: 'a' },
+                    { left: '4️⃣ بذور تدفنها الحيوانات', right: 'د) دفن البذور', matchKey: 'd' }
+                ],
+                explanation: 'البذور الكبيرة تؤكل ثمراتها وترمى بذورها، الصغيرة تؤكل وتتخلص منها الفضلات، ذات الأشواك تلتصق بالفراء، والمدفونة تبقى مكانها.'
+            },
+            {
+                id: 7, type: 'mcq', title: 'اختيار من متعدد',
+                text: 'بذرة تتميز بوجود أشواك أو مسننات أو خطافات. كيف يمكن أن تنتشر وفقًا للدرس؟',
+                options: [
+                    { text: 'عن طريق الماء', correct: false },
+                    { text: 'عن طريق الرياح', correct: false },
+                    { text: 'عن طريق دفنها', correct: false },
+                    { text: 'عن طريق الالتصاق بالفراء', correct: true }
+                ],
+                explanation: 'البذور التي تلتصق بالفراء تتميز بوجود أشواك أو مسننات أو خطافات.'
+            },
+            {
+                id: 8, type: 'mcq', title: 'موقف علمي بصري 🐾',
+                text: 'إذا كانت البذرة كبيرة ولا يستطيع الحيوان أكلها، فما الطريقة التي يمكن أن تنتشر بها وفقًا للدرس؟',
+                options: [
+                    { text: 'أكل الثمرة ورمي البذرة', correct: true },
+                    { text: 'الالتصاق بالفراء', correct: false },
+                    { text: 'أكل البذرة والتخلص منها في الفضلات', correct: false },
+                    { text: 'دفن البذور', correct: false }
+                ],
+                explanation: 'البذور الكبيرة التي لا تستطيع الحيوانات أكلها تنتشر عندما يأكل الحيوان الثمرة ويرمي البذرة.'
+            },
+            {
+                id: 9, type: 'mcq', title: 'اختيار من متعدد + استنتاج',
+                text: 'لماذا يمكن أن تنتشر بعض البذور الصغيرة عن طريق أكل الحيوان للبذرة ثم التخلص منها في فضلاته؟',
+                options: [
+                    { text: 'لانها تحتوي على خطافات', correct: false },
+                    { text: 'لانها كبيرة جدًا', correct: false },
+                    { text: 'لانها صغيرة وتستطيع الطيور أو الحيوانات أكلها', correct: true },
+                    { text: 'لانها لا تستطيع الحيوانات رؤيتها', correct: false }
+                ],
+                explanation: 'تتميز هذه البذور بأنها صغيرة، ولذلك تستطيع الطيور أو الحيوانات أكلها.'
+            },
+            {
+                id: 10, type: 'mcq', title: 'التحدي النهائي 🏆',
+                text: 'أي عبارة تلخص درس «كيف تنتشر البذور؟» بصورة صحيحة؟',
+                options: [
+                    { text: 'تنتشر البذور فقط بواسطة الإنسان.', correct: false },
+                    { text: 'الثمرة لا علاقة لها بالبذور.', correct: false },
+                    { text: 'النباتات الزهرية لا تنمو من البذور.', correct: false },
+                    { text: 'تساعد الثمرة في حماية البذور وانتشارها، ويمكن أن تنتشر البذور بوساطة الماء أو الإنسان أو الحيوان أو الرياح.', correct: true }
+                ],
+                explanation: 'الثمرة تحمي البذور وتساعد في انتشارها، ومن طرق انتشار البذور الماء والإنسان والحيوان والرياح.'
+            }
+        ];
+
+        let gameState = {
+            mode: 'single',
+            teams: [],
+            currentTeamIdx: 0,
+            playerName: '',
+            currentIndex: 0,
+            score: 0,
+            battery: 0,
+            stars: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            userAnswers: [],
+            timer: 30,
+            timerInterval: null
+        };
+
+        function setGameMode(mode) {
+            gameState.mode = mode;
+            const setupDiv = document.getElementById('setup-inputs');
+            setupDiv.classList.remove('hidden');
+            
+            if (mode === 'single') {
+                setupDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-slate-300 mb-2">أدخل اسم الطالب:</label>
+                    <input type="text" id="input-player-name" placeholder="اكتب اسمك هنا..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-indigo-500">
+                `;
+            } else {
+                setupDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-slate-300 mb-2">اختر عدد الفرق:</label>
+                    <select id="teams-count" onchange="generateTeamInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 mb-3 focus:outline-none focus:border-indigo-500">
+                        <option value="2">فريقان (2)</option>
+                        <option value="3">ثلاثة فرق (3)</option>
+                        <option value="4">أربعة فرق (4)</option>
+                    </select>
+                    <div id="teams-names-container" class="space-y-2"></div>
+                `;
+                generateTeamInputs();
+            }
+            document.getElementById('start-game-btn').classList.remove('hidden');
+        }
+
+        function generateTeamInputs() {
+            const count = document.getElementById('teams-count').value;
+            const container = document.getElementById('teams-names-container');
+            container.innerHTML = '';
+            for(let i=1; i<=count; i++) {
+                container.innerHTML += `<input type="text" placeholder="اسم الفريق ${i}" class="team-name-input w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-slate-100 text-sm focus:outline-none focus:border-indigo-500">`;
+            }
+        }
+
+        function initGame() {
+            if (gameState.mode === 'single') {
+                const nameInput = document.getElementById('input-player-name').value.trim();
+                gameState.playerName = nameInput ? nameInput : 'طالب مبدع';
+                gameState.teams = [{ name: gameState.playerName, score: 0 }];
+            } else {
+                const inputs = document.querySelectorAll('.team-name-input');
+                gameState.teams = [];
+                inputs.forEach((inp, idx) => {
+                    gameState.teams.push({ name: inp.value.trim() || `فريق ${idx+1}`, score: 0 });
+                });
+            }
+
+            document.getElementById('official-identity').classList.add('hidden');
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questionsData[gameState.currentIndex];
+            document.getElementById('question-counter').innerText = `السؤال ${gameState.currentIndex + 1} من 10`;
+            document.getElementById('question-type-badge').innerText = q.title;
+            document.getElementById('question-text').innerText = q.text;
+
+            const currentTeam = gameState.teams[gameState.currentTeamIdx];
+            document.getElementById('current-player-name').innerText = currentTeam.name;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('action-area').classList.add('hidden');
+            document.getElementById('feedback-card').classList.add('hidden');
+            document.getElementById('robot-message').innerText = "أنا أفكر وأحلل السؤال معك... اختر الإجابة بدقة!";
+
+            if (q.type === 'mcq' || q.type === 'tf') {
+                let shuffled = [...q.options].sort(() => Math.random() - 0.5);
+                shuffled.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-right p-4 bg-slate-900/80 hover:bg-indigo-900/50 border border-slate-700 hover:border-indigo-500 rounded-2xl font-medium text-slate-200 transition shadow-sm";
+                    btn.innerText = opt.text;
+                    btn.onclick = () => checkAnswer(opt.correct, q);
+                    optionsContainer.appendChild(btn);
+                });
+            } else if (q.type === 'order') {
+                document.getElementById('action-area').classList.remove('hidden');
+                optionsContainer.className = "flex flex-col gap-2 mb-6";
+                window.tempOrder = [...q.items].sort(() => Math.random() - 0.5);
+                renderOrderCards(q);
+            } else if (q.type === 'match') {
+                document.getElementById('action-area').classList.remove('hidden');
+                optionsContainer.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6";
+                window.tempMatches = {};
+                renderMatchCards(q);
+            }
+
+            startTimer(q.type);
+        }
+
+        function renderOrderCards(q) {
+            const container = document.getElementById('options-container');
+            container.innerHTML = `<p class="text-xs text-indigo-300 mb-2">اضغط على البطاقة لتغيير ترتيبها:</p>`;
+            window.tempOrder.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = "flex items-center justify-between p-3 bg-slate-900 border border-slate-700 rounded-xl cursor-pointer hover:border-cyan-500 text-slate-200";
+                card.innerHTML = `<span>🌱 ${item}</span> <span class="text-xs text-cyan-400">انقر لتبديل الترتيب ↕</span>`;
+                card.onclick = () => {
+                    if (idx < window.tempOrder.length - 1) {
+                        let temp = window.tempOrder[idx];
+                        window.tempOrder[idx] = window.tempOrder[idx+1];
+                        window.tempOrder[idx+1] = temp;
+                    } else {
+                        let temp = window.tempOrder[idx];
+                        window.tempOrder[idx] = window.tempOrder[0];
+                        window.tempOrder[0] = temp;
+                    }
+                    renderOrderCards(q);
+                };
+                container.appendChild(card);
+            });
+        }
+
+        function renderMatchCards(q) {
+            const container = document.getElementById('options-container');
+            container.innerHTML = `<p class="text-xs text-indigo-300 mb-2">اختر التوصيلات المناسبة بالنقر:</p>`;
+            q.pairs.forEach((p, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex flex-col sm:flex-row items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-700 gap-2";
+                row.innerHTML = `
+                    <span class="font-bold text-slate-300">${p.left}</span>
+                    <select id="match-sel-${idx}" class="bg-slate-800 border border-slate-600 rounded-lg p-2 text-xs text-slate-200">
+                        <option value="">اختر المطابق...</option>
+                        <option value="c">ج) أكل الثمرة ورمي البذرة</option>
+                        <option value="b">ب) أكل البذرة والتخلص منها في الفضلات</option>
+                        <option value="a">أ) الالتصاق بالفراء</option>
+                        <option value="d">د) دفن البذور</option>
+                    </select>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function submitSpecialQuestion() {
+            clearInterval(gameState.timerInterval);
+            const q = questionsData[gameState.currentIndex];
+            let isCorrect = false;
+
+            if (q.type === 'order') {
+                isCorrect = window.tempOrder.every((val, i) => val === q.correctOrder[i]);
+            } else if (q.type === 'match') {
+                let allMatch = true;
+                q.pairs.forEach((p, idx) => {
+                    const val = document.getElementById(`match-sel-${idx}`).value;
+                    if (val !== p.matchKey) allMatch = false;
+                });
+                isCorrect = allMatch;
+            }
+
+            handleAnswerResult(isCorrect, q);
+        }
+
+        function startTimer(type) {
+            clearInterval(gameState.timerInterval);
+            const timerBox = document.getElementById('timer-box');
+            timerBox.classList.remove('hidden');
+            gameState.timer = (type === 'match' || type === 'order') ? 40 : 30;
+            document.getElementById('timer-val').innerText = gameState.timer;
+
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                document.getElementById('timer-val').innerText = gameState.timer;
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleAnswerResult(false, questionsData[gameState.currentIndex], true);
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(isCorrect, q) {
+            clearInterval(gameState.timerInterval);
+            handleAnswerResult(isCorrect, q, false);
+        }
+
+        function handleAnswerResult(isCorrect, q, timedOut = false) {
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('action-area').classList.add('hidden');
+            document.getElementById('timer-box').classList.add('hidden');
+
+            const feedbackCard = document.getElementById('feedback-card');
+            const feedbackHeader = document.getElementById('feedback-header');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackCard.classList.remove('hidden');
+            feedbackExp.innerText = q.explanation;
+
+            gameState.userAnswers.push({
+                question: q.text,
+                correct: isCorrect,
+                explanation: q.explanation
+            });
+
+            if (isCorrect) {
+                soundCorrect();
+                soundCharge();
+                feedbackHeader.innerHTML = `<span class="text-emerald-400">✅ إجابة صحيحة!</span> <span class="text-xs text-emerald-300 font-normal">+10% شحن | +100 نقطة | ⭐ نجمة</span>`;
+                gameState.score += 100;
+                gameState.battery = Math.min(100, gameState.battery + 10);
+                gameState.stars += 1;
+                gameState.correctCount++;
+                document.getElementById('robot-avatar').classList.add('animate-bounce');
+                document.getElementById('robot-message').innerText = "رائع جداً! تم شحن البطارية بنجاح!";
+            } else {
+                soundWrong();
+                feedbackHeader.innerHTML = `<span class="text-red-400">❌ ${timedOut ? 'انتهى الوقت!' : 'إجابة غير صحيحة'}</span> <span class="text-xs text-slate-400 font-normal">0 نقطة</span>`;
+                document.getElementById('robot-message').innerText = "لا تقلق، الخطأ خطوة نحو التعلم. راجع التفسير العلمي أدناه.";
+            }
+
+            document.getElementById('score-val').innerText = gameState.score;
+            document.getElementById('battery-pct').innerText = gameState.battery + '%';
+            document.getElementById('battery-fill').style.width = gameState.battery + '%';
+            document.getElementById('stars-val').innerText = gameState.stars;
+        }
+
+        function nextQuestion() {
+            document.getElementById('robot-avatar').classList.remove('animate-bounce');
+            gameState.currentIndex++;
+            if (gameState.currentIndex < questionsData.length) {
+                gameState.currentTeamIdx = (gameState.currentTeamIdx + 1) % gameState.teams.length;
+                loadQuestion();
+            } else {
+                finishGame();
+            }
+        }
+
+        function finishGame() {
+            soundWin();
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+
+            document.getElementById('final-score').innerText = gameState.score + ' / 1000';
+            document.getElementById('final-stars').innerText = '⭐ ' + gameState.stars;
+            document.getElementById('final-correct').innerText = gameState.correctCount;
+
+            const pct = (gameState.correctCount / 10) * 100;
+            let rank = pct >= 90 ? "⚡ عبقري العلوم" : pct >= 80 ? "🔋 خبير انتشار البذور" : pct >= 70 ? "🌱 مستكشف البذور" : pct >= 60 ? "🌿 باحث واعد" : "🚀 واصل الشحن والاستكشاف!";
+            document.getElementById('final-rank').innerText = rank;
+        }
+
+        function openReviewModal() {
+            const container = document.getElementById('review-content');
+            container.innerHTML = '';
+            gameState.userAnswers.forEach((ans, idx) => {
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-2xl border text-xs sm:text-sm ${ans.correct ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200' : 'bg-red-950/30 border-red-500/30 text-red-200'}`;
+                div.innerHTML = `
+                    <p class="font-bold text-slate-100 mb-1">السؤال ${idx+1}: ${ans.question}</p>
+                    <p class="mb-1">النتيجة: ${ans.correct ? '✅ صحيحة' : '❌ غير صحيحة'}</p>
+                    <p class="text-indigo-200 bg-slate-900/60 p-2 rounded-lg mt-1">💡 التفسير: ${ans.explanation}</p>
+                `;
+                container.appendChild(div);
+            });
+            document.getElementById('review-modal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.add('hidden');
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

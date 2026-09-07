@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي المليون العلمي</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        studio: {
+                            dark: '#030712',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            gold: '#f59e0b',
+                            goldHover: '#d97706',
+                            blue: '#1e40af',
+                            blueGlow: '#3b82f6',
+                            correct: '#15803d',
+                            wrong: '#b91c1c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts for professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at center, #090d16 0%, #030712 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .studio-glow {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.25), inset 0 0 15px rgba(59, 130, 246, 0.1);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(245, 158, 11, 0.8); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+    <div id="app" class="flex-1 flex flex-col justify-between p-4 md:p-6 max-w-7xl mx-auto w-full">
+        <!-- Dynamic views will be mounted here -->
+    </div>
+
+    <!-- Footer Credit -->
+    <footer class="text-center py-3 text-xs text-slate-500 border-t border-slate-900 mt-auto">
+        تحدي المليون العلمي &copy; 2026 - جميع الحقوق محفوظة لتعليم شمال الباطنة
+    </footer>
+
+    <script>
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            playTone(freq, type, duration, delay = 0) {
+                try {
+                    this.init();
+                    setTimeout(() => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = type;
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + duration);
+                    }, delay * 1000);
+                } catch(e) {}
+            }
+            playStart() {
+                this.playTone(300, 'sine', 0.2, 0);
+                this.playTone(450, 'sine', 0.2, 0.2);
+                this.playTone(600, 'sine', 0.4, 0.4);
+            }
+            playSelect() {
+                this.playTone(440, 'triangle', 0.15);
+            }
+            playCorrect() {
+                this.playTone(523.25, 'sine', 0.15, 0);
+                this.playTone(659.25, 'sine', 0.15, 0.15);
+                this.playTone(783.99, 'sine', 0.3, 0.3);
+                this.playTone(1046.50, 'sine', 0.5, 0.45);
+            }
+            playWrong() {
+                this.playTone(220, 'sawtooth', 0.3, 0);
+                this.playTone(185, 'sawtooth', 0.4, 0.25);
+            }
+            playLifeline() {
+                this.playTone(587.33, 'sine', 0.2, 0);
+                this.playTone(880, 'sine', 0.3, 0.2);
+            }
+            playTimerTick() {
+                this.playTone(800, 'sine', 0.05);
+            }
+            playWin() {
+                const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.50];
+                notes.forEach((n, idx) => {
+                    this.playTone(n, 'sine', 0.25, idx * 0.12);
+                });
+            }
+        }
+        const soundFX = new SoundFX();
+
+        const PRIZES = [
+            { level: 1, points: 50, safe: false },
+            { level: 2, points: 60, safe: false },
+            { level: 3, points: 70, safe: false },
+            { level: 4, points: 80, safe: false },
+            { level: 5, points: 90, safe: true, safePoints: 350 },
+            { level: 6, points: 100, safe: false },
+            { level: 7, points: 110, safe: false },
+            { level: 8, points: 120, safe: false },
+            { level: 9, points: 140, safe: false },
+            { level: 10, points: 180, safe: true, safePoints: 1000 }
+        ];
+
+        // Raw master questions with balanced distribution across keys a, b, c, d
+        const MASTER_QUESTIONS = [
+            {
+                id: 1,
+                title: "المقياس المناسب",
+                type: "mcq",
+                text: "أي تدريج حراري يستخدم 0°C لتجمد الماء و100°C لغليانه؟",
+                options: [
+                    { text: "فهرنهايت" },
+                    { text: "كلفن" },
+                    { text: "سلسيوس" },
+                    { text: "مقياس آخر" }
+                ],
+                correctText: "سلسيوس",
+                explanation: "يستخدم تدريج سلسيوس 0°C لتجمد الماء و100°C لغليانه.",
+                time: 30,
+                hasVisual: true,
+                visualType: "thermometer_celsius_boiling"
+            },
+            {
+                id: 2,
+                title: "مقارنة ثلاثة مقاييس",
+                type: "mcq",
+                text: "أي مقياس يمثل تدريج سلسيوس بناءً على البيانات (المقياس A: التجمد = 273، الغليان = 373 | المقياس B: التجمد = 32، الغليان = 212 | المقياس C: التجمد = 0، الغليان = 100)؟",
+                options: [
+                    { text: "A" },
+                    { text: "B" },
+                    { text: "C" },
+                    { text: "لا شيء منها" }
+                ],
+                correctText: "C",
+                explanation: "في تدريج سلسيوس يتجمد الماء عند 0°C ويغلي عند 100°C (المقياس C).",
+                time: 30,
+                hasVisual: true,
+                visualType: "three_thermometers"
+            },
+            {
+                id: 3,
+                title: "سلسيوس وكلفن",
+                type: "mcq",
+                text: "ما الملاحظة الصحيحة عند مقارنة تدريجي سلسيوس وكلفن في قيم التجمد والغليان للماء (سلسيوس: 0 إلى 100 | كلفن: 273 إلى 373)؟",
+                options: [
+                    { text: "الفرق بين التجمد والغليان في كليهما 100 درجة" },
+                    { text: "الفرق في سلسيوس 180 درجة" },
+                    { text: "الفرق في كلفن 180 درجة" },
+                    { text: "لا يوجد فرق بين القيم" }
+                ],
+                correctText: "الفرق بين التجمد والغليان في كليهما 100 درجة",
+                explanation: "الفرق بين نقطتي تجمد وغليان الماء في كل من سلسيوس وكلفن هو 100 درجة بالضبط.",
+                time: 30,
+                hasVisual: true,
+                visualType: "celsius_kelvin_compare"
+            },
+            {
+                id: 4,
+                title: "الصفر المطلق",
+                type: "mcq",
+                text: "أي قيمة تمثل الصفر المطلق على تدريج كلفن؟",
+                options: [
+                    { text: "0 K" },
+                    { text: "-273 K" },
+                    { text: "100 K" },
+                    { text: "273 K" }
+                ],
+                correctText: "0 K",
+                explanation: "الصفر المطلق يساوي 0 K، ويقابل تقريبًا -273°C.",
+                time: 30,
+                hasVisual: true,
+                visualType: "absolute_zero"
+            },
+            {
+                id: 5,
+                title: "أكبر فرق بين التجمد والغليان",
+                type: "mcq",
+                text: "أي تدريج يظهر أكبر فرق عددي بين درجة التجمد ودرجة الغليان بناءً على البيانات (سلسيوس: 0-100، كلفن: 273-373، فهرنهايت: 32-212)؟",
+                options: [
+                    { text: "سلسيوس" },
+                    { text: "كلفن" },
+                    { text: "فهرنهايت" },
+                    { text: "سلسيوس وكلفن" }
+                ],
+                correctText: "فهرنهايت",
+                explanation: "الفرق في فهرنهايت بين 32 و212 يساوي 180 درجة، وهو الأكبر بين المقاييس الثلاثة.",
+                time: 30,
+                hasVisual: true,
+                visualType: "scales_table"
+            },
+            {
+                id: 6,
+                title: "اقرأ مقياس الحرارة بدقة",
+                type: "mcq",
+                text: "انظر إلى مقياس الحرارة في الرسم العلمي المجاور. ما درجة الحرارة التي يشير إليها مستوى السائل بدقة؟",
+                options: [
+                    { text: "38°C" },
+                    { text: "-15°C" },
+                    { text: "45°C" },
+                    { text: "0°C" }
+                ],
+                correctText: "45°C",
+                explanation: "يشير مستوى السائل إلى 45°C عند قراءة التدريجات من أسفل إلى أعلى بدقة بين 40 و50.",
+                time: 30,
+                hasVisual: true,
+                visualType: "thermometer_reading_45"
+            },
+            {
+                id: 7,
+                title: "اختر الرسم الصحيح",
+                type: "mcq",
+                text: "أي رسم يمثل تدريج سلسيوس بين الرسوم المعروضة في الرسم العلمي؟",
+                options: [
+                    { text: "A" },
+                    { text: "B" },
+                    { text: "C" },
+                    { text: "جميعها" }
+                ],
+                correctText: "A",
+                explanation: "الرسم A يمثل بدقة تدريج سلسيوس (تجمد الماء 0°C وغليانه 100°C).",
+                time: 40,
+                hasVisual: true,
+                visualType: "three_thermometers_drawings"
+            },
+            {
+                id: 8,
+                title: "توصيل العلماء والمقاييس",
+                type: "matching",
+                text: "صل كل عالم أو مصطلح بما يناسبه بالنقر على العنصر الأول ثم العنصر المطابق له:",
+                pairs: [
+                    { leftId: 1, leftText: "أندرس سلسيوس", rightKey: "d", rightText: "مقياس سلسيوس" },
+                    { leftId: 2, leftText: "فهرنهايت", rightKey: "b", rightText: "مقياس فهرنهايت" },
+                    { leftId: 3, leftText: "اللورد كلفن", rightKey: "c", rightText: "مقياس كلفن" },
+                    { leftId: 4, leftText: "الصفر المطلق", rightKey: "a", rightText: "0 K" }
+                ],
+                explanation: "تم ربط كل عالم ومصطلح بمقياسه أو قيمته الصحيحة.",
+                time: 40,
+                hasVisual: false
+            },
+            {
+                id: 9,
+                title: "تحدي ترتيب درجات الحرارة",
+                type: "ordering",
+                text: "رتّب العبارات التالية من الأقل إلى الأعلى حسب درجة حرارتها:",
+                items: [
+                    { id: "i1", text: "درجة تجمد الماء" },
+                    { id: "i2", text: "درجة حرارة الغرفة" },
+                    { id: "i3", text: "درجة غليان الماء" }
+                ],
+                correctOrder: ["i1", "i2", "i3"],
+                explanation: "يتجمد الماء عند 0°C، وتبلغ درجة حرارة الغرفة نحو 25°C، ويغلي الماء عند 100°C؛ لذلك يكون ترتيب درجات الحرارة من الأقل إلى الأعلى: درجة تجمد الماء ← درجة حرارة الغرفة ← درجة غليان الماء.",
+                time: 45,
+                hasVisual: false
+            },
+            {
+                id: 10,
+                title: "التحدي النهائي لدرجات الحرارة",
+                type: "mcq",
+                text: "أي عبارة علمية تجمع المعلومات الصحيحة والدقيقة للمقاييس والحرارة؟",
+                options: [
+                    { text: "سلسيوس يتجمد عند 0°C ويغلي عند 100°C، وكلفن يبدأ من 0 K للصفر المطلق." },
+                    { text: "فهرنهايت يتجمد عند 0°C ويغلي عند 100°C." },
+                    { text: "الصفر المطلق يساوي 273 K." },
+                    { text: "الفرق بين التجمد والغليان في فهرنهايت يساوي 100 درجة." }
+                ],
+                correctText: "سلسيوس يتجمد عند 0°C ويغلي عند 100°C، وكلفن يبدأ من 0 K للصفر المطلق.",
+                explanation: "السلسيوس يستخدم 0°C و100°C لتجمد وغليان الماء، والصفر المطلق يساوي 0 K بدقة.",
+                time: 60,
+                hasVisual: true,
+                visualType: "final_challenge_visual"
+            }
+        ];
+
+        let QUESTIONS = [];
+
+        function prepareQuestions() {
+            // Force a balanced correct answer key distribution across a, b, c, d (e.g. indices 0, 1, 2, 3)
+            // Questions 1, 5, 10 -> 'a' (index 0)
+            // Questions 2, 6 -> 'b' (index 1)
+            // Questions 3, 7 -> 'c' (index 2)
+            // Questions 4 -> 'd' (index 3)
+            const preferredCorrectIndices = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 0, 5: 1, 6: 2, 7: 0, 9: 0 };
+
+            QUESTIONS = MASTER_QUESTIONS.map((q, qIdx) => {
+                let qCopy = JSON.parse(JSON.stringify(q));
+                if (qCopy.type === 'mcq') {
+                    // Find correct option object
+                    const correctObj = qCopy.options.find(o => o.text === qCopy.correctText);
+                    // Remove correctObj from options
+                    let otherOpts = qCopy.options.filter(o => o.text !== qCopy.correctText);
+                    // Shuffle other options
+                    otherOpts.sort(() => Math.random() - 0.5);
+
+                    // Determine target index for correct answer
+                    let targetIdx = preferredCorrectIndices[qIdx] !== undefined ? preferredCorrectIndices[qIdx] : Math.floor(Math.random() * 4);
+                    
+                    let finalOpts = [];
+                    let otherIdx = 0;
+                    for (let i = 0; i < 4; i++) {
+                        if (i === targetIdx) {
+                            finalOpts.push(correctObj);
+                        } else if (otherOpts[otherIdx]) {
+                            finalOpts.push(otherOpts[otherIdx]);
+                            otherIdx++;
+                        }
+                    }
+                    qCopy.options = finalOpts.map((o, idx) => ({
+                        key: ['a', 'b', 'c', 'd'][idx],
+                        text: o.text
+                    }));
+                    qCopy.correct = ['a', 'b', 'c', 'd'][targetIdx];
+                }
+                return qCopy;
+            });
+        }
+
+        let gameState = {
+            view: 'welcome',
+            mode: 'solo',
+            teams: [],
+            currentTeamIndex: 0,
+            playerName: '',
+            currentQuestionIndex: 0,
+            score: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            unansweredCount: 0,
+            answersHistory: [],
+            timer: 30,
+            timerInterval: null,
+            selectedOption: null,
+            isConfirmed: false,
+            lifelines: {
+                fiftyFifty: false,
+                expert: false
+            },
+            lifelineActiveState: {
+                eliminatedOptions: [],
+                expertMessage: ''
+            },
+            matchingState: {
+                selectedLeft: null,
+                connections: {}
+            },
+            orderingState: {
+                userOrder: []
+            }
+        };
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+            
+            switch(gameState.view) {
+                case 'welcome':
+                    app.innerHTML = renderWelcomeScreen();
+                    break;
+                case 'setup':
+                    app.innerHTML = renderSetupScreen();
+                    break;
+                case 'playing':
+                    app.innerHTML = renderGameScreen();
+                    break;
+                case 'feedback':
+                    app.innerHTML = renderFeedbackScreen();
+                    break;
+                case 'gameover':
+                    app.innerHTML = renderGameOverScreen();
+                    break;
+                case 'review':
+                    app.innerHTML = renderReviewScreen();
+                    break;
+            }
+        }
+
+        function renderWelcomeScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center text-center p-4">
+                    <!-- Oman Dagger & Official Identity Header -->
+                    <div class="mb-6 animate-pulse-glow bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 max-w-2xl w-full studio-glow">
+                        <div class="flex justify-center mb-4">
+                            <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="الخنجر العماني" class="h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" onerror="this.src='https://placehold.co/120x80/0f172a/f59e0b?text=Oman+Dagger'">
+                        </div>
+                        <h2 class="text-sm md:text-base font-semibold text-amber-400 tracking-wider mb-1">سلطنة عمان</h2>
+                        <h2 class="text-xs md:text-sm font-semibold text-slate-200 tracking-wider mb-1">وزارة التعليم</h2>
+                        <h3 class="text-xs md:text-sm text-slate-300 font-medium mb-1">المديرية العامة للتعليم بمحافظة شمال الباطنة</h3>
+                        <h4 class="text-xs text-slate-400 mb-4">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</h4>
+                        
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6 border-t border-slate-800 pt-4 mt-2">
+                            <div class="flex items-center gap-4">
+                                <!-- Enlarged circular frame for teacher photo ensuring head and face are fully visible without cropping -->
+                                <div class="w-72 h-72 md:w-80 md:h-80 rounded-full bg-slate-950 p-3 border-4 border-amber-500 shadow-2xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top rounded-full scale-110">
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-base md:text-lg font-bold text-slate-100">أ. فيصل الشبلي</p>
+                                    <p class="text-xs text-amber-500 font-mono mt-1">99812126 | Instagram: faalll8</p>
+                                </div>
+                            </div>
+                            <div class="text-right md:border-r md:border-slate-800 md:pr-6">
+                                <p class="text-xs text-slate-400">مدير المدرسة:</p>
+                                <p class="text-sm md:text-base font-bold text-slate-200">أ. سعود الشيزاوي</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Title -->
+                    <div class="mb-8">
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold tracking-widest uppercase mb-3">
+                            🏆🔬 مسابقات العلوم التفاعلية
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 drop-shadow-[0_0_25px_rgba(245,158,11,0.4)] mb-3">
+                            تحدي المليون العلمي
+                        </h1>
+                        <p class="text-base md:text-lg text-slate-300 font-semibold">«من مخترع تدريج درجة الحرارة؟»</p>
+                    </div>
+
+                    <!-- Start Button -->
+                    <button onclick="goToSetup()" class="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xl rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.5)] transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto">
+                        <span>ابدأ التحدي الآن</span>
+                        <svg class="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderSetupScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center max-w-xl mx-auto w-full p-6 bg-slate-900/90 border border-slate-800 rounded-3xl studio-glow">
+                    <h2 class="text-2xl md:text-3xl font-black text-amber-400 mb-6 text-center">إعدادات المشاركة في التحدي</h2>
+                    
+                    <div class="w-full space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-300 mb-2">اختر وضع اللعب:</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="setGameMode('solo')" class="py-3 px-4 rounded-xl font-bold border ${gameState.mode === 'solo' ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-slate-800/50 border-slate-700 text-slate-400'} transition-all">
+                                    👤 لعب فردي
+                                </button>
+                                <button onclick="setGameMode('team')" class="py-3 px-4 rounded-xl font-bold border ${gameState.mode === 'team' ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-slate-800/50 border-slate-700 text-slate-400'} transition-all">
+                                    👥 لعب جماعي (فرق)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            ${gameState.mode === 'solo' ? `
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-300 mb-2">اسم الطالب / المتسابق:</label>
+                                    <input type="text" id="player-name-input" value="${gameState.playerName}" placeholder="أدخل اسمك الكريم..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-500 text-right">
+                                </div>
+                            ` : `
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-300 mb-2">اختر عدد الفرق:</label>
+                                    <div class="grid grid-cols-3 gap-3 mb-4">
+                                        <button onclick="setTeamCount(2)" class="py-2.5 rounded-lg font-bold border ${gameState.teams.length === 2 ? 'bg-blue-600/30 border-blue-500 text-blue-300' : 'bg-slate-800/50 border-slate-700 text-slate-400'}">2 فرق</button>
+                                        <button onclick="setTeamCount(3)" class="py-2.5 rounded-lg font-bold border ${gameState.teams.length === 3 ? 'bg-blue-600/30 border-blue-500 text-blue-300' : 'bg-slate-800/50 border-slate-700 text-slate-400'}">3 فرق</button>
+                                        <button onclick="setTeamCount(4)" class="py-2.5 rounded-lg font-bold border ${gameState.teams.length === 4 ? 'bg-blue-600/30 border-blue-500 text-blue-300' : 'bg-slate-800/50 border-slate-700 text-slate-400'}">4 فرق</button>
+                                    </div>
+                                    <label class="block text-sm font-bold text-slate-300 mb-2">أسماء الفرق المشاركة:</label>
+                                    <div class="space-y-2">
+                                        ${gameState.teams.map((t, idx) => `
+                                            <input type="text" data-team-index="${idx}" value="${t.name}" placeholder="اسم الفريق ${idx + 1}" class="team-input w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-amber-500 text-right">
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `}
+                        </div>
+
+                        <button onclick="startGameSession()" class="w-full py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-lg rounded-xl shadow-lg transition-all mt-4">
+                            🚀 انطلق إلى الاستوديو
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setGameMode(mode) {
+            gameState.mode = mode;
+            if (mode === 'team' && gameState.teams.length === 0) {
+                gameState.teams = [
+                    { name: "فريق ألفا", score: 0 },
+                    { name: "فريق بيتا", score: 0 }
+                ];
+            }
+            render();
+        }
+
+        function setTeamCount(count) {
+            let newTeams = [];
+            for (let i = 0; i < count; i++) {
+                newTeams.push({
+                    name: gameState.teams[i] ? gameState.teams[i].name : `فريق ${i + 1}`,
+                    score: 0
+                });
+            }
+            gameState.teams = newTeams;
+            render();
+        }
+
+        function goToSetup() {
+            soundFX.playSelect();
+            gameState.view = 'setup';
+            if (gameState.mode === 'team' && gameState.teams.length === 0) {
+                gameState.teams = [{ name: "فريق الصقور", score: 0 }, { name: "فريق النجوم", score: 0 }];
+            }
+            render();
+        }
+
+        function startGameSession() {
+            soundFX.playStart();
+            prepareQuestions(); // Reshuffle options to ensure fresh distribution on every new game
+
+            if (gameState.mode === 'solo') {
+                const input = document.getElementById('player-name-input');
+                gameState.playerName = input && input.value.trim() !== '' ? input.value.trim() : 'الممتسابق البطل';
+            } else {
+                const inputs = document.querySelectorAll('.team-input');
+                inputs.forEach((inp, idx) => {
+                    if (gameState.teams[idx]) {
+                        gameState.teams[idx].name = inp.value.trim() !== '' ? inp.value.trim() : `فريق ${idx + 1}`;
+                    }
+                });
+            }
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.unansweredCount = 0;
+            gameState.answersHistory = [];
+            gameState.view = 'playing';
+            initQuestionState();
+        }
+
+        function initQuestionState() {
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+            gameState.timer = q.time;
+            gameState.selectedOption = null;
+            gameState.isConfirmed = false;
+            gameState.lifelineActiveState = { eliminatedOptions: [], expertMessage: '' };
+            gameState.matchingState = { selectedLeft: null, connections: {} };
+            
+            if (q.type === 'ordering') {
+                let shuffled = [...q.items.map(item => item.id)];
+                shuffled.sort(() => Math.random() - 0.5);
+                gameState.orderingState.userOrder = shuffled;
+            }
+
+            startTimer();
+            render();
+        }
+
+        function startTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.timer > 0) {
+                    gameState.timer--;
+                    if (gameState.timer <= 5) {
+                        soundFX.playTimerTick();
+                    }
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(gameState.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const el = document.getElementById('timer-display');
+            if (el) {
+                el.innerText = `${gameState.timer} ث`;
+                if (gameState.timer <= 10) {
+                    el.classList.add('text-red-500', 'animate-pulse');
+                }
+            }
+        }
+
+        function handleTimeOut() {
+            if (gameState.isConfirmed) return;
+            gameState.unansweredCount++;
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+            gameState.answersHistory.push({
+                questionNumber: gameState.currentQuestionIndex + 1,
+                questionText: q.text,
+                userAnswer: "انتهى الوقت",
+                correctAnswer: getCorrectAnswerText(q),
+                isCorrect: false,
+                explanation: q.explanation
+            });
+            goToFeedback(false);
+        }
+
+        function getCorrectAnswerText(q) {
+            if (q.type === 'mcq') {
+                const correctOpt = q.options.find(o => o.key === q.correct);
+                return correctOpt ? `${q.correct.toUpperCase()}) ${correctOpt.text}` : q.correct;
+            } else if (q.type === 'matching') {
+                return "توصيل صحيح للعلاقات العلمية";
+            } else if (q.type === 'ordering') {
+                return "الترتيب الصحيح لدرجات الحرارة من الأقل للأعلى";
+            }
+            return "";
+        }
+
+        function renderGameScreen() {
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+            const currentPrize = PRIZES[gameState.currentQuestionIndex];
+            
+            let participantNameStr = gameState.mode === 'solo' 
+                ? gameState.playerName 
+                : `${gameState.teams[gameState.currentTeamIndex].name} (دور الفريق)`;
+
+            return `
+                <div class="flex-1 flex flex-col justify-between max-w-7xl mx-auto w-full">
+                    <!-- Top Studio Bar -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between studio-glow">
+                            <span class="text-xs text-slate-400">المتسابق / الفريق</span>
+                            <span class="text-sm md:text-base font-bold text-amber-400 truncate max-w-[150px]">${participantNameStr}</span>
+                        </div>
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between studio-glow">
+                            <span class="text-xs text-slate-400">السؤال رقم</span>
+                            <span class="text-lg font-black text-blue-400">${gameState.currentQuestionIndex + 1} / 10</span>
+                        </div>
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between studio-glow">
+                            <span class="text-xs text-slate-400">قيمة السؤال</span>
+                            <span class="text-lg font-black text-amber-400">${currentPrize.points} نقطة</span>
+                        </div>
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between studio-glow">
+                            <span class="text-xs text-slate-400">الوقت المتبقي</span>
+                            <span id="timer-display" class="text-lg font-black ${gameState.timer <= 10 ? 'text-red-500 animate-pulse' : 'text-emerald-400'}">${gameState.timer} ث</span>
+                        </div>
+                    </div>
+
+                    <!-- Lifelines Bar -->
+                    <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
+                        <button onclick="useLifeline('fiftyFifty')" ${gameState.lifelinedUsed('fiftyFifty') || gameState.isConfirmed ? 'opacity-50 cursor-not-allowed' : ''} class="px-4 py-2 bg-slate-900 border border-blue-500/40 hover:border-blue-500 rounded-xl text-xs font-bold text-blue-300 flex items-center gap-2 transition-all">
+                            <span>🔬 مساعدة المختبر (حذف خيارين)</span> ${gameState.lifelines.fiftyFifty ? '✓' : ''}
+                        </button>
+                        <button onclick="useLifeline('expert')" ${gameState.lifelinedUsed('expert') || gameState.isConfirmed ? 'opacity-50 cursor-not-allowed' : ''} class="px-4 py-2 bg-slate-900 border border-purple-500/40 hover:border-purple-500 rounded-xl text-xs font-bold text-purple-300 flex items-center gap-2 transition-all">
+                            <span>🧠 رأي الخبراء</span> ${gameState.lifelines.expert ? '✓' : ''}
+                        </button>
+                    </div>
+
+                    <!-- Lifeline Banners -->
+                    ${gameState.lifelineActiveState.expertMessage ? `
+                        <div class="bg-purple-950/80 border border-purple-500 p-3 rounded-xl text-purple-200 text-sm mb-3 text-center animate-pulse">
+                            🧠 رأي الخبير العلمي: ${gameState.lifelineActiveState.expertMessage}
+                        </div>
+                    ` : ''}
+
+                    <!-- Main Center Layout: Question, Non-overlapping Scientific Visual & Options beside Prize Ladder -->
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start flex-1 mb-4">
+                        
+                        <!-- Left 3 columns: Question, Visual, Options -->
+                        <div class="lg:col-span-3 flex flex-col gap-4">
+                            <!-- Question Card -->
+                            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 studio-glow text-center">
+                                <span class="text-xs font-bold text-amber-500 uppercase tracking-widest block mb-2">السؤال ${q.id}: ${q.title}</span>
+                                <h2 class="text-base md:text-xl font-bold text-slate-100 leading-relaxed">${q.text}</h2>
+                            </div>
+
+                            <!-- Scientific Visual Area with clear side separation (Zero overlap) -->
+                            ${q.hasVisual ? `
+                                <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 flex flex-col items-center justify-center relative studio-glow">
+                                    <div class="absolute top-3 right-4 text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                                        📐 الرسم العلمي
+                                    </div>
+                                    <div class="w-full py-4 flex justify-center items-center">
+                                        ${renderScientificVisual(q.visualType)}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Interaction Options Area -->
+                            <div class="mt-2">
+                                ${renderInteractionArea(q)}
+                            </div>
+
+                            <!-- Confirm Button Area -->
+                            <div class="flex justify-center mt-2">
+                                <button onclick="confirmAnswer()" ${!canConfirm() ? 'disabled opacity-40 cursor-not-allowed' : ''} class="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-base rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center gap-2">
+                                    <span>[ ✓ تأكيد الإجابة ]</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right 1 column: Prize Ladder -->
+                        <div class="hidden lg:flex flex-col bg-slate-900/90 border border-slate-800 rounded-3xl p-4 studio-glow">
+                            <h3 class="text-center font-black text-amber-400 text-sm mb-3 border-b border-slate-800 pb-2">🏆 سلم الجوائز</h3>
+                            <div class="space-y-1.5 flex flex-col-reverse">
+                                ${PRIZES.map((p, idx) => {
+                                    const isCurrent = idx === gameState.currentQuestionIndex;
+                                    const isPassed = idx < gameState.currentQuestionIndex;
+                                    return `
+                                        <div class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${isCurrent ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.6)] transform scale-105' : isPassed ? 'bg-slate-800/80 text-slate-400' : 'bg-slate-950/60 text-slate-300'}">
+                                            <span class="flex items-center gap-1">
+                                                ${p.safe ? '🛡️' : ''} السؤال ${p.level}
+                                            </span>
+                                            <span class="font-mono">${p.points} نقطة</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScientificVisual(type) {
+            switch(type) {
+                case 'thermometer_celsius_boiling':
+                    return `
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-12 w-full px-6">
+                            <svg viewBox="0 0 200 200" class="w-36 h-40 flex-shrink-0">
+                                <rect x="80" y="20" width="40" height="130" rx="20" fill="#1e293b" stroke="#3b82f6" stroke-width="3"/>
+                                <rect x="92" y="30" width="16" height="110" rx="8" fill="#ef4444"/>
+                                <circle cx="100" cy="150" r="22" fill="#ef4444" stroke="#3b82f6" stroke-width="3"/>
+                            </svg>
+                            <div class="space-y-3 text-right">
+                                <div class="bg-slate-900 border border-slate-800 px-5 py-2.5 rounded-xl flex items-center gap-4">
+                                    <span class="text-slate-300 font-bold font-mono">100°C</span>
+                                    <span class="text-slate-200 text-sm">نقطة الغليان المعيارية</span>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 px-5 py-2.5 rounded-xl flex items-center gap-4">
+                                    <span class="text-slate-300 font-bold font-mono">0°C</span>
+                                    <span class="text-slate-200 text-sm">نقطة التجمد المعيارية</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'three_thermometers':
+                    return `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4">
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <svg viewBox="0 0 100 140" class="w-20 h-28 mb-3">
+                                    <rect x="35" y="10" width="30" height="100" rx="15" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                    <rect x="44" y="30" width="12" height="75" rx="6" fill="#3b82f6"/>
+                                    <circle cx="50" cy="115" r="16" fill="#3b82f6"/>
+                                </svg>
+                                <span class="text-slate-200 font-bold text-xs mb-1">المقياس A</span>
+                                <span class="text-slate-300 text-[11px]">التجمد: 273 | الغليان: 373</span>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <svg viewBox="0 0 100 140" class="w-20 h-28 mb-3">
+                                    <rect x="35" y="10" width="30" height="100" rx="15" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                    <rect x="44" y="40" width="12" height="65" rx="6" fill="#f59e0b"/>
+                                    <circle cx="50" cy="115" r="16" fill="#f59e0b"/>
+                                </svg>
+                                <span class="text-slate-200 font-bold text-xs mb-1">المقياس B</span>
+                                <span class="text-slate-300 text-[11px]">التجمد: 32 | الغليان: 212</span>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <svg viewBox="0 0 100 140" class="w-20 h-28 mb-3">
+                                    <rect x="35" y="10" width="30" height="100" rx="15" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                                    <rect x="44" y="25" width="12" height="80" rx="6" fill="#ef4444"/>
+                                    <circle cx="50" cy="115" r="16" fill="#ef4444"/>
+                                </svg>
+                                <span class="text-slate-200 font-bold text-xs mb-1">المقياس C</span>
+                                <span class="text-slate-300 text-[11px]">التجمد: 0 | الغليان: 100</span>
+                            </div>
+                        </div>
+                    `;
+                case 'celsius_kelvin_compare':
+                    return `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-lg px-4">
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl text-center">
+                                <p class="text-slate-200 font-bold text-sm mb-2">مقياس سلسيوس</p>
+                                <p class="text-slate-300 text-xs">نقطة التجمد: 0°C</p>
+                                <p class="text-slate-300 text-xs">نقطة الغليان: 100°C</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl text-center">
+                                <p class="text-slate-200 font-bold text-sm mb-2">مقياس كلفن</p>
+                                <p class="text-slate-300 text-xs">نقطة التجمد: 273 K</p>
+                                <p class="text-slate-300 text-xs">نقطة الغليان: 373 K</p>
+                            </div>
+                        </div>
+                    `;
+                case 'absolute_zero':
+                    return `
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-8 w-full px-6">
+                            <svg viewBox="0 0 120 160" class="w-28 h-36 flex-shrink-0">
+                                <rect x="40" y="10" width="40" height="120" rx="20" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+                                <rect x="52" y="110" width="16" height="20" rx="8" fill="#a855f7"/>
+                                <circle cx="60" cy="135" r="18" fill="#a855f7"/>
+                            </svg>
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl text-right">
+                                <p class="text-slate-200 font-bold text-sm mb-1">مقياس كلفن الحراري</p>
+                                <p class="text-slate-300 text-xs">يعتمد على نقطة الصفر المطلق</p>
+                            </div>
+                        </div>
+                    `;
+                case 'scales_table':
+                    return `
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-xs w-full max-w-lg space-y-3">
+                            <div class="flex justify-between border-b border-slate-800 pb-2 font-bold text-slate-300"><span>المقياس</span><span>نطاق درجات الحرارة</span></div>
+                            <div class="flex justify-between text-slate-300"><span>سلسيوس</span><span>0°C إلى 100°C</span></div>
+                            <div class="flex justify-between text-slate-300"><span>كلفن</span><span>273K إلى 373K</span></div>
+                            <div class="flex justify-between text-slate-300 font-bold"><span>فهرنهايت</span><span>32°F إلى 212°F</span></div>
+                        </div>
+                    `;
+                case 'thermometer_reading_45':
+                    return `
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-16 w-full px-8">
+                            <svg viewBox="0 0 280 240" class="w-60 h-64 flex-shrink-0">
+                                <rect x="130" y="15" width="36" height="190" rx="18" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+                                <rect x="140" y="68" width="16" height="125" rx="8" fill="#ef4444"/>
+                                <circle cx="148" cy="205" r="16" fill="#ef4444"/>
+                                
+                                <text x="75" y="28" fill="#94a3b8" font-size="12" font-family="sans-serif">60°C</text>
+                                <line x1="114" y1="24" x2="126" y2="24" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="75" y="55" fill="#94a3b8" font-size="12" font-family="sans-serif">50°C</text>
+                                <line x1="114" y1="50" x2="126" y2="50" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="75" y="82" fill="#94a3b8" font-size="12" font-family="sans-serif">40°C</text>
+                                <line x1="114" y1="76" x2="126" y2="76" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="75" y="108" fill="#94a3b8" font-size="12" font-family="sans-serif">30°C</text>
+                                <line x1="114" y1="102" x2="126" y2="102" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="75" y="135" fill="#94a3b8" font-size="12" font-family="sans-serif">20°C</text>
+                                <line x1="114" y1="128" x2="126" y2="128" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="75" y="162" fill="#94a3b8" font-size="12" font-family="sans-serif">10°C</text>
+                                <line x1="114" y1="154" x2="126" y2="154" stroke="#94a3b8" stroke-width="2"/>
+                                
+                                <text x="80" y="188" fill="#94a3b8" font-size="12" font-family="sans-serif">0°C</text>
+                                <line x1="114" y1="180" x2="126" y2="180" stroke="#94a3b8" stroke-width="2"/>
+                            </svg>
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl text-right space-y-2">
+                                <p class="text-slate-200 font-bold text-xs">قراءة مقياس الحرارة:</p>
+                                <p class="text-slate-300 text-xs">التدريجات بمسافات متساوية من 0°C إلى 60°C.</p>
+                                <p class="text-slate-400 text-xs">استنتج قراءة السائل بدقة من التدريج المجاور.</p>
+                            </div>
+                        </div>
+                    `;
+                case 'three_thermometers_drawings':
+                    return `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4">
+                            <!-- Thermometer Drawing A -->
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <span class="text-slate-200 font-bold text-xs mb-3">رسم مقياس A</span>
+                                <div class="flex items-center gap-6">
+                                    <svg viewBox="0 0 100 150" class="w-24 h-32">
+                                        <rect x="35" y="10" width="30" height="110" rx="15" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="44" y="30" width="12" height="85" rx="6" fill="#ef4444"/>
+                                        <circle cx="50" cy="125" r="16" fill="#ef4444"/>
+                                    </svg>
+                                    <div class="text-[11px] text-slate-300 space-y-8 font-mono pl-2">
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">100°C</div>
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">0°C</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Thermometer Drawing B -->
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <span class="text-slate-200 font-bold text-xs mb-3">رسم مقياس B</span>
+                                <div class="flex items-center gap-6">
+                                    <svg viewBox="0 0 100 150" class="w-24 h-32">
+                                        <rect x="35" y="10" width="30" height="110" rx="15" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="44" y="40" width="12" height="75" rx="6" fill="#f59e0b"/>
+                                        <circle cx="50" cy="125" r="16" fill="#f59e0b"/>
+                                    </svg>
+                                    <div class="text-[11px] text-slate-300 space-y-8 font-mono pl-2">
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">212°F</div>
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">32°F</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Thermometer Drawing C -->
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center">
+                                <span class="text-slate-200 font-bold text-xs mb-3">رسم مقياس C</span>
+                                <div class="flex items-center gap-6">
+                                    <svg viewBox="0 0 100 150" class="w-24 h-32">
+                                        <rect x="35" y="10" width="30" height="110" rx="15" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                                        <rect x="44" y="25" width="12" height="90" rx="6" fill="#a855f7"/>
+                                        <circle cx="50" cy="125" r="16" fill="#a855f7"/>
+                                    </svg>
+                                    <div class="text-[11px] text-slate-300 space-y-8 font-mono pl-2">
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">373K</div>
+                                        <div class="bg-slate-950 px-2 py-1 rounded border border-slate-800">273K</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'final_challenge_visual':
+                    return `
+                        <div class="flex flex-wrap gap-4 justify-center items-center text-xs text-slate-300 w-full px-4">
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+                                <p class="text-slate-200 font-bold mb-1">سلسيوس</p>
+                                <p>تدريج مئوي</p>
+                            </div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+                                <p class="text-slate-200 font-bold mb-1">كلفن</p>
+                                <p>الصفر المطلق</p>
+                            </div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+                                <p class="text-slate-200 font-bold mb-1">فهرنهايت</p>
+                                <p>تدريج تقليدي</p>
+                            </div>
+                        </div>
+                    `;
+                default:
+                    return '';
+            }
+        }
+
+        function renderInteractionArea(q) {
+            if (q.type === 'mcq') {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${q.options.map((opt, i) => {
+                            const isEliminated = gameState.lifelineActiveState.eliminatedOptions.includes(opt.key);
+                            const isSelected = gameState.selectedOption === opt.key;
+                            const labelLetter = ['أ', 'ب', 'ج', 'د'][i];
+                            
+                            if (isEliminated) {
+                                return `<div class="p-3 bg-slate-950/40 border border-slate-900 rounded-xl opacity-30 text-slate-600 flex items-center gap-3 cursor-not-allowed">
+                                    <span class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center font-bold text-xs">${labelLetter}</span>
+                                    <span class="text-sm">${opt.text}</span>
+                                </div>`;
+                            }
+
+                            return `
+                                <button onclick="selectOption('${opt.key}')" ${gameState.isConfirmed ? 'disabled' : ''} class="p-3.5 rounded-xl border text-right transition-all flex items-center gap-3 ${isSelected ? 'bg-amber-500/20 border-amber-500 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'bg-slate-900/80 border-slate-800 hover:border-slate-600 text-slate-200'}">
+                                    <span class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-xs text-amber-400">${labelLetter}</span>
+                                    <span class="text-sm font-semibold">${opt.text}</span>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'matching') {
+                const { selectedLeft, connections } = gameState.matchingState;
+                const leftItems = [...q.pairs];
+                // Non-opposing right items layout
+                const rightItems = [q.pairs[2], q.pairs[0], q.pairs[3], q.pairs[1]];
+
+                return `
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+                        <p class="text-xs text-amber-400 text-center font-bold">اضغط على المصطلح في القائمة الأولى ثم العنصر المطابق في القائمة الثانية غير المتقابلة للتوصيل:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <p class="text-xs font-bold text-slate-400 mb-1">المصطلحات:</p>
+                                ${leftItems.map(p => {
+                                    const isConnected = connections[p.leftId] !== undefined;
+                                    const isSelected = selectedLeft === p.leftId;
+                                    return `
+                                        <button onclick="selectMatchingLeft(${p.leftId})" class="w-full p-3 rounded-xl border text-right flex justify-between items-center ${isConnected ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300' : isSelected ? 'bg-amber-500/30 border-amber-500 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-200'}">
+                                            <span>${p.leftText}</span>
+                                            ${isConnected ? `<span class="text-xs font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-300">موصول 🔗</span>` : isSelected ? '<span class="text-xs text-amber-400">محدد...</span>' : ''}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-xs font-bold text-slate-400 mb-1">القيم والتعاريف:</p>
+                                ${rightItems.map(p => {
+                                    const connectedLeftId = Object.keys(connections).find(k => connections[k] === p.rightKey);
+                                    const isConnectedToAny = connectedLeftId !== undefined;
+                                    return `
+                                        <button onclick="selectMatchingRight('${p.rightKey}')" class="w-full p-3 rounded-xl border text-right flex justify-between items-center ${isConnectedToAny ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-200'}">
+                                            <span>${p.rightText}</span>
+                                            <span class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-amber-400">${p.rightKey.toUpperCase()}</span>
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-800 pt-3 mt-4">
+                            <p class="text-xs font-bold text-slate-300 mb-2">التوصيلات الحالية:</p>
+                            <div class="space-y-2">
+                                ${Object.keys(connections).length === 0 ? '<p class="text-xs text-slate-500">لم يتم توصيل أي عناصر بعد.</p>' : ''}
+                                ${Object.keys(connections).map(leftId => {
+                                    const leftItem = q.pairs.find(p => p.leftId == leftId);
+                                    const rightKey = connections[leftId];
+                                    const rightItem = q.pairs.find(p => p.rightKey == rightKey);
+                                    return `
+                                        <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-lg text-xs">
+                                            <span class="text-slate-200">${leftItem.leftText} ↔ ${rightItem.rightText}</span>
+                                            <button onclick="cancelConnection(${leftId})" class="text-red-400 hover:text-red-300 font-bold bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1 rounded transition-all">
+                                                [ إلغاء التوصيل ]
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (q.type === 'ordering') {
+                const { userOrder } = gameState.orderingState;
+                return `
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+                        <p class="text-xs text-amber-400 text-center font-bold">استخدم أزرار التحريك لتسلسل العبارات العلمية من الأقل إلى الأعلى دون أرقام مسبقة:</p>
+                        <div class="max-w-xl mx-auto space-y-3">
+                            ${userOrder.map((itemId, idx) => {
+                                const item = q.items.find(i => i.id === itemId);
+                                return `
+                                    <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">${idx + 1}</span>
+                                            <span class="text-sm text-slate-200 font-semibold">${item.text}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="moveOrderItem(${idx}, -1)" ${idx === 0 ? 'disabled opacity-30' : ''} class="px-2.5 py-1 bg-slate-800 rounded hover:bg-slate-700 text-xs font-bold text-slate-300">⬆️ لأعلى</button>
+                                            <button onclick="moveOrderItem(${idx}, 1)" ${idx === userOrder.length - 1 ? 'disabled opacity-30' : ''} class="px-2.5 py-1 bg-slate-800 rounded hover:bg-slate-700 text-xs font-bold text-slate-300">⬇️ لأسفل</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function selectOption(key) {
+            soundFX.playSelect();
+            gameState.selectedOption = key;
+            render();
+        }
+
+        function selectMatchingLeft(leftId) {
+            soundFX.playSelect();
+            gameState.matchingState.selectedLeft = leftId;
+            render();
+        }
+
+        function selectMatchingRight(rightKey) {
+            const { selectedLeft, connections } = gameState.matchingState;
+            if (selectedLeft !== null) {
+                soundFX.playSelect();
+                connections[selectedLeft] = rightKey;
+                gameState.matchingState.selectedLeft = null;
+                render();
+            }
+        }
+
+        function cancelConnection(leftId) {
+            soundFX.playSelect();
+            delete gameState.matchingState.connections[leftId];
+            render();
+        }
+
+        function moveOrderItem(index, direction) {
+            soundFX.playSelect();
+            const order = gameState.orderingState.userOrder;
+            const targetIndex = index + direction;
+            if (targetIndex >= 0 && targetIndex < order.length) {
+                const temp = order[index];
+                order[index] = order[targetIndex];
+                order[targetIndex] = temp;
+                render();
+            }
+        }
+
+        function canConfirm() {
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+            if (q.type === 'mcq') return gameState.selectedOption !== null;
+            if (q.type === 'matching') return Object.keys(gameState.matchingState.connections).length === q.pairs.length;
+            if (q.type === 'ordering') return true;
+            return false;
+        }
+
+        function useLifeline(type) {
+            if (gameState.lifelinedUsed(type) || gameState.isConfirmed) return;
+            soundFX.playLifeline();
+            gameState.lifelines[type] = true;
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+
+            if (type === 'fiftyFifty' && q.type === 'mcq') {
+                const wrongOptions = q.options.filter(o => o.key !== q.correct).map(o => o.key);
+                wrongOptions.sort(() => Math.random() - 0.5);
+                gameState.lifelineActiveState.eliminatedOptions = wrongOptions.slice(0, 2);
+            } else if (type === 'expert') {
+                gameState.lifelineActiveState.expertMessage = `الخبير العلمي يرجح الإجابة الصحيحة بناءً على خصائص المقاييس الحرارية.`;
+            }
+            render();
+        }
+
+        gameState.lifelinedUsed = function(type) {
+            return gameState.lifelines[type];
+        };
+
+        function confirmAnswer() {
+            if (!canConfirm() || gameState.isConfirmed) return;
+            gameState.isConfirmed = true;
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+            const q = QUESTIONS[gameState.currentQuestionIndex];
+            let isCorrect = false;
+            let userAnswerStr = "";
+
+            if (q.type === 'mcq') {
+                userAnswerStr = gameState.selectedOption.toUpperCase();
+                isCorrect = gameState.selectedOption === q.correct;
+            } else if (q.type === 'matching') {
+                const conn = gameState.matchingState.connections;
+                let matchesOk = true;
+                q.pairs.forEach(p => {
+                    if (conn[p.leftId] !== p.rightKey) matchesOk = false;
+                });
+                isCorrect = matchesOk;
+                userAnswerStr = "توصيل شبكي للمصطلحات";
+            } else if (q.type === 'ordering') {
+                const userOrd = gameState.orderingState.userOrder;
+                isCorrect = JSON.stringify(userOrd) === JSON.stringify(q.correctOrder);
+                userAnswerStr = "ترتيب تصاعدي للعبارات الحرارية";
+            }
+
+            const currentPrize = PRIZES[gameState.currentQuestionIndex];
+
+            if (isCorrect) {
+                soundFX.playCorrect();
+                gameState.correctCount++;
+                gameState.score += currentPrize.points;
+                if (gameState.mode === 'team') {
+                    gameState.teams[gameState.currentTeamIndex].score += currentPrize.points;
+                }
+            } else {
+                soundFX.playWrong();
+                gameState.wrongCount++;
+            }
+
+            gameState.answersHistory.push({
+                questionNumber: gameState.currentQuestionIndex + 1,
+                questionText: q.text,
+                userAnswer: userAnswerStr,
+                correctAnswer: getCorrectAnswerText(q),
+                isCorrect: isCorrect,
+                explanation: q.explanation
+            });
+
+            goToFeedback(isCorrect);
+        }
+
+        function goToFeedback(isCorrect) {
+            gameState.view = 'feedback';
+            render();
+        }
+
+        function renderFeedbackScreen() {
+            const lastAnswer = gameState.answersHistory[gameState.answersHistory.length - 1];
+            const isLastQuestion = gameState.currentQuestionIndex === QUESTIONS.length - 1;
+
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center max-w-xl mx-auto w-full p-6 bg-slate-900/95 border border-slate-800 rounded-3xl studio-glow text-center">
+                    <div class="text-6xl mb-4 animate-bounce">
+                        ${lastAnswer.isCorrect ? '✅' : '❌'}
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-black mb-2 ${lastAnswer.isCorrect ? 'text-emerald-400' : 'text-red-400'}">
+                        ${lastAnswer.isCorrect ? 'إجابة صحيحة!' : 'إجابة غير صحيحة.'}
+                    </h2>
+                    <p class="text-slate-300 font-semibold mb-6">النقاط الحالية: <span class="text-amber-400 font-bold">${gameState.score} نقطة</span></p>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 w-full text-right mb-6">
+                        <p class="text-xs font-bold text-amber-400 mb-1">💡 لماذا؟ (التفسير العلمي):</p>
+                        <p class="text-sm text-slate-200 leading-relaxed">${lastAnswer.explanation}</p>
+                    </div>
+
+                    <button onclick="nextStepAfterFeedback(${isLastQuestion})" class="w-full py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-lg rounded-xl shadow-lg transition-all">
+                        ${isLastQuestion ? '🏆 عرض النتيجة النهائية' : 'متابعة التحدي ➔'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function nextStepAfterFeedback(isLast) {
+            soundFX.playSelect();
+            if (isLast) {
+                soundFX.playWin();
+                gameState.view = 'gameover';
+            } else {
+                gameState.currentQuestionIndex++;
+                if (gameState.mode === 'team') {
+                    gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+                }
+                gameState.view = 'playing';
+                initQuestionState();
+            }
+            render();
+        }
+
+        function renderGameOverScreen() {
+            const totalQ = QUESTIONS.length;
+            const percentage = Math.round((gameState.correctCount / totalQ) * 100);
+            
+            let rankTitle = "متدرب العلوم";
+            if (percentage >= 90) rankTitle = "🧠 عبقري العلوم";
+            else if (percentage >= 80) rankTitle = "🔬 خبير علمي";
+            else if (percentage >= 70) rankTitle = "🌟 عالم واعد";
+            else if (percentage >= 60) rankTitle = "🚀 مستكشف المعرفة";
+
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full p-6 bg-slate-900/95 border border-slate-800 rounded-3xl studio-glow text-center">
+                    <div class="text-5xl mb-3">🏆</div>
+                    <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 mb-2">
+                        تحدي المليون العلمي
+                    </h2>
+                    <p class="text-sm font-semibold text-slate-300 mb-6">تهانينا لإتمام التحدي بنجاح وتفوق!</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full mb-6">
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
+                            <span class="text-xs text-slate-400 block mb-1">النقاط الكلية</span>
+                            <span class="text-xl font-black text-amber-400">${gameState.score} / 1000</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
+                            <span class="text-xs text-slate-400 block mb-1">الإجابات الصحيحة</span>
+                            <span class="text-xl font-black text-emerald-400">${gameState.correctCount} / 10</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
+                            <span class="text-xs text-slate-400 block mb-1">الخاطئة / غير المجابة</span>
+                            <span class="text-xl font-black text-red-400">${gameState.wrongCount + gameState.unansweredCount}</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
+                            <span class="text-xs text-slate-400 block mb-1">النسبة المئوية</span>
+                            <span class="text-xl font-black text-blue-400">${percentage}%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 w-full mb-6">
+                        <span class="text-xs text-amber-400 block mb-1">رتبتك العلمية المستحقة:</span>
+                        <span class="text-2xl font-black text-amber-300">${rankTitle}</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 w-full">
+                        <button onclick="restartGame()" class="flex-1 py-3.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black rounded-xl shadow-lg transition-all">
+                            🔄 العب من جديد
+                        </button>
+                        <button onclick="openReview()" class="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black rounded-xl border border-slate-700 transition-all">
+                            📋 مراجعة الإجابات
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4 md:p-6 bg-slate-900/95 border border-slate-800 rounded-3xl studio-glow">
+                    <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                        <h2 class="text-2xl font-black text-amber-400">📋 مراجعة إجابات التحدي العلمي</h2>
+                        <button onclick="backToGameOver()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700">
+                            العودة للنتائج ➔
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
+                        ${gameState.answersHistory.map((ans) => `
+                            <div class="bg-slate-950 border ${ans.isCorrect ? 'border-emerald-500/30' : 'border-red-500/30'} rounded-2xl p-4 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-amber-400 font-bold">السؤال ${ans.questionNumber}</span>
+                                    <span class="${ans.isCorrect ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'} px-2.5 py-0.5 rounded-full font-bold">
+                                        ${ans.isCorrect ? '✓ صحيح' : '✗ غير صحيح'}
+                                    </span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-100">${ans.questionText}</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-900">
+                                    <p class="text-slate-300"><span class="text-slate-500">إجابتك:</span> <span class="font-semibold">${ans.userAnswer}</span></p>
+                                    <p class="text-emerald-400"><span class="text-slate-500">الإجابة الصحيحة:</span> <span class="font-semibold">${ans.correctAnswer}</span></p>
+                                </div>
+                                <p class="text-xs text-amber-300/90 bg-amber-500/5 p-2 rounded-lg mt-2">💡 التفسير: ${ans.explanation}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openReview() {
+            soundFX.playSelect();
+            gameState.view = 'review';
+            render();
+        }
+
+        function backToGameOver() {
+            soundFX.playSelect();
+            gameState.view = 'gameover';
+            render();
+        }
+
+        function restartGame() {
+            soundFX.playSelect();
+            gameState.view = 'welcome';
+            render();
+        }
+
+        window.onload = function() {
+            prepareQuestions();
+            render();
+        };
+    </script>
+</body>
+</html>

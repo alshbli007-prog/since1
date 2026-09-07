@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صندوق المعرفة | سر التبخر - الصف الخامس - عُمان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.9); transform: scale(1.02); }
+        }
+        @keyframes floatBubble {
+            0% { transform: translateY(0px) scale(0.8); opacity: 0.2; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+        }
+        @keyframes shakeBox {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-5deg); }
+            40% { transform: rotate(5deg); }
+            60% { transform: rotate(-3deg); }
+            80% { transform: rotate(3deg); }
+        }
+        .box-shake {
+            animation: shakeBox 0.5s ease-in-out;
+        }
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <script>
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playBoxOpen() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(250, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+            playCorrect() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.setValueAtTime(600, now + 0.1);
+                osc.frequency.setValueAtTime(800, now + 0.2);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+            playWrong() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.setValueAtTime(120, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            playVictory() {
+                this.init();
+                const notes = [300, 450, 600, 750, 950];
+                notes.forEach((freq, idx) => {
+                    const now = this.ctx.currentTime + (idx * 0.12);
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                });
+            }
+        }
+        const sfx = new SoundFX();
+    </script>
+
+    <script>
+        const MASTER_QUESTION_BANK = [
+            {
+                id: 1,
+                type: "mcq",
+                question: "أمامك كأسين متساويين في كمية الماء، أحدهما وُضع في مكان مشمس والآخر في مكان بارد. أي كأس يتوقع أن يحتوي على كمية ماء أقل بعد مدة؟",
+                imageType: "two_cups_sun",
+                options: [
+                    { id: 'a', text: "الكأس الذي في المكان البارد" },
+                    { id: 'b', text: "الكأس الذي في المكان المشمس" },
+                    { id: 'c', text: "يبقى الكأسان بنفس الكمية تمامًا" },
+                    { id: 'd', text: "يزداد الماء في كلا الكأسين" }
+                ],
+                correctId: 'b',
+                why: "لأن الحرارة من العوامل الأساسية المؤثرة على التبخر، وكلما زادت أشعة الشمس والحرارة، زادت سرعة تحول الماء إلى بخار.",
+                concept: "تأثير الحرارة على التبخر"
+            },
+            {
+                id: 2,
+                type: "mcq",
+                question: "ما المقصود بعملية (التبخر) في علم العلوم للصف الخامس؟",
+                imageType: "molecule_change",
+                options: [
+                    { id: 'a', text: "تحول الماء من الحالة الصلبة إلى الحالة السائلة" },
+                    { id: 'b', text: "تحول الماء من الحالة السائلة إلى الحالة الغازية (بخار)" },
+                    { id: 'c', text: "تحول البخار إلى قطرات ماء سائلة" },
+                    { id: 'd', text: "تجمد الماء في درجات الحرارة المنخفضة" }
+                ],
+                correctId: 'b',
+                why: "التبخر هو عملية تحول المادة من الحالة السائلة إلى الحالة الغازية (البخار) باكتساب طاقة.",
+                concept: "مفهوم التبخر"
+            },
+            {
+                id: 3,
+                type: "mcq",
+                question: "لاحظ الصورة: كأس ماء وُضع أمام مروحة نشطة وكأس آخر بعيدًا عن أي حركة هواء. أيهما يتبخر فيه الماء أسرع؟",
+                imageType: "fan_cup",
+                options: [
+                    { id: 'a', text: "الكأس البعيد عن الهواء" },
+                    { id: 'b', text: "الكأس الذي أمام المروحة" },
+                    { id: 'c', text: "لا تأثير للهواء على سرعة التبخر" },
+                    { id: 'd', text: "ينتج ماء أكثر أمام المروحة" }
+                ],
+                correctId: 'b',
+                why: "لأن الهواء والرياح من العوامل الأساسية التي تزيد سرعة التبخر، حيث يحمل جزيئات البخار المتبخرة بعيدًا عن سطح السائل.",
+                concept: "تأثير الهواء على التبخر"
+            },
+            {
+                id: 4,
+                type: "true_false",
+                question: "هل يتوقف تبخر الماء تمامًا إذا وُضع في غرفة باردة مظلمة لا توجد فيها أشعة شمس مباشرة؟",
+                imageType: "cold_room",
+                options: [
+                    { id: 'true', text: "صحيح، يتوقف نهائيًا" },
+                    { id: 'false', text: "خطأ، يستمر ولكن بشكل بطيء جداً" }
+                ],
+                correctId: 'false',
+                why: "الماء يمكن أن يتبخر في الأماكن الباردة أو الظليلة ولكن بشكل بسيط وبطيء جداً لعدم توفر الحرارة الكافية بسرعة.",
+                concept: "التبخر في الأماكن الباردة"
+            },
+            {
+                id: 5,
+                type: "mcq",
+                question: "ما هما العامِلان الأساسيان اللذان يدرسهما طالب الصف الخامس ويزيدان من سرعة تبخر الماء؟",
+                imageType: "factors_icon",
+                options: [
+                    { id: 'a', text: "البرودة والظلام" },
+                    { id: 'b', text: "الحرارة والهواء" },
+                    { id: 'c', text: "حجم الكأس ولونه" },
+                    { id: 'd', text: "عمق الماء ونوع الكأس" }
+                ],
+                correctId: 'b',
+                why: "العاملان الأساسيان في درس التبخر هما الحرارة (التسخين/الشمس) والهواء (الرياح/المروحة).",
+                concept: "عوامل سرعة التبخر"
+            },
+            {
+                id: 6,
+                type: "matching",
+                question: "صل كل عامل بأثره الصحيح على عملية التبخر:",
+                imageType: "matching_graphic",
+                pairs: [
+                    { premise: "التسخين وأشعة الشمس", answer: "يزيد سرعة التبخر" },
+                    { premise: "وجود الرياح والهواء", answer: "يزيد سرعة التبخر" },
+                    { premise: "المكان البارد المظلم", answer: "يبطئ عملية التبخر" }
+                ],
+                why: "الحرارة والهواء ترفعان معدل تحول السائل إلى غاز، بينما غيابهما يبطئ العملية.",
+                concept: "تحليل عوامل التبخر"
+            },
+            {
+                id: 7,
+                type: "ordering",
+                question: "رتب خطوات تجربة الكأسين لمقارنة سرعة التبخر بالشكل الصحيح:",
+                imageType: "experiment_steps",
+                steps: [
+                    "وضع كمية متساوية من الماء في الكأسين",
+                    "وضع أحد الكأسين في مكان مشمس والآخر في مكان بارد",
+                    "ترك الكأسين لفترة زمنية محددة",
+                    "ملاحظة ومقارنة كمية الماء المتبقية في الكأسين"
+                ],
+                why: "لتجربة عادلة وصحيحة، نبدأ بكميات متساوية، ثم نغير العامل المراد دراسته (الحرارة)، ثم نقارن النتائج.",
+                concept: "خطوات التجربة العلمية"
+            },
+            {
+                id: 8,
+                type: "mcq",
+                question: "في نموذج جزيئات المادة، ماذا يحدث لجزيئات السائل عندما يتحول إلى غاز (بخار) أثناء التبخر؟",
+                imageType: "molecules_diagram",
+                options: [
+                    { id: 'a', text: "تقترب الجزيئات من بعضها وتتثبت" },
+                    { id: 'b', text: "تتباعد الجزيئات وتنتشر بحرية في الهواء" },
+                    { id: 'c', text: "تتحول جزيئات الماء إلى مادة صلبة" },
+                    { id: 'd', text: "تختفي جزيئات الماء تماماً دون أثر" }
+                ],
+                correctId: 'b',
+                why: "في الحالة الغازية، تكتسب الجزيئات طاقة وتتباعد عن بعضها وتتحرك بحرية تامة في الهواء المحيط.",
+                concept: "حالات المادة وجزيئاتها"
+            },
+            {
+                id: 9,
+                type: "true_false",
+                question: "هل تعتبر تجربة وضع كأس ماء تحت الشمس وكأس في الظل دليلاً على أن الحرارة تؤثر على سرعة التبخر؟",
+                imageType: "sun_shade_cup",
+                options: [
+                    { id: 'true', text: "صحيح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correctId: 'true',
+                why: "نعم، هذه التجربة توضح بجلاء أن الكأس المعرض للحرارة والشمس ينقص ماؤه أسرع بسبب زيادة التبخر.",
+                concept: "تفسير تجربة الكأسين"
+            },
+            {
+                id: 10,
+                type: "mcq",
+                question: "أي الحالات التالية يكون فيها تبخر الماء من سطح المسطحات المائية أسرع ما يمكن؟",
+                imageType: "weather_condition",
+                options: [
+                    { id: 'a', text: "يوم بارد وممطر وبدون هواء" },
+                    { id: 'b', text: "يوم حار ومشمس وبه رياح نشطة" },
+                    { id: 'c', text: "يوم مثلج ومظلم وساكن" },
+                    { id: 'd', text: "في الليل البارد الهادئ" }
+                ],
+                correctId: 'b',
+                why: "يوفر اليوم الحار المشمس (حرارة) والنشط بالرياح (هواء) الظروف المثالية لأسرع معدل تبخر.",
+                concept: "الظروف المثالية للتبخر"
+            },
+            {
+                id: 11,
+                type: "mcq",
+                question: "ما الخطأ العلمي في التجربة التالية: طالب وضع 50 مل من الماء في كأس ضيق تحت الشمس، و200 مل من الماء في كأس واسع في الظل، ثم قارن بينهما؟",
+                imageType: "unfair_experiment",
+                options: [
+                    { id: 'a', text: "اختلاف كمية الماء الابتدائية وعدم تثبيت ظروف التجربة" },
+                    { id: 'b', text: "استخدام الماء بدلاً من العصير" },
+                    { id: 'c', text: "وضع الكأسين على الطاولة" },
+                    { id: 'd', text: "لا يوجد أي خطأ في التجربة" }
+                ],
+                correctId: 'a',
+                why: "من شروط التجربة العادلة توحيد كمية الماء الابتدائية وتغيير عامل واحد فقط (مثل مكان التواجد) لكي تكون المقارنة صحيحة.",
+                concept: "شروط التجربة العادلة"
+            },
+            {
+                id: 12,
+                type: "true_false",
+                question: "الماء بعد أن يتبخر يتحول من الحالة السائلة إلى الحالة الغازية ويصعد في الهواء.",
+                imageType: "steam_up",
+                options: [
+                    { id: 'true', text: "صحيح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correctId: 'true',
+                why: "هذا هو التعريف الأساسي للتبخر في مقرر العلوم للصف الخامس.",
+                concept: "حالات الماء في التبخر"
+            },
+            {
+                id: 13,
+                type: "mcq",
+                question: "إذا قمت بنشر ملابس مبلولة في يوم حار ومشمس وهادئ، مقارنة بيوم حار ومشمس وبه رياح قوية، متى تجف الملابس أسرع؟",
+                imageType: "drying_clothes",
+                options: [
+                    { id: 'a', text: "في اليوم الهادئ بدون رياح" },
+                    { id: 'b', text: "في اليوم الذي به رياح قوية ومشمس" },
+                    { id: 'c', text: "تتجفف بنفس السرعة تماماً" },
+                    { id: 'd', text: "لا تجف الملابس أبدًا تحت الشمس" }
+                ],
+                correctId: 'b',
+                why: "اجتماع الحرارة (الشمس) مع الهواء (الرياح) يحقق أقصى وأسرع معدل تبخر للماء الموجود في الملابس.",
+                concept: "تطبيقات حياتية على التبخر"
+            },
+            {
+                id: 14,
+                type: "mcq",
+                question: "أي من الآتي يُعد مثالاً صحيحاً على تحول المادة بالتبخر في الطبيعة؟",
+                imageType: "nature_evap",
+                options: [
+                    { id: 'a', text: "تكون الثلج فوق الجبال" },
+                    { id: 'b', text: "جفاف بركة مائية صغيرة بعد سطوع الشمس عليها" },
+                    { id: 'c', text: "نزول المطر من السحب" },
+                    { id: 'd', text: "تجمد الماء داخل الثلاجة" }
+                ],
+                correctId: 'b',
+                why: "جفاف البركة يدل على تبخر الماء وتحوله من سائل إلى بخار بفعل حرارة الشمس.",
+                concept: "أمثلة واقعية للتبخر"
+            },
+            {
+                id: 15,
+                type: "true_false",
+                question: "كلما زادت كمية الحرارة المكتسبة، قلت سرعة تبخر الماء.",
+                imageType: "heat_test",
+                options: [
+                    { id: 'true', text: "صحيح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correctId: 'false',
+                why: "خطأ؛ كلما زادت الحرارة، زادت واطردت سرعة تبخر الماء وليس العكس.",
+                concept: "علاقة الحرارة بالسرعة"
+            }
+        ];
+    </script>
+
+    <script>
+        const state = {
+            view: 'START', // START, MODE_SELECTION, PLAYER_SETUP, PLAYING, QUESTION_VIEW, FEEDBACK_VIEW, FINISHED, REVIEW
+            gameMode: 'solo',
+            teamCount: 2,
+            teams: [],
+            currentTeamIndex: 0,
+            playerName: '',
+            score: 0,
+            stars: 0,
+            labEnergy: 0,
+            currentRoundQuestions: [],
+            currentQuestionIndex: 0,
+            selectedBoxIndex: null,
+            openedBoxes: [],
+            timerEnabled: false,
+            timerSeconds: 35,
+            timerInterval: null,
+            reducedMotion: false,
+            selectedOptionId: null,
+            matchingSelections: {},
+            orderingSteps: [],
+            answersHistory: []
+        };
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initRoundQuestions() {
+            const shuffled = shuffleArray(MASTER_QUESTION_BANK);
+            state.currentRoundQuestions = shuffled.slice(0, 10).map(q => {
+                let cloned = JSON.parse(JSON.stringify(q));
+                if (cloned.type === 'mcq' || cloned.type === 'true_false') {
+                    cloned.options = shuffleArray(cloned.options);
+                } else if (cloned.type === 'matching') {
+                    cloned.shuffledAnswers = shuffleArray(cloned.pairs.map(p => p.answer));
+                } else if (cloned.type === 'ordering') {
+                    cloned.steps = shuffleArray(cloned.steps);
+                }
+                return cloned;
+            });
+            state.currentQuestionIndex = 0;
+            state.openedBoxes = [];
+            state.score = 0;
+            state.stars = 0;
+            state.labEnergy = 0;
+            state.answersHistory = [];
+        }
+
+        function render() {
+            const appEl = document.getElementById('app');
+            appEl.innerHTML = '';
+
+            switch (state.view) {
+                case 'START':
+                    appEl.innerHTML = renderStartScreen();
+                    break;
+                case 'MODE_SELECTION':
+                    appEl.innerHTML = renderModeSelectionScreen();
+                    break;
+                case 'PLAYER_SETUP':
+                    appEl.innerHTML = renderPlayerSetupScreen();
+                    break;
+                case 'PLAYING':
+                    appEl.innerHTML = renderLabDashboard();
+                    break;
+                case 'QUESTION_VIEW':
+                    appEl.innerHTML = renderQuestionBoxModal();
+                    break;
+                case 'FEEDBACK_VIEW':
+                    appEl.innerHTML = renderFeedbackModal();
+                    break;
+                case 'FINISHED':
+                    appEl.innerHTML = renderFinishedScreen();
+                    break;
+                case 'REVIEW':
+                    appEl.innerHTML = renderReviewScreen();
+                    break;
+            }
+        }
+
+        function renderStartScreen() {
+            return `
+            <div class="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900">
+                <!-- Official Identity Header -->
+                <div class="bg-slate-800/80 backdrop-blur border border-blue-500/30 rounded-2xl p-6 max-w-2xl w-full text-center shadow-2xl mb-6">
+                    <div class="flex justify-center mb-4">
+                        <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار الخنجر العُماني" class="h-16 w-auto object-contain drop-shadow-md">
+                    </div>
+                    <h2 class="text-lg font-bold text-amber-400">سلطنة عمان</h2>
+                    <h3 class="text-base font-semibold text-slate-200">وزارة التعليم</h3>
+                    <p class="text-sm text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                    <p class="text-sm font-medium text-blue-300 mt-1">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+                    
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 flex flex-col sm:flex-row items-center justify-center gap-6">
+                        <!-- Teacher photo with full head & face visibility -->
+                        <div class="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-xl bg-slate-900 flex items-center justify-center relative flex-shrink-0">
+                            <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top">
+                        </div>
+                        <div class="text-center sm:text-right">
+                            <p class="text-sm text-slate-400">إعداد المعلم:</p>
+                            <p class="font-bold text-slate-100 text-lg">أ. فيصل الشبلي</p>
+                            <p class="text-xs text-blue-400">هاتف: 99812126</p>
+                            <p class="text-xs text-slate-300">Instagram: faalll8</p>
+                            <p class="text-xs text-slate-400 mt-1">مدير المدرسة: أ. سعود الشيزاوي</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Title Banner -->
+                <div class="text-center max-w-xl w-full bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border border-cyan-400/40 rounded-2xl p-6 shadow-xl mb-6 pulse-glow">
+                    <span class="text-4xl">📦🧠</span>
+                    <h1 class="text-3xl sm:text-4xl font-black text-white mt-2 drop-shadow-lg">صندوق المعرفة</h1>
+                    <h2 class="text-xl sm:text-2xl font-bold text-cyan-300 mt-1">💧 سر التبخر</h2>
+                    <p class="text-xs text-slate-300 mt-2 bg-slate-900/60 py-1 px-3 rounded-full inline-block">المادة: العلوم | الصف الخامس | المنهج العُماني</p>
+                </div>
+
+                <!-- Start Button -->
+                <button onclick="state.view='MODE_SELECTION'; render();" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-xl px-10 py-4 rounded-2xl shadow-xl transform transition hover:scale-105 flex items-center gap-3">
+                    <i class="fa-solid fa-rocket text-2xl"></i> ابدأ المغامرة العلمية
+                </button>
+            </div>
+            `;
+        }
+
+        function renderModeSelectionScreen() {
+            return `
+            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900">
+                <div class="max-w-xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl text-center">
+                    <h2 class="text-2xl font-bold text-white mb-2"><i class="fa-solid fa-users-gear text-cyan-400"></i> اختر نمط اللعب</h2>
+                    <p class="text-sm text-slate-400 mb-8">اختر الطريقة التي تفضل خوض المغامرة بها:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <button onclick="state.gameMode='solo'; state.view='PLAYER_SETUP'; render();" class="p-6 bg-slate-700/60 hover:bg-blue-600/30 border border-slate-600 hover:border-blue-400 rounded-2xl flex flex-col items-center transition group">
+                            <i class="fa-solid fa-user-astronaut text-4xl text-cyan-400 mb-3 group-hover:scale-110 transition"></i>
+                            <span class="text-lg font-bold text-white">اللعب الفردي</span>
+                            <span class="text-xs text-slate-400 mt-1">تحدي نفسك واكتشف سر التبخر</span>
+                        </button>
+
+                        <button onclick="state.gameMode='team'; state.view='PLAYER_SETUP'; render();" class="p-6 bg-slate-700/60 hover:bg-emerald-600/30 border border-slate-600 hover:border-emerald-400 rounded-2xl flex flex-col items-center transition group">
+                            <i class="fa-solid fa-users text-4xl text-emerald-400 mb-3 group-hover:scale-110 transition"></i>
+                            <span class="text-lg font-bold text-white">اللعب الجماعي (فرق)</span>
+                            <span class="text-xs text-slate-400 mt-1">تنافس مع زملائك في المختبر</span>
+                        </button>
+                    </div>
+
+                    <button onclick="state.view='START'; render();" class="text-slate-400 hover:text-white text-sm flex items-center gap-2 mx-auto mt-4">
+                        <i class="fa-solid fa-arrow-right"></i> عودة للخلف
+                    </button>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderPlayerSetupScreen() {
+            const isTeam = state.gameMode === 'team';
+            return `
+            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900">
+                <div class="max-w-xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl">
+                    <h2 class="text-2xl font-bold text-white mb-2 text-center">
+                        ${isTeam ? '👥 إعداد الفرق المدرسية' : '👤 إعداد اللاعب'}
+                    </h2>
+                    <p class="text-sm text-slate-400 mb-6 text-center">
+                        ${isTeam ? 'حدد عدد الفرق وأدخل أسماءها' : 'أدخل اسمك الكريم لنبدأ المغامرة'}
+                    </p>
+
+                    ${isTeam ? `
+                        <div class="mb-4">
+                            <label class="block text-sm text-slate-300 mb-2 font-semibold">عدد الفرق:</label>
+                            <select id="teamCountSelect" onchange="updateTeamCount(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400">
+                                <option value="2">فريقان (2)</option>
+                                <option value="3">ثلاثة فرق (3)</option>
+                                <option value="4">أربعة فرق (4)</option>
+                            </select>
+                        </div>
+                        <div id="teamInputsContainer" class="space-y-3 mb-6"></div>
+                    ` : `
+                        <div class="mb-6">
+                            <label class="block text-sm text-slate-300 mb-2 font-semibold">اسم الطالب:</label>
+                            <input type="text" id="playerNameInput" placeholder="أدخل اسمك هنا..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400" value="${state.playerName}">
+                        </div>
+                    `}
+
+                    <!-- Timer Option -->
+                    <div class="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-bold text-white block">⏱️ الوضع التنافسي (المؤقت)</span>
+                            <span class="text-xs text-slate-400">تفعيل مؤقت 35 ثانية لكل سؤال</span>
+                        </div>
+                        <input type="checkbox" id="timerCheckbox" ${state.timerEnabled ? 'checked' : ''} class="w-5 h-5 accent-cyan-500 cursor-pointer">
+                    </div>
+
+                    <!-- Reduced Motion Option -->
+                    <div class="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-bold text-white block">♿ تقليل الحركة</span>
+                            <span class="text-xs text-slate-400">تخفيف المؤثرات البصرية المتحركة</span>
+                        </div>
+                        <input type="checkbox" id="motionCheckbox" ${state.reducedMotion ? 'checked' : ''} class="w-5 h-5 accent-cyan-500 cursor-pointer">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button onclick="state.view='MODE_SELECTION'; render();" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition">
+                            الرجوع
+                        </button>
+                        <button onclick="startGameAction()" class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> ابدأ المغامرة
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function updateTeamCount(count) {
+            state.teamCount = parseInt(count);
+            const container = document.getElementById('teamInputsContainer');
+            if (!container) return;
+            let html = '';
+            for (let i = 0; i < state.teamCount; i++) {
+                html += `<input type="text" placeholder="اسم الفريق ${i+1}" class="team-input-field w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400" value="فريق ${i+1}">`;
+            }
+            container.innerHTML = html;
+        }
+
+        function startGameAction() {
+            if (state.gameMode === 'team') {
+                const inputs = document.querySelectorAll('.team-input-field');
+                state.teams = Array.from(inputs).map((inp, idx) => ({
+                    name: inp.value.trim() || `فريق ${idx+1}`,
+                    score: 0,
+                    stars: 0
+                }));
+                state.currentTeamIndex = 0;
+            } else {
+                const nameInput = document.getElementById('playerNameInput');
+                state.playerName = nameInput ? nameInput.value.trim() || 'الباحث الصغير' : 'الباحث الصغير';
+            }
+
+            const timerCb = document.getElementById('timerCheckbox');
+            state.timerEnabled = timerCb ? timerCb.checked : false;
+
+            const motionCb = document.getElementById('motionCheckbox');
+            state.reducedMotion = motionCb ? motionCb.checked : false;
+
+            initRoundQuestions();
+            state.view = 'PLAYING';
+            render();
+            if (state.gameMode === 'team') {
+                updateTeamCount(state.teamCount);
+            }
+        }
+
+        function renderLabDashboard() {
+            const currentTurnName = state.gameMode === 'team' ? state.teams[state.currentTeamIndex].name : state.playerName;
+
+            return `
+            <div class="flex-1 flex flex-col p-4 sm:p-6 max-w-6xl mx-auto w-full">
+                <!-- Top Status Bar -->
+                <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-cyan-500/20 p-3 rounded-xl border border-cyan-400/40 text-cyan-400 text-xl">
+                            <i class="fa-solid fa-flask-vial"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">مختبر حالات المادة (التبخر)</span>
+                            <h2 class="text-base font-bold text-white">${currentTurnName}</h2>
+                        </div>
+                    </div>
+
+                    <!-- Lab Energy & Progress Bar -->
+                    <div class="flex-1 max-w-md w-full">
+                        <div class="flex justify-between text-xs text-slate-300 mb-1">
+                            <span>طاقة المختبر (اكتشاف سر التبخر)</span>
+                            <span class="font-bold text-cyan-400">${state.labEnergy}%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700">
+                            <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full transition-all duration-500" style="width: ${state.labEnergy}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="flex items-center gap-4">
+                        <div class="bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-xs text-slate-400 block">النقاط</span>
+                            <span class="font-black text-amber-400 text-lg">${state.score}</span>
+                        </div>
+                        <div class="bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-xs text-slate-400 block">النجوم</span>
+                            <span class="font-black text-amber-300 text-lg">⭐ ${state.stars}</span>
+                        </div>
+                        <div class="bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-xs text-slate-400 block">التحدي</span>
+                            <span class="font-bold text-white text-lg">${state.currentQuestionIndex + 1}/10</span>
+                        </div>
+                    </div>
+                </div>
+
+                ${state.gameMode === 'team' ? `
+                <div class="mb-4 bg-cyan-950/40 border border-cyan-500/30 p-3 rounded-xl flex items-center justify-center gap-2 text-cyan-300 font-bold animate-pulse">
+                    <i class="fa-solid fa-bullseye"></i> دور الفريق الحالي: ${currentTurnName}
+                </div>
+                ` : ''}
+
+                <!-- Lab Visual Area & Knowledge Boxes -->
+                <div class="flex-1 bg-gradient-to-b from-slate-800/60 to-slate-900 border border-slate-700/80 rounded-3xl p-6 relative flex flex-col items-center justify-center overflow-hidden shadow-2xl">
+                    
+                    <div class="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-between px-12">
+                        <i class="fa-solid fa-sun text-6xl text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
+                        <i class="fa-solid fa-wind text-6xl text-cyan-300"></i>
+                        <i class="fa-solid fa-atom text-6xl text-blue-400"></i>
+                    </div>
+
+                    <div class="text-center mb-8 z-10">
+                        <h3 class="text-xl font-bold text-white mb-1"><i class="fa-solid fa-box-open text-amber-400"></i> صناديق المعرفة العلمية</h3>
+                        <p class="text-sm text-slate-400">اختر أي صندوق تفاعلي يناسبك لخوض التحدي العلمي:</p>
+                    </div>
+
+                    <!-- Boxes Grid (10 boxes for 10 challenges) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 max-w-4xl w-full z-10 mb-6">
+                        ${renderBoxesGrid()}
+                    </div>
+
+                    <!-- AI Educational Robot Guide -->
+                    <div class="mt-auto bg-slate-900/90 border border-blue-500/40 rounded-2xl p-4 flex items-center gap-4 max-w-xl w-full z-10 shadow-lg">
+                        <div class="bg-blue-600/20 p-3 rounded-xl border border-blue-400 text-blue-400 text-2xl flex-shrink-0">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-cyan-300 font-bold block">مساعد المختبر الآلي:</span>
+                            <p class="text-xs text-slate-300 mt-0.5">"اختر أي صندوق متاح أمامك يا باحث المستقبل، وساعدنا في كشف سر التبخر وزيادة طاقة المختبر!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderBoxesGrid() {
+            let html = '';
+            for (let i = 0; i < 10; i++) {
+                const isOpened = state.openedBoxes.includes(i);
+                const isCurrentReady = i === state.currentQuestionIndex;
+                
+                let boxClass = "bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-600 cursor-pointer shadow-md";
+                let iconClass = "fa-box";
+                let statusText = `صندوق ${i+1}`;
+
+                if (isOpened) {
+                    boxClass = "bg-emerald-950/60 border-emerald-500/50 text-emerald-400 opacity-80 cursor-default";
+                    iconClass = "fa-box-open";
+                    statusText = "تم فتحه ✅";
+                } else {
+                    boxClass = "bg-gradient-to-br from-blue-600 to-cyan-600 border-cyan-300 text-white pulse-glow cursor-pointer hover:scale-105 shadow-xl";
+                    iconClass = "fa-gift";
+                    statusText = `تحدي ${i+1} 🎁`;
+                }
+
+                html += `
+                <div onclick="${!isOpened ? `openBox(${i})` : ''}" class="border-2 rounded-2xl p-4 flex flex-col items-center justify-center transition-all duration-300 ${boxClass}" style="min-height: 110px;">
+                    <i class="fa-solid ${iconClass} text-3xl mb-2"></i>
+                    <span class="text-xs font-bold text-center">${statusText}</span>
+                </div>
+                `;
+            }
+            return html;
+        }
+
+        function openBox(index) {
+            sfx.playBoxOpen();
+            state.selectedBoxIndex = index;
+            state.currentQuestionIndex = index;
+            state.view = 'QUESTION_VIEW';
+            
+            const q = state.currentRoundQuestions[state.currentQuestionIndex];
+            state.selectedOptionId = null;
+            state.matchingSelections = {};
+            state.orderingSteps = q.type === 'ordering' ? [...q.steps] : [];
+
+            if (state.timerEnabled) {
+                startTimer();
+            }
+
+            render();
+        }
+
+        function startTimer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerSeconds = 35;
+            state.timerInterval = setInterval(() => {
+                state.timerSeconds--;
+                const timerEl = document.getElementById('questionTimerDisplay');
+                if (timerEl) {
+                    timerEl.innerText = state.timerSeconds;
+                }
+                if (state.timerSeconds <= 0) {
+                    clearInterval(state.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            submitAnswer(null);
+        }
+
+        function renderQuestionBoxModal() {
+            const q = state.currentRoundQuestions[state.currentQuestionIndex];
+            
+            return `
+            <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                <div class="bg-slate-900 border border-blue-500/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative flex flex-col max-h-[90vh] overflow-y-auto">
+                    
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-600/30 text-blue-400 border border-blue-500/40 px-3 py-1 rounded-xl text-xs font-bold">
+                                صندوق التحدي رقم ${state.currentQuestionIndex + 1}
+                            </span>
+                            <span class="text-xs text-slate-400">100 نقطة</span>
+                        </div>
+                        ${state.timerEnabled ? `
+                            <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-xl border border-slate-700 text-amber-400 font-bold text-sm">
+                                <i class="fa-solid fa-stopwatch"></i> <span id="questionTimerDisplay">${state.timerSeconds}</span>ث
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Question Image / Visual Representation -->
+                    <div class="mb-6 bg-slate-800/70 border border-slate-700 rounded-2xl p-4 flex flex-col items-center justify-center">
+                        ${renderQuestionVisual(q.imageType)}
+                    </div>
+
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-6 leading-relaxed">
+                        ${q.question}
+                    </h3>
+
+                    <div class="mb-6 flex-1">
+                        ${renderQuestionInputControls(q)}
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 flex justify-end">
+                        <button onclick="validateAndSubmitAnswer()" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-check"></i> تأكيد الإجابة
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderQuestionVisual(imageType) {
+            switch(imageType) {
+                case 'two_cups_sun':
+                    return `
+                    <div class="flex items-center justify-center gap-8 py-2">
+                        <div class="flex flex-col items-center">
+                            <i class="fa-solid fa-sun text-amber-400 text-3xl mb-1 animate-spin" style="animation-duration: 15s;"></i>
+                            <div class="w-16 h-20 bg-blue-500/20 border-2 border-blue-400 rounded-b-xl relative overflow-hidden">
+                                <div class="absolute bottom-0 w-full h-3/4 bg-blue-500/50"></div>
+                            </div>
+                            <span class="text-xs text-slate-300 mt-1">مشمس (حرارة)</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="fa-solid fa-snowflake text-cyan-300 text-3xl mb-1"></i>
+                            <div class="w-16 h-20 bg-blue-500/20 border-2 border-blue-400 rounded-b-xl relative overflow-hidden">
+                                <div class="absolute bottom-0 w-full h-full bg-blue-500/50"></div>
+                            </div>
+                            <span class="text-xs text-slate-300 mt-1">بارد</span>
+                        </div>
+                    </div>`;
+                case 'fan_cup':
+                    return `
+                    <div class="flex items-center justify-center gap-8 py-2">
+                        <div class="flex flex-col items-center">
+                            <i class="fa-solid fa-fan text-cyan-400 text-3xl mb-1 animate-spin"></i>
+                            <div class="w-16 h-20 bg-blue-500/20 border-2 border-blue-400 rounded-b-xl relative overflow-hidden">
+                                <div class="absolute bottom-0 w-full h-1/2 bg-blue-500/50"></div>
+                            </div>
+                            <span class="text-xs text-slate-300 mt-1">أمام مروحة (هواء)</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="fa-solid fa-box text-slate-400 text-3xl mb-1"></i>
+                            <div class="w-16 h-20 bg-blue-500/20 border-2 border-blue-400 rounded-b-xl relative overflow-hidden">
+                                <div class="absolute bottom-0 w-full h-3/4 bg-blue-500/50"></div>
+                            </div>
+                            <span class="text-xs text-slate-300 mt-1">ساكن (بدون هواء)</span>
+                        </div>
+                    </div>`;
+                case 'molecules_diagram':
+                    return `
+                    <div class="flex items-center justify-center gap-8 py-2">
+                        <div class="flex flex-col items-center bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                            <div class="flex gap-1 mb-1">
+                                <span class="w-3 h-3 bg-blue-400 rounded-full"></span>
+                                <span class="w-3 h-3 bg-blue-400 rounded-full"></span>
+                            </div>
+                            <span class="text-xs text-slate-300">سائل (متماسكة)</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right text-cyan-400 text-xl"></i>
+                        <div class="flex flex-col items-center bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                            <div class="flex gap-3 mb-1">
+                                <span class="w-3 h-3 bg-cyan-300 rounded-full"></span>
+                                <span class="w-3 h-3 bg-cyan-300 rounded-full"></span>
+                            </div>
+                            <span class="text-xs text-cyan-300">غاز (متباعدة)</span>
+                        </div>
+                    </div>`;
+                default:
+                    return `
+                    <div class="flex items-center justify-center gap-4 py-2 text-cyan-400">
+                        <i class="fa-solid fa-flask text-4xl"></i>
+                        <i class="fa-solid fa-water text-4xl"></i>
+                        <i class="fa-solid fa-wind text-4xl"></i>
+                    </div>`;
+            }
+        }
+
+        function renderQuestionInputControls(q) {
+            if (q.type === 'mcq' || q.type === 'true_false') {
+                let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+                q.options.forEach(opt => {
+                    const isSelected = state.selectedOptionId === opt.id;
+                    html += `
+                    <div onclick="state.selectedOptionId='${opt.id}'; render();" class="p-4 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-blue-600/30 border-blue-400 text-white shadow-lg' : 'bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700'}">
+                        <div class="w-6 h-6 rounded-full border-2 ${isSelected ? 'border-cyan-400 bg-cyan-500' : 'border-slate-500'} flex items-center justify-center text-xs text-white">
+                            ${isSelected ? '✓' : ''}
+                        </div>
+                        <span class="text-sm font-medium">${opt.text}</span>
+                    </div>
+                    `;
+                });
+                html += '</div>';
+                return html;
+            } else if (q.type === 'matching') {
+                let html = '<div class="space-y-3"><p class="text-xs text-cyan-300">اختر التطابق الصحيح لكل عبارة:</p>';
+                q.pairs.forEach((pair, idx) => {
+                    const currentSelected = state.matchingSelections[idx] || '';
+                    html += `
+                    <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <span class="text-sm font-bold text-slate-200 flex-1">${pair.premise}</span>
+                        <select onchange="updateMatchingSelection(${idx}, this.value)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-cyan-300 focus:outline-none focus:border-cyan-400 w-full sm:w-60">
+                            <option value="">-- اختر التطابق الصحيح --</option>
+                            ${q.shuffledAnswers.map(ans => `<option value="${ans}" ${currentSelected === ans ? 'selected' : ''}>${ans}</option>`).join('')}
+                        </select>
+                    </div>
+                    `;
+                });
+                html += '</div>';
+                return html;
+            } else if (q.type === 'ordering') {
+                let html = '<div class="space-y-2"><p class="text-xs text-cyan-300">رتب الخطوات باستخدام أزرار التوجيه:</p>';
+                state.orderingSteps.forEach((step, idx) => {
+                    html += `
+                    <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex items-center justify-between gap-3">
+                        <span class="text-sm font-bold text-slate-200">${idx+1}. ${step}</span>
+                        <div class="flex gap-1">
+                            <button onclick="moveStep(${idx}, -1)" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button onclick="moveStep(${idx}, 1)" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white"><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
+                    </div>
+                    `;
+                });
+                html += '</div>';
+                return html;
+            }
+            return '';
+        }
+
+        function updateMatchingSelection(idx, val) {
+            state.matchingSelections[idx] = val;
+        }
+
+        function moveStep(idx, direction) {
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= state.orderingSteps.length) return;
+            const temp = state.orderingSteps[idx];
+            state.orderingSteps[idx] = state.orderingSteps[newIdx];
+            state.orderingSteps[newIdx] = temp;
+            render();
+        }
+
+        function validateAndSubmitAnswer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+
+            const q = state.currentRoundQuestions[state.currentQuestionIndex];
+            let isCorrect = false;
+
+            if (q.type === 'mcq' || q.type === 'true_false') {
+                if (!state.selectedOptionId) {
+                    alertBoxModal("يرجى اختيار إجابة أولاً.");
+                    return;
+                }
+                isCorrect = state.selectedOptionId === q.correctId;
+            } else if (q.type === 'matching') {
+                let allCorrect = true;
+                q.pairs.forEach((pair, idx) => {
+                    if (state.matchingSelections[idx] !== pair.answer) {
+                        allCorrect = false;
+                    }
+                });
+                isCorrect = allCorrect;
+            } else if (q.type === 'ordering') {
+                isCorrect = JSON.stringify(state.orderingSteps) === JSON.stringify(q.steps);
+            }
+
+            submitAnswer(isCorrect);
+        }
+
+        function alertBoxModal(msg) {
+            const div = document.createElement('div');
+            div.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2";
+            div.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2500);
+        }
+
+        function submitAnswer(isCorrect) {
+            const q = state.currentRoundQuestions[state.currentQuestionIndex];
+            
+            if (isCorrect) {
+                sfx.playCorrect();
+                state.score += 100;
+                state.stars += 1;
+                state.labEnergy = Math.min(100, state.labEnergy + 10);
+                if (state.gameMode === 'team') {
+                    state.teams[state.currentTeamIndex].score += 100;
+                    state.teams[state.currentTeamIndex].stars += 1;
+                }
+            } else {
+                sfx.playWrong();
+            }
+
+            state.answersHistory.push({
+                question: q.question,
+                isCorrect: isCorrect,
+                why: q.why,
+                concept: q.concept
+            });
+
+            state.openedBoxes.push(state.selectedBoxIndex);
+            state.view = 'FEEDBACK_VIEW';
+            render();
+        }
+
+        function renderFeedbackModal() {
+            const lastAns = state.answersHistory[state.answersHistory.length - 1];
+            const isCorrect = lastAns.isCorrect;
+
+            return `
+            <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                <div class="bg-slate-900 border ${isCorrect ? 'border-emerald-500/50' : 'border-rose-500/50'} rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl text-center">
+                    
+                    <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 ${isCorrect ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500' : 'bg-rose-500/20 text-rose-400 border border-rose-500'}">
+                        <i class="fa-solid ${isCorrect ? 'fa-check' : 'fa-xmark'}"></i>
+                    </div>
+
+                    <h3 class="text-2xl font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'} mb-2">
+                        ${isCorrect ? 'إجابة صحيحة!' : 'إجابة غير صحيحة'}
+                    </h3>
+
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-right mb-6">
+                        <span class="text-xs font-bold text-cyan-300 block mb-1"><i class="fa-solid fa-lightbulb"></i> لماذا؟</span>
+                        <p class="text-sm text-slate-200 leading-relaxed">${lastAns.why}</p>
+                    </div>
+
+                    <button onclick="proceedBackToLab()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        متابعة التحدي <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+            `;
+        }
+
+        function proceedBackToLab() {
+            if (state.gameMode === 'team') {
+                state.currentTeamIndex = (state.currentTeamIndex + 1) % state.teams.length;
+            }
+
+            if (state.openedBoxes.length >= 10) {
+                sfx.playVictory();
+                state.view = 'FINISHED';
+            } else {
+                state.view = 'PLAYING';
+            }
+            render();
+        }
+
+        function renderFinishedScreen() {
+            const currentName = state.gameMode === 'team' ? state.teams.map(t => `${t.name}: ${t.score} نقطة`).join(' | ') : state.playerName;
+            const percentage = (state.score / 1000) * 100;
+            
+            let rankTitle = "🌱 واصل الاستكشاف";
+            let rankDesc = "أنت على الطريق الصحيح، راجع درس التبخر لتصبح خبيراً علمياً.";
+            if (percentage >= 90) {
+                rankTitle = "🏆 عبقري حالات المادة";
+                rankDesc = "مذهل! أظهرت فهماً استثنائياً لسر التبخر وعوامل التأثير.";
+            } else if (percentage >= 80) {
+                rankTitle = "🥇 خبير التبخر";
+                rankDesc = "ممتاز جداً! لديك معرفة علمية متقدمة ورائعة.";
+            } else if (percentage >= 70) {
+                rankTitle = "🥈 مستكشف علمي";
+                rankDesc = "جيد جداً! استكشفت معظم أسرار التبخر بنجاح.";
+            } else if (percentage >= 60) {
+                rankTitle = "🥉 باحث واعد";
+                rankDesc = "أداء طيب، يمكنك مراجعة المفهوم لتحسين نتيجتك.";
+            }
+
+            return `
+            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900">
+                <div class="max-w-2xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl text-center">
+                    <div class="text-5xl mb-3">🎉</div>
+                    <h2 class="text-3xl font-black text-white mb-1">اكتمل مختبر التبخر بنجاح!</h2>
+                    <p class="text-sm text-cyan-300 mb-6">${currentName}</p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block">النقاط الإجمالية</span>
+                            <span class="text-xl font-black text-amber-400">${state.score}/1000</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block">الإجابات الصحيحة</span>
+                            <span class="text-xl font-black text-emerald-400">${state.stars}/10</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block">النجوم المكتسبة</span>
+                            <span class="text-xl font-black text-amber-300">⭐ ${state.stars}</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block">النسبة المئوية</span>
+                            <span class="text-xl font-black text-cyan-400">${percentage}%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border border-cyan-400/40 rounded-2xl p-6 mb-6">
+                        <span class="text-2xl block mb-1">${rankTitle}</span>
+                        <p class="text-xs text-slate-300">${rankDesc}</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="state.view='REVIEW'; render();" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i> مراجعة التحديات
+                        </button>
+                        <button onclick="restartGame()" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate"></i> العب من جديد
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            let html = `
+            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900">
+                <div class="max-w-3xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col max-h-[85vh]">
+                    <h2 class="text-2xl font-bold text-white mb-4 text-center"><i class="fa-solid fa-clipboard-question text-cyan-400"></i> مراجعة إجابات التحديات</h2>
+                    
+                    <div class="flex-1 overflow-y-auto space-y-4 pr-2 mb-6">
+            `;
+
+            state.answersHistory.forEach((item, idx) => {
+                html += `
+                <div class="bg-slate-900/80 border ${item.isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'} rounded-2xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-cyan-300">السؤال (${item.concept})</span>
+                        <span class="text-xs font-bold ${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${item.isCorrect ? 'صحيح ✓' : 'خطأ ✗'}</span>
+                    </div>
+                    <p class="text-sm text-white font-medium mb-2">${item.question}</p>
+                    <div class="bg-slate-800/90 p-3 rounded-xl border border-slate-700 text-xs text-slate-300">
+                        <span class="font-bold text-cyan-400 block mb-1">الشرح العلمي (لماذا؟):</span>
+                        ${item.why}
+                    </div>
+                </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button onclick="state.view='FINISHED'; render();" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition">
+                        العودة لنتيجة المختبر
+                    </button>
+                </div>
+            </div>
+            `;
+            return html;
+        }
+
+        function restartGame() {
+            initRoundQuestions();
+            state.view = 'PLAYING';
+            render();
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+
+    <div id="app" class="flex flex-col min-h-screen"></div>
+
+</body>
+</html>

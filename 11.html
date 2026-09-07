@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مختبر عجلة التحدي - استقصاء التلقيح</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+        }
+        .glow-gold {
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.6);
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none">
+
+    <!-- Top Minimal Header (Clean, No Competition Titles on Questions) -->
+    <header id="topNavbar" class="w-full glass-panel border-b border-sky-500/20 py-2.5 px-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🎡</span>
+                <span class="font-bold text-sm text-sky-400">مختبر عجلة التحدي • استقصاء التلقيح</span>
+            </div>
+
+            <!-- Global Controls -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="soundBtn" class="p-1.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sky-300 transition text-xs flex items-center gap-1">
+                    <span>🔊</span> <span class="hidden sm:inline">الصوت</span>
+                </button>
+                <button onclick="toggleMotion()" id="motionBtn" class="p-1.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sky-300 transition text-xs flex items-center gap-1" title="تقليل الحركة">
+                    <span>♿</span> <span class="hidden sm:inline">الحركة</span>
+                </button>
+                <button onclick="toggleFullScreen()" class="p-1.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sky-300 transition text-xs flex items-center gap-1">
+                    <span>⛶</span> <span class="hidden sm:inline">ملء الشاشة</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4 max-w-5xl mx-auto w-full my-4">
+
+        <!-- SCREEN 1: START & OFFICIAL IDENTITY -->
+        <div id="screenStart" class="w-full glass-panel rounded-3xl p-6 md:p-8 text-center glow-effect max-w-2xl animate-pulse-slow">
+            <div class="mb-6 flex justify-center">
+                <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار سلطنة عمان" class="w-20 h-20 object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+            </div>
+
+            <div class="space-y-1 mb-8 text-sm font-semibold text-sky-200/90">
+                <p>سلطنة عمان</p>
+                <p>وزارة التعليم</p>
+                <p>المديرية العامة للتعليم بمحافظة شمال الباطنة</p>
+                <p class="text-sky-400 font-bold">مدرسة محمد بن محبوب الرحيلي للتعليم الاساسي (5-10)</p>
+            </div>
+
+            <!-- Teacher Info with Adjusted Image Container -->
+            <div class="bg-slate-900/80 border border-sky-500/30 rounded-2xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-5 justify-center">
+                <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-sky-400 shadow-lg bg-slate-950 flex-shrink-0">
+                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top">
+                </div>
+                <div class="text-center sm:text-right">
+                    <p class="text-lg font-bold text-white">أ. فيصل الشبلي</p>
+                    <p class="text-sm text-sky-300 font-mono">99812126</p>
+                    <p class="text-xs text-sky-400">Instagram: faalll8</p>
+                    <div class="mt-2 pt-2 border-t border-slate-700 text-xs text-slate-300">
+                        مدير المدرسة: أ. سعود الشيزاوي
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="goToModeSelection()" class="w-full py-4 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xl rounded-2xl shadow-xl transition transform hover:scale-[1.02] active:scale-[0.98] glow-effect">
+                🚀 ابدأ رحلة المختبر العلمي
+            </button>
+        </div>
+
+        <!-- SCREEN 2: MODE SELECTION -->
+        <div id="screenMode" class="w-full glass-panel rounded-3xl p-6 md:p-8 text-center hidden max-w-xl">
+            <h2 class="text-2xl font-black text-sky-400 mb-6">اختر نمط اللعب في المختبر</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <button onclick="selectMode('solo')" class="p-6 rounded-2xl bg-slate-800/90 border-2 border-sky-500/40 hover:border-sky-400 hover:bg-slate-800 transition flex flex-col items-center gap-3 group">
+                    <span class="text-4xl group-hover:scale-110 transition">👤</span>
+                    <span class="font-bold text-lg text-white">الوضع الفردي</span>
+                    <span class="text-xs text-slate-400">تحدى نفسك واختبر معلوماتك</span>
+                </button>
+                <button onclick="selectMode('team')" class="p-6 rounded-2xl bg-slate-800/90 border-2 border-indigo-500/40 hover:border-indigo-400 hover:bg-slate-800 transition flex flex-col items-center gap-3 group">
+                    <span class="text-4xl group-hover:scale-110 transition">👥</span>
+                    <span class="font-bold text-lg text-white">الوضع الجماعي</span>
+                    <span class="text-xs text-slate-400">نافس الفرق داخل الفصل</span>
+                </button>
+            </div>
+
+            <button onclick="goBackToStart()" class="text-sm text-slate-400 hover:text-white underline">← رجوع للخلف</button>
+        </div>
+
+        <!-- SCREEN 3: PLAYER / TEAM SETUP -->
+        <div id="screenSetup" class="w-full glass-panel rounded-3xl p-6 md:p-8 text-center hidden max-w-xl">
+            <h2 id="setupTitle" class="text-2xl font-black text-sky-400 mb-6">إعداد اللاعبين</h2>
+
+            <div id="soloSetupDiv" class="mb-6">
+                <label class="block text-sm text-slate-300 mb-2">أدخل اسم الباحث الصغير:</label>
+                <input type="text" id="playerNameInput" placeholder="مثال: أحمد العبري" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-center focus:outline-none focus:border-sky-400">
+            </div>
+
+            <div id="teamSetupDiv" class="mb-6 hidden">
+                <label class="block text-sm text-slate-300 mb-2">اختر عدد الفرق المنافسة:</label>
+                <select id="teamCountSelect" onchange="generateTeamInputs()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-center focus:outline-none focus:border-sky-400 mb-4">
+                    <option value="2">فريقان (2)</option>
+                    <option value="3">ثلاثة فرق (3)</option>
+                    <option value="4">أربعة فرق (4)</option>
+                </select>
+                <div id="teamInputsContainer" class="space-y-3">
+                    <!-- Dynamically generated team name inputs -->
+                </div>
+            </div>
+
+            <!-- Timer Toggle Option -->
+            <div class="mb-6 flex items-center justify-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-700">
+                <input type="checkbox" id="timerCheckbox" class="w-5 h-5 accent-sky-500 rounded cursor-pointer">
+                <label for="timerCheckbox" class="text-sm text-slate-200 cursor-pointer">تفعيل الوضع التنافسي (مؤقت لكل سؤال)</label>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="backToMode()" class="w-1/3 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition">رجوع</button>
+                <button onclick="startGameSession()" class="w-2/3 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition">دخول المختبر ⚡</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: MAIN GAME & WHEEL DASHBOARD -->
+        <div id="screenGame" class="w-full hidden flex flex-col gap-4">
+            
+            <!-- Dashboard Top Bar -->
+            <div class="glass-panel rounded-2xl p-3 flex flex-wrap justify-between items-center gap-3 text-sm">
+                <div>
+                    <div id="activePlayerDisplay" class="font-black text-sky-300">الباحث: أحمد</div>
+                    <div class="text-xs text-slate-400">التحدي <span id="currentQuestionNum">1</span> من 10</div>
+                </div>
+
+                <!-- Laboratory Energy Progress -->
+                <div class="flex-grow max-w-xs">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-sky-400 font-bold">⚡ طاقة المختبر</span>
+                        <span id="energyText" class="text-sky-300 font-mono">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 border border-slate-700 overflow-hidden">
+                        <div id="energyBar" class="bg-gradient-to-r from-sky-500 to-emerald-400 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <div class="text-left">
+                    <div class="text-xs text-slate-400">النقاط الإجمالية</div>
+                    <div id="totalScoreDisplay" class="font-black text-emerald-400">0 / 1000</div>
+                </div>
+            </div>
+
+            <!-- Main Laboratory Wheel Area -->
+            <div id="wheelAreaContainer" class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-3 left-4 text-xs text-sky-400 bg-sky-950/60 px-3 py-1 rounded-full border border-sky-500/30">
+                    🎡 حدد نوع التحدي القادم
+                </div>
+
+                <!-- Lab Visual Environment Status -->
+                <div id="labStatusBadge" class="mb-4 text-xs bg-indigo-950/80 text-indigo-300 px-4 py-1.5 rounded-full border border-indigo-500/30 flex items-center gap-2">
+                    <span>🔬 المختبر جاهز للاستقصاء</span>
+                    <span id="labLevelIndicator" class="font-bold text-sky-400">المستوى الأساسي</span>
+                </div>
+
+                <!-- Canvas Wheel Wrapper -->
+                <div class="relative my-4 flex items-center justify-center">
+                    <!-- Fixed Pointer Indicator Top -->
+                    <div class="absolute -top-4 z-20 w-8 h-8 bg-amber-400 rotate-45 border-2 border-white shadow-lg flex items-center justify-center"></div>
+                    
+                    <canvas id="wheelCanvas" width="320" height="320" class="max-w-full drop-shadow-[0_0_20px_rgba(56,189,248,0.4)]"></canvas>
+                </div>
+
+                <div id="selectedChallengeBanner" class="my-2 text-center min-h-[30px]">
+                    <span id="challengeTitlePreview" class="text-sky-300 font-bold text-base">أدر العجلة لاختيار التحدي!</span>
+                </div>
+
+                <button id="spinWheelBtn" onclick="spinWheel()" class="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-base rounded-2xl shadow-xl transition transform hover:scale-105 active:scale-95 glow-gold flex items-center gap-2">
+                    <span>🎡</span> أدر العجلة
+                </button>
+            </div>
+
+            <!-- SCREEN 5: QUESTION ACTIVE MODAL / AREA -->
+            <div id="questionArea" class="glass-panel rounded-3xl p-6 md:p-8 hidden relative border-2 border-sky-500/40">
+                
+                <!-- Timer Bar if active -->
+                <div id="timerWrapper" class="mb-4 hidden">
+                    <div class="flex justify-between text-xs text-amber-400 mb-1">
+                        <span>⏳ الوقت المتبقي</span>
+                        <span id="timerCount" class="font-mono font-bold">30</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="timerBar" class="bg-amber-500 h-full w-full transition-all duration-1000"></div>
+                    </div>
+                </div>
+
+                <!-- Challenge Type Tag -->
+                <div class="flex justify-between items-center mb-4">
+                    <span id="qTypeBadge" class="bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full text-xs font-bold border border-sky-500/30">🔍 تحدي الملاحظة</span>
+                    <span class="text-xs text-slate-400">سؤال علمي من المنهاج العماني</span>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="qQuestionText" class="text-base md:text-lg font-bold text-white mb-5 leading-relaxed">
+                    <!-- Question text injected here -->
+                </h3>
+
+                <!-- Dynamic Question Visual / Canvas / Table / Options -->
+                <div id="qContentContainer" class="mb-5">
+                    <!-- Options, tables, matching or ordering UI injected here -->
+                </div>
+
+                <!-- Confirm Answer Button -->
+                <div id="confirmBtnContainer" class="text-center mt-4">
+                    <button id="confirmAnswerBtn" onclick="confirmAnswer()" class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-white font-bold rounded-xl shadow-lg transition opacity-50 cursor-not-allowed" disabled>
+                        ✅ تأكيد الإجابة
+                    </button>
+                </div>
+
+                <!-- Feedback & Explanation Box (Hidden initially) -->
+                <div id="feedbackBox" class="mt-4 p-4 rounded-2xl bg-slate-900/90 border border-slate-700 hidden">
+                    <div id="feedbackTitle" class="font-bold text-base mb-2"></div>
+                    <div id="feedbackExplanation" class="text-xs sm:text-sm text-slate-300 mb-3 leading-relaxed"></div>
+                    <button onclick="proceedToNext()" class="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 text-white font-bold rounded-xl shadow transition">
+                        ➡️ متابعة التحدي
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SCREEN 6: FINISHED & FINAL RESULTS -->
+        <div id="screenFinished" class="w-full glass-panel rounded-3xl p-6 md:p-8 text-center hidden max-w-2xl">
+            <div class="text-5xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black text-sky-400 mb-2">النتيجة النهائية للمختبر</h2>
+            <p id="finishedPlayerName" class="text-lg text-slate-300 mb-6 font-bold"></p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                    <div class="text-xs text-slate-400">النقاط الإجمالية</div>
+                    <div id="resScore" class="text-xl font-black text-emerald-400">1000 / 1000</div>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                    <div class="text-xs text-slate-400">الإجابات الصحيحة</div>
+                    <div id="resCorrect" class="text-xl font-black text-sky-400">10 / 10</div>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                    <div class="text-xs text-slate-400">طاقة المختبر</div>
+                    <div class="text-xl font-black text-amber-400">100%</div>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                    <div class="text-xs text-slate-400">النجوم المكتسبة</div>
+                    <div id="resStars" class="text-xl font-black text-yellow-400">⭐ 10/10</div>
+                </div>
+            </div>
+
+            <!-- Rank Badge -->
+            <div id="rankBadgeBox" class="p-4 rounded-2xl bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-500/40 mb-6">
+                <div class="text-sm text-indigo-300">الرتبة العلمية</div>
+                <div id="rankTitleText" class="text-2xl font-black text-white mt-1">🏆 عبقري الاستقصاء</div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="openReviewModal()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold rounded-xl border border-sky-500/30 transition">
+                    🔎 مراجعة التحديات
+                </button>
+                <button onclick="restartGame()" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 text-white font-bold rounded-xl shadow transition">
+                    🔄 العب من جديد
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- REVIEW MODAL -->
+    <div id="reviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-xl font-black text-sky-400">🔎 سجل مراجعة التحديات</h3>
+                <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white text-lg font-bold px-3 py-1 rounded-lg bg-slate-800">✕</button>
+            </div>
+            <div id="reviewContentList" class="space-y-4 flex-grow">
+                <!-- Injected review items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-800">
+        جميع الحقوق محفوظة • سلطنة عُمان • مدرسة محمد بن محبوب الرحيلي (5-10)
+    </footer>
+
+    <!-- Audio Synth Script & Game Logic -->
+    <script>
+        // --- SOUND SYNTHESIZER (Web Audio API) ---
+        let soundEnabled = true;
+        let motionReduced = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'spin') {
+                // Soft Glide Chime tone for wheel spinning
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(330, now + 0.08);
+                gain.gain.setValueAtTime(0.03, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'tick') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'stop') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.25);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(554.37, now + 0.1);
+                osc.frequency.setValueAtTime(659.25, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.setValueAtTime(150, now + 0.15);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'energy') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'win') {
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(freq, now + i * 0.12);
+                    g.gain.setValueAtTime(0.15, now + i * 0.12);
+                    g.gain.linearRampToValueAtTime(0.01, now + i * 0.12 + 0.2);
+                    o.start(now + i * 0.12);
+                    o.stop(now + i * 0.12 + 0.2);
+                });
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').innerHTML = soundEnabled ? '<span>🔊</span> <span class="hidden sm:inline">الصوت</span>' : '<span>🔇</span> <span class="hidden sm:inline">صامت</span>';
+        }
+
+        function toggleMotion() {
+            motionReduced = !motionReduced;
+            document.getElementById('motionBtn').style.opacity = motionReduced ? '0.5' : '1';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- QUESTION BANK (18 Diverse Challenges on "استقصاء التلقيح") ---
+        const fullQuestionBank = [
+            {
+                id: 1,
+                type: '🔍 تحدي الملاحظة',
+                question: 'أثناء استقصاء النباتات المزهرة، لاحظ الباحثون زهرتين مختلفتين: إحداهما ذات بتلات زاهية الرائحة والأخرى باهتة بدون رائحة. ما الملاحظة المتوقعة للزهرة ذات البتلات الزاهية؟',
+                options: [
+                    { id: 'a', text: 'تعتمد على الرياح بشكل أساسي', correct: false },
+                    { id: 'b', text: 'تنجذب إليها الحشرات لتوفر الرحيق', correct: true },
+                    { id: 'c', text: 'لا تنتج حبوب لقاح أبداً', correct: false },
+                    { id: 'd', text: 'تنمو فقط في فصل الشتاء البارد', correct: false }
+                ],
+                explanation: 'الأزهار ذات البتلات الزاهية والعطرة تجذب الحشرات الملقحة (مثل النحل والفراشات) للحصول على الرحيق.'
+            },
+            {
+                id: 2,
+                type: '🐝 تحدي الحشرات',
+                question: 'عند مراقبة زهرة نبات التفاح، وُجد أن عدد زيارات النحل لها بلغ 15 زيارة في الساعة. ما السبب الأساسي لزيارة النحل المتكررة لهذه الأزهار؟',
+                options: [
+                    { id: 'a', text: 'للبحث عن مسكن ومأوى دائم', correct: false },
+                    { id: 'b', text: 'لتجميع الرحيق وحبوب اللقاح المغذية', correct: true },
+                    { id: 'c', text: 'للهروب من الرياح القوية', correct: false },
+                    { id: 'd', text: 'لتنظيف أوراق الزهرة', correct: false }
+                ],
+                explanation: 'تزور الحشرات الأزهار بحثاً عن الرحيق والغذاء، وأثناء ذلك تلتصق حبوب اللقاح بأجسامها.'
+            },
+            {
+                id: 3,
+                type: '🌸 تحدي المقارنة',
+                question: 'أي من الصفات الآتية تميز حبوب اللقاح في النباتات التي تلقحها الرياح مقارنة بالنباتات التي تلقحها الحشرات؟',
+                options: [
+                    { id: 'a', text: 'ثقيلة ولزجة لكي تلتصق بالحشرات', correct: false },
+                    { id: 'b', text: 'خفيفة وصغيرة جداً لكي يحملها الهواء بسهولة', correct: true },
+                    { id: 'c', text: 'ذات ألوان زاهية ورائحة فواحة قوية', correct: false },
+                    { id: 'd', text: 'تحتوي على كميات كبيرة من السكر', correct: false }
+                ],
+                explanation: 'حبوب اللقاح التي تنتقل عبر الرياح تكون خفيفة الوزن والجافة لتطير بسهولة لمسافات بعيدة.'
+            },
+            {
+                id: 4,
+                type: '📊 تحدي الجدول',
+                question: 'من خلال جدول زيارات الحشرات لثلاث أزهار (س: 12 زيارة، ص: 2 زيارة، ع: 20 زيارة)، أي زهرة يُرجح أن تكون الأكثر جذباً للحشرات الملقحة؟',
+                options: [
+                    { id: 'a', text: 'الزهرة (ص) لقلة زياراتها', correct: false },
+                    { id: 'b', text: 'الزهرة (ع) لكثرة زيارات الحشرات لها', correct: true },
+                    { id: 'c', text: 'الزهرة (س) لأنها المتوسطة', correct: false },
+                    { id: 'd', text: 'جميع الأزهار متساوية الجذب', correct: false }
+                ],
+                explanation: 'الزهرة (ع) التي سجلت 20 زيارة هي الأكثر جذباً للحشرات بناءً على بيانات الاستقصاء.'
+            },
+            {
+                id: 5,
+                type: '🧠 تحدي الاستنتاج',
+                question: 'قام طالبان بقطع بتلات زهرة بعناية مع إبقاء الأجزاء التناسلية، فلاحظا انخفاض زيارات الحشرات لها بشكل ملحوظ. ما الاستنتاج العلمي السليم من هذه التجربة؟',
+                options: [
+                    { id: 'a', text: 'البتلات تلعب دوراً أساسياً في جذب الحشرات للأزهار', correct: true },
+                    { id: 'b', text: 'الحشرات تزور الأزهار لتناول الأوراق فقط', correct: false },
+                    { id: 'c', text: 'البتلات مسؤولة عن إنتاج حبوب اللقاح', correct: false },
+                    { id: 'd', text: 'الرياح هي السبب الوحيد لانتقال اللقاح', correct: false }
+                ],
+                explanation: 'البتلات الملونة والبارزة تعمل كإشارات مرئية لجذب الحشرات من مسافات بعيدة.'
+            },
+            {
+                id: 6,
+                type: '🔗 تحدي التوصيل',
+                question: 'صل كل مصطلح استقصائي بما يناسبه (اضغط للربط ويمكنك إلغاء أي توصيل بشكل فردي):',
+                isMatching: true,
+                pairs: [
+                    { id: 1, left: 'الرحيق', right: 'سائل سكري مغذٍ تفرزه الزهرة' },
+                    { id: 2, left: 'حبوب اللقاح', right: 'خلايا التكاثر الذكرية في الزهرة' },
+                    { id: 3, left: 'الميسم', right: 'الجزء الأنثوي الذي يلتقط حبوب اللقاح' }
+                ],
+                explanation: 'الرحيق يغذي الحشرات، وحبوب اللقاح تنتقل لتتم عملية التلقيح عبر الميسم.'
+            },
+            {
+                id: 7,
+                type: '🔢 تحدي الترتيب',
+                question: 'رتب الخطوات الصحيحة لإجراء استقصاء زيارات الحشرات للأزهار في حديقة المدرسة:',
+                isOrdering: true,
+                items: [
+                    'تحديد الأزهار المراد مراقبتها في الحديقة',
+                    'الوقوف بهدوء ومراقبة الزهرة لمدة 10 دقائق',
+                    'تسجيل عدد الحشرات الزائرة وأنواعها في الجدول',
+                    'مقارنة النتائج واستنتاج الزهرة الأكثر جذباً'
+                ],
+                correctOrder: [0, 1, 2, 3],
+                explanation: 'يبدأ الاستقصاء بالتحديد ثم المراقبة فالتسجيل وأخيراً المقارنة والاستنتاج.'
+            },
+            {
+                id: 8,
+                type: '🌬️ تحدي التلقيح بالرياح',
+                question: 'أثناء استقصاء نباتات الأعشاب النجيلية، لاحظ الباحثون أن أزهارها غير ملونة وليس لها رائحة، وحبوب لقاحها كثيرة جداً وتطير مع هبوب النسيم. كيف تتم عملية التلقيح فيها؟',
+                options: [
+                    { id: 'a', text: 'تلقيح بواسطة النحل والطيور الطنانة', correct: false },
+                    { id: 'b', text: 'تلقيح بواسطة الرياح التي تحمل حبوب اللقاح الخفيفة', correct: true },
+                    { id: 'c', text: 'تلقيح ذاتي داخل البتلات المغلقة', correct: false },
+                    { id: 'd', text: 'تلقيح عن طريق الحشرات الليلية فقط', correct: false }
+                ],
+                explanation: 'الأزهار الباهتة وغير العطرة التي تطلق حبوب لقاح خفيفة تعتمد على الرياح في نقلها.'
+            },
+            {
+                id: 9,
+                type: '❌ تحدي اكتشاف الخطأ',
+                question: 'سجل أحد الطلاب في تقرير الاستقصاء العبارة الآتية: "النباتات التي تلقحها الحشرات تمتلك حبوب لقاح جافة وخفيفة تطير مع الهواء لمسافات هائلة". حدد الخطأ العلمي في هذه العبارة:',
+                options: [
+                    { id: 'a', text: 'حبوب لقاح الحشرات ثقيلة ولزجة لتلتصق بأجسامها، وليست خفيفة', correct: true },
+                    { id: 'b', text: 'النباتات لا تنتج حبوب لقاح أصلاً', correct: false },
+                    { id: 'c', text: 'الحشرات هي التي تنقل الرياح وليست العكس', correct: false },
+                    { id: 'd', text: 'الخطأ هو عدم ذكر اللون الأحمر للبتلات', correct: false }
+                ],
+                explanation: 'حبوب اللقاح الخفيفة والجافة تخص النباتات التي تلقحها الرياح، بينما حبوب لقاح الحشرات لزجة وخشنة.'
+            },
+            {
+                id: 10,
+                type: '🔮 تحدي التنبؤ',
+                question: 'في تجربة استقصائية، إذا قمت بوضع شبكة دقيقة تحجب الحشرات عن زهرة عطرية جميلة، ماذا تتوقع أن يحدث لعملية انتقال حبوب اللقاح مقارنة بزهرة مكشوفة؟',
+                options: [
+                    { id: 'a', text: 'تزداد سرعة التلقيح بشكل مضاعف', correct: false },
+                    { id: 'b', text: 'تقل أو تنعدم فرصة التلقيح لغياب الحشرات الزائرة', correct: true },
+                    { id: 'c', text: 'تتحول الزهرة تلقائياً للتلقيح بالرياح', correct: false },
+                    { id: 'd', text: 'لا يتأثر الاستقصاء بأي شكل من الأشكال', correct: false }
+                ],
+                explanation: 'حجب الحشرات يمنعها من الوصول للزهرة ونقل حبوب اللقاح، مما يقلل نجاح التلقيح.'
+            },
+            {
+                id: 11,
+                type: '🐝 تحدي التلقيح بالحشرات',
+                question: 'أي من الخيارات الآتية يمثل أفضل مجموعة من الصفات التي تجذب النحل للأزهار في الحديقة؟',
+                options: [
+                    { id: 'a', text: 'بتلات باهتة، بلا رائحة، خالية من الرحيق', correct: false },
+                    { id: 'b', text: 'بتلات زاهية الألوان، رائحة عطرة، وجود رحيق حلو', correct: true },
+                    { id: 'c', text: 'أوراق شوكية، حبوب لقاح ثقيلة جداً، أزهار مغلقة', correct: false },
+                    { id: 'd', text: 'أزهار تختفي تحت التربة طوال اليوم', correct: false }
+                ],
+                explanation: 'الألوان الزاهية والرائحة الطيبة والرحيق هي وسائل الجذب الرئيسية التي تتوفر في أزهار الحشرات.'
+            },
+            {
+                id: 12,
+                type: '📊 تحدي البيانات',
+                question: 'قام الباحثون بحساب عدد الحشرات على زهرة البابونج صباحاً (8 حشرات) وظهراً (3 حشرات) ومساءً (1 حشرة). ما الاستنتاج الأقرب للصحة حول نشاط الحشرات؟',
+                options: [
+                    { id: 'a', text: 'تكون الحشرات أكثر نشاطاً في الصباح الباكر على هذه الأزهار', correct: true },
+                    { id: 'b', text: 'الحشرات تفضل الظلام الدامس تماماً', correct: false },
+                    { id: 'c', text: 'عدد الحشرات لا علاقة له بوقت اليوم', correct: false },
+                    { id: 'd', text: 'تتوقف الحشرات عن زيارة الأزهار نهائياً', correct: false }
+                ],
+                explanation: 'البيانات تُظهر تدريجاً تنازلياً في عدد زيارات الحشرات مع تقدم وقت اليوم.'
+            }
+        ];
+
+        // --- GAME STATE VARIABLES ---
+        let gameState = {
+            state: 'START',
+            mode: 'solo',
+            playerName: 'الباحث الصغير',
+            teams: [],
+            currentTeamIndex: 0,
+            questionNum: 1,
+            maxQuestions: 10,
+            energy: 0,
+            score: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            unansweredCount: 0,
+            timerActive: false,
+            timerSeconds: 30,
+            timerInterval: null,
+            activeQuestionsList: [],
+            currentQuestion: null,
+            selectedWheelSector: null,
+            reviewHistory: [],
+            matchSelectedLeft: null,
+            matchPairsDone: []
+        };
+
+        // Wheel Sectors Definition
+        const wheelSectors = [
+            { label: 'تحدي الملاحظة', color: '#0ea5e9', icon: '🔍' },
+            { label: 'تحدي الحشرات', color: '#10b981', icon: '🐝' },
+            { label: 'تحدي المقارنة', color: '#f59e0b', icon: '🌸' },
+            { label: 'تحدي الجدول', color: '#8b5cf6', icon: '📊' },
+            { label: 'تحدي الاستنتاج', color: '#ec4899', icon: '🧠' },
+            { label: 'تحدي التوصيل', color: '#3b82f6', icon: '🔗' },
+            { label: 'تحدي الترتيب', color: '#14b8a6', icon: '🔢' },
+            { label: 'تحدي الرياح', color: '#6366f1', icon: '🌬️' }
+        ];
+
+        // --- NAVIGATION & SCREENS ---
+        function goToModeSelection() {
+            playSound('correct');
+            document.getElementById('screenStart').classList.add('hidden');
+            document.getElementById('screenMode').classList.remove('hidden');
+        }
+
+        function goBackToStart() {
+            document.getElementById('screenMode').classList.add('hidden');
+            document.getElementById('screenStart').classList.remove('hidden');
+        }
+
+        function selectMode(mode) {
+            playSound('correct');
+            gameState.mode = mode;
+            document.getElementById('screenMode').classList.add('hidden');
+            document.getElementById('screenSetup').classList.remove('hidden');
+
+            if (mode === 'solo') {
+                document.getElementById('setupTitle').innerText = 'إعداد الباحث الفردي';
+                document.getElementById('soloSetupDiv').classList.remove('hidden');
+                document.getElementById('teamSetupDiv').classList.add('hidden');
+            } else {
+                document.getElementById('setupTitle').innerText = 'إعداد الفرق المنافسة';
+                document.getElementById('soloSetupDiv').classList.add('hidden');
+                document.getElementById('teamSetupDiv').classList.remove('hidden');
+                generateTeamInputs();
+            }
+        }
+
+        function backToMode() {
+            document.getElementById('screenSetup').classList.add('hidden');
+            document.getElementById('screenMode').classList.remove('hidden');
+        }
+
+        function generateTeamInputs() {
+            const count = parseInt(document.getElementById('teamCountSelect').value);
+            const container = document.getElementById('teamInputsContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                container.innerHTML += `
+                    <input type="text" id="teamName_${i}" placeholder="اسم الفريق ${i}" value="فريق ${i}" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-center focus:outline-none focus:border-sky-400">
+                `;
+            }
+        }
+
+        function startGameSession() {
+            playSound('win');
+            if (gameState.mode === 'solo') {
+                const nameInput = document.getElementById('playerNameInput').value.trim();
+                gameState.playerName = nameInput !== '' ? nameInput : 'الباحث الصغير';
+                gameState.teams = [{ name: gameState.playerName, score: 0 }];
+            } else {
+                const count = parseInt(document.getElementById('teamCountSelect').value);
+                gameState.teams = [];
+                for (let i = 1; i <= count; i++) {
+                    const tName = document.getElementById(`teamName_${i}`).value.trim();
+                    gameState.teams.push({ name: tName !== '' ? tName : `فريق ${i}`, score: 0 });
+                }
+            }
+
+            gameState.currentTeamIndex = 0;
+            gameState.questionNum = 1;
+            gameState.energy = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.unansweredCount = 0;
+            gameState.reviewHistory = [];
+
+            gameState.activeQuestionsList = [...fullQuestionBank].sort(() => 0.5 - Math.random()).slice(0, 10);
+
+            document.getElementById('screenSetup').classList.add('hidden');
+            document.getElementById('screenGame').classList.remove('hidden');
+
+            updateGameHeader();
+            initWheelCanvas();
+            drawWheel(0);
+        }
+
+        function updateGameHeader() {
+            const currentTeam = gameState.teams[gameState.currentTeamIndex];
+            document.getElementById('activePlayerDisplay').innerText = gameState.mode === 'team' ? `دور: ${currentTeam.name}` : `الباحث: ${currentTeam.name}`;
+            document.getElementById('currentQuestionNum').innerText = gameState.questionNum;
+            document.getElementById('energyText').innerText = `${gameState.energy}%`;
+            document.getElementById('energyBar').style.width = `${gameState.energy}%`;
+            document.getElementById('totalScoreDisplay').innerText = `${gameState.score} / 1000`;
+
+            const labLevel = Math.min(5, Math.floor(gameState.energy / 20) + 1);
+            const levelsDesc = ['المستوى الأساسي', 'تنشيط البتلات', 'تفعيل الحشرات الملقحة', 'مختبر متطور', 'مختبر الاكتشاف التام ⚡'];
+            document.getElementById('labLevelIndicator').innerText = levelsDesc[labLevel - 1];
+        }
+
+        // --- REAL WHEEL CANVAS IMPLEMENTATION ---
+        let wheelCanvas, wheelCtx;
+        let currentAngle = 0;
+        let isSpinning = false;
+
+        function initWheelCanvas() {
+            wheelCanvas = document.getElementById('wheelCanvas');
+            wheelCtx = wheelCanvas.getContext('2d');
+            drawWheel(0);
+        }
+
+        function drawWheel(angle) {
+            if (!wheelCtx) return;
+            const cx = wheelCanvas.width / 2;
+            const cy = wheelCanvas.height / 2;
+            const radius = 140;
+            const totalSectors = wheelSectors.length;
+            const arcSize = (2 * Math.PI) / totalSectors;
+
+            wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+
+            wheelCtx.save();
+            wheelCtx.translate(cx, cy);
+            wheelCtx.rotate(angle);
+
+            for (let i = 0; i < totalSectors; i++) {
+                const startAngle = i * arcSize;
+                const endAngle = (i + 1) * arcSize;
+
+                wheelCtx.beginPath();
+                wheelCtx.moveTo(0, 0);
+                wheelCtx.arc(0, 0, radius, startAngle, endAngle);
+                wheelCtx.closePath();
+
+                wheelCtx.fillStyle = wheelSectors[i].color;
+                wheelCtx.fill();
+                wheelCtx.lineWidth = 2;
+                wheelCtx.strokeStyle = '#ffffff';
+                wheelCtx.stroke();
+
+                wheelCtx.save();
+                wheelCtx.rotate(startAngle + arcSize / 2);
+                wheelCtx.textAlign = 'right';
+                wheelCtx.fillStyle = '#ffffff';
+                wheelCtx.font = 'bold 14px Cairo';
+                wheelCtx.fillText(wheelSectors[i].icon, radius - 25, 6);
+                wheelCtx.restore();
+            }
+
+            wheelCtx.beginPath();
+            wheelCtx.arc(0, 0, 22, 0, 2 * Math.PI);
+            wheelCtx.fillStyle = '#0f172a';
+            wheelCtx.fill();
+            wheelCtx.lineWidth = 3;
+            wheelCtx.strokeStyle = '#38bdf8';
+            wheelCtx.stroke();
+
+            wheelCtx.restore();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            document.getElementById('spinWheelBtn').disabled = true;
+            document.getElementById('spinWheelBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('challengeTitlePreview').innerText = '🎡 العجلة تدور الآن...';
+
+            let spinDuration = 3000;
+            let startTimestamp = null;
+            let randomSpins = 5 + Math.random() * 3;
+            let targetAngle = currentAngle + randomSpins * 2 * Math.PI + Math.random() * 2 * Math.PI;
+
+            function animateSpin(timestamp) {
+                if (!startTimestamp) startTimestamp = timestamp;
+                let elapsed = timestamp - startTimestamp;
+                let progress = Math.min(1, elapsed / spinDuration);
+
+                let easeProgress = 1 - Math.pow(1 - progress, 3);
+                let currentPosAngle = currentAngle + (targetAngle - currentAngle) * easeProgress;
+
+                drawWheel(currentPosAngle);
+                playSound('spin');
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    currentAngle = targetAngle % (2 * Math.PI);
+                    isSpinning = false;
+                    playSound('stop');
+
+                    const totalSectors = wheelSectors.length;
+                    const arcSize = (2 * Math.PI) / totalSectors;
+                    let normalizedAngle = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
+                    let winningIndex = Math.floor(normalizedAngle / arcSize) % totalSectors;
+                    
+                    const winningSector = wheelSectors[winningIndex];
+                    document.getElementById('challengeTitlePreview').innerHTML = `✨ التحدي الفائز: <span class="text-amber-400 font-black">${winningSector.label} ${winningSector.icon}</span>`;
+
+                    setTimeout(() => {
+                        openQuestionScreen(winningSector);
+                    }, 1200);
+                }
+            }
+
+            requestAnimationFrame(animateSpin);
+        }
+
+        function openQuestionScreen(sector) {
+            document.getElementById('wheelAreaContainer').classList.add('hidden');
+            const qArea = document.getElementById('questionArea');
+            qArea.classList.remove('hidden');
+
+            let qData = gameState.activeQuestionsList[gameState.questionNum - 1];
+            gameState.currentQuestion = qData;
+
+            document.getElementById('qTypeBadge').innerText = qData.type;
+            document.getElementById('qQuestionText').innerText = qData.question;
+            document.getElementById('feedbackBox').classList.add('hidden');
+            document.getElementById('confirmBtnContainer').classList.remove('hidden');
+
+            const container = document.getElementById('qContentContainer');
+            container.innerHTML = '';
+
+            if (qData.isMatching) {
+                renderMatchingQuestion(qData, container);
+            } else if (qData.isOrdering) {
+                renderOrderingQuestion(qData, container);
+            } else {
+                renderMCQQuestion(qData, container);
+            }
+
+            if (document.getElementById('timerCheckbox').checked) {
+                startQuestionTimer();
+            }
+        }
+
+        function renderMCQQuestion(qData, container) {
+            let shuffledOpts = [...qData.options].sort(() => 0.5 - Math.random());
+            qData.shuffledOptions = shuffledOpts;
+
+            let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+            shuffledOpts.forEach((opt, idx) => {
+                html += `
+                    <button onclick="selectMCQOption('${opt.id}', this)" class="option-btn text-right p-3.5 rounded-2xl bg-slate-900/80 border border-slate-700 hover:border-sky-400 transition flex items-center justify-between group">
+                        <span class="font-medium text-white text-sm">${opt.text}</span>
+                        <span class="w-7 h-7 rounded-xl bg-slate-800 flex items-center justify-center text-sky-400 font-bold text-xs group-hover:bg-sky-500 group-hover:text-white transition">${String.fromCharCode(65 + idx)}</span>
+                    </button>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        let selectedMCQId = null;
+        function selectMCQOption(optId, btnElement) {
+            playSound('tick');
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('border-sky-400', 'bg-sky-950/40', 'ring-2', 'ring-sky-400');
+            });
+            btnElement.classList.add('border-sky-400', 'bg-sky-950/40', 'ring-2', 'ring-sky-400');
+            selectedMCQId = optId;
+
+            const confirmBtn = document.getElementById('confirmAnswerBtn');
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        let matchLeftItems = [];
+        let matchRightItems = [];
+
+        function renderMatchingQuestion(qData, container) {
+            gameState.matchSelectedLeft = null;
+            gameState.matchPairsDone = [];
+
+            matchLeftItems = qData.pairs.map(p => ({ id: p.id, text: p.left }));
+            matchRightItems = qData.pairs.map(p => ({ id: p.id, text: p.right })).sort(() => 0.5 - Math.random());
+
+            updateMatchingUI();
+        }
+
+        function updateMatchingUI() {
+            const container = document.getElementById('qContentContainer');
+            let html = '<div class="text-xs text-sky-300 mb-3">اضغط على العنصر في العمود الأيمن، ثم اضغط على ما يناسبه في العمود الأيسر. يمكنك إلغاء أي توصيل بالضغط عليه مجدداً:</div>';
+            html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">';
+            
+            // Left Column
+            html += '<div class="space-y-2.5">';
+            html += '<div class="text-xs font-bold text-slate-400">المصطلحات / العبارات:</div>';
+            matchLeftItems.forEach(item => {
+                const connectedPair = gameState.matchPairsDone.find(p => p.leftId === item.id);
+                const isSelected = gameState.matchSelectedLeft === item.id;
+                let bgClass = 'bg-slate-900 border-slate-700';
+                let statusBadge = '';
+
+                if (connectedPair) {
+                    bgClass = 'bg-emerald-950/60 border-emerald-500/80';
+                    const rightObj = matchRightItems.find(r => r.id === connectedPair.rightId);
+                    statusBadge = `<span class="text-xs text-emerald-300 font-bold bg-emerald-900/60 px-2 py-0.5 rounded flex items-center gap-1">🔗 مرتبطة بـ: (${rightObj ? rightObj.text : ''}) <button onclick="cancelMatchPair(${item.id}, event)" class="text-rose-400 hover:text-rose-300 font-bold ml-1 px-1 rounded bg-rose-950/80" title="إلغاء التوصيل">✕</button></span>`;
+                } else if (isSelected) {
+                    bgClass = 'bg-sky-950/80 border-sky-400 ring-2 ring-sky-400';
+                    statusBadge = '<span class="text-xs text-sky-300">محدد للاختيار...</span>';
+                }
+
+                html += `
+                    <div onclick="clickMatchLeft(${item.id})" class="p-3 rounded-2xl border ${bgClass} cursor-pointer transition flex flex-col gap-1">
+                        <div class="font-bold text-white text-xs sm:text-sm">${item.text}</div>
+                        ${statusBadge}
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            // Right Column
+            html += '<div class="space-y-2.5">';
+            html += '<div class="text-xs font-bold text-slate-400">الخيارات / التفسيرات:</div>';
+            matchRightItems.forEach(item => {
+                const isConnected = gameState.matchPairsDone.some(p => p.rightId === item.id);
+                let bgClass = 'bg-slate-900 border-slate-700';
+                if (isConnected) {
+                    bgClass = 'bg-indigo-950/50 border-indigo-500/50 opacity-80';
+                }
+
+                html += `
+                    <div onclick="clickMatchRight(${item.id})" class="p-3 rounded-2xl border ${bgClass} cursor-pointer hover:border-indigo-400 transition text-white text-xs sm:text-sm flex justify-between items-center">
+                        <span>${item.text}</span>
+                        ${isConnected ? '<span class="text-xs text-indigo-400 font-bold">✓</span>' : '<span class="text-xs text-slate-500">○</span>'}
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function clickMatchLeft(id) {
+            if (gameState.matchPairsDone.some(p => p.leftId === id)) return;
+            playSound('tick');
+            gameState.matchSelectedLeft = gameState.matchSelectedLeft === id ? null : id;
+            updateMatchingUI();
+        }
+
+        function clickMatchRight(rightId) {
+            if (gameState.matchSelectedLeft === null) return;
+            playSound('correct');
+
+            gameState.matchPairsDone = gameState.matchPairsDone.filter(p => p.leftId !== gameState.matchSelectedLeft && p.rightId !== rightId);
+            gameState.matchPairsDone.push({ leftId: gameState.matchSelectedLeft, rightId: rightId });
+            gameState.matchSelectedLeft = null;
+
+            updateMatchingUI();
+
+            if (gameState.matchPairsDone.length === gameState.currentQuestion.pairs.length) {
+                const confirmBtn = document.getElementById('confirmAnswerBtn');
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function cancelMatchPair(leftId, event) {
+            event.stopPropagation();
+            playSound('tick');
+            gameState.matchPairsDone = gameState.matchPairsDone.filter(p => p.leftId !== leftId);
+            updateMatchingUI();
+
+            const confirmBtn = document.getElementById('confirmAnswerBtn');
+            if (gameState.matchPairsDone.length < gameState.currentQuestion.pairs.length) {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        let currentOrderList = [];
+        function renderOrderingQuestion(qData, container) {
+            currentOrderList = qData.items.map((text, idx) => ({ text, originalIdx: idx })).sort(() => 0.5 - Math.random());
+
+            let html = '<div class="text-xs text-sky-300 mb-3">اضغط على العنصر لتحريكه لأعلى أو أسفل لترتيب الخطوات علمياً:</div>';
+            html += '<div class="space-y-2" id="orderItemsContainer">';
+            currentOrderList.forEach((item, idx) => {
+                html += `
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-white text-xs sm:text-sm font-bold">
+                        <span>${idx + 1}. ${item.text}</span>
+                        <div class="flex gap-1">
+                            <button onclick="moveOrder(${idx}, -1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-sky-300">⬆️</button>
+                            <button onclick="moveOrder(${idx}, 1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-sky-300">⬇️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            const confirmBtn = document.getElementById('confirmAnswerBtn');
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function moveOrder(index, direction) {
+            playSound('tick');
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= currentOrderList.length) return;
+
+            let temp = currentOrderList[index];
+            currentOrderList[index] = currentOrderList[newIndex];
+            currentOrderList[newIndex] = temp;
+
+            const container = document.getElementById('orderItemsContainer');
+            let html = '';
+            currentOrderList.forEach((item, idx) => {
+                html += `
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-white text-xs sm:text-sm font-bold">
+                        <span>${idx + 1}. ${item.text}</span>
+                        <div class="flex gap-1">
+                            <button onclick="moveOrder(${idx}, -1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-sky-300">⬆️</button>
+                            <button onclick="moveOrder(${idx}, 1)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-sky-300">⬇️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        let timerInterval = null;
+        function startQuestionTimer() {
+            const wrapper = document.getElementById('timerWrapper');
+            const countEl = document.getElementById('timerCount');
+            const barEl = document.getElementById('timerBar');
+            wrapper.classList.remove('hidden');
+
+            let timeLeft = 30;
+            countEl.innerText = timeLeft;
+            barEl.style.width = '100%';
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                countEl.innerText = timeLeft;
+                barEl.style.width = `${(timeLeft / 30) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    confirmAnswer(true);
+                }
+            }, 1000);
+        }
+
+        function stopQuestionTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timerWrapper').classList.add('hidden');
+        }
+
+        function confirmAnswer(isTimeout = false) {
+            stopQuestionTimer();
+            document.getElementById('confirmBtnContainer').classList.add('hidden');
+
+            let qData = gameState.currentQuestion;
+            let isCorrect = false;
+
+            if (qData.isMatching) {
+                let correctPairsCount = 0;
+                qData.pairs.forEach(p => {
+                    const match = gameState.matchPairsDone.find(mp => mp.leftId === p.id && mp.rightId === p.id);
+                    if (match) correctPairsCount++;
+                });
+                if (correctPairsCount === qData.pairs.length) isCorrect = true;
+            } else if (qData.isOrdering) {
+                let userOrderIndices = currentOrderList.map(item => item.originalIdx);
+                let isOrdCorrect = true;
+                for (let i = 0; i < userOrderIndices.length; i++) {
+                    if (userOrderIndices[i] !== qData.correctOrder[i]) {
+                        isOrdCorrect = false;
+                        break;
+                    }
+                }
+                if (isOrdCorrect) isCorrect = true;
+            } else {
+                const correctOpt = qData.options.find(o => o.correct);
+                if (!isTimeout && selectedMCQId === correctOpt.id) {
+                    isCorrect = true;
+                }
+            }
+
+            let feedbackTitle = document.getElementById('feedbackTitle');
+            let feedbackExpl = document.getElementById('feedbackExplanation');
+            let feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                playSound('correct');
+                playSound('energy');
+                gameState.correctCount++;
+                gameState.score += 100;
+                gameState.energy = Math.min(100, gameState.energy + 10);
+                gameState.teams[gameState.currentTeamIndex].score += 100;
+
+                feedbackTitle.innerHTML = '🎉 إجابة صحيحة!<br><span class="text-emerald-400 text-sm">+10% طاقة المختبر • +100 نقطة</span>';
+                feedbackExpl.innerHTML = `<strong>لماذا؟</strong> ${qData.explanation}`;
+            } else {
+                playSound('wrong');
+                gameState.wrongCount++;
+                feedbackTitle.innerHTML = '❌ ليست الإجابة الصحيحة<br><span class="text-amber-400 text-sm">لا تقلق، استمر في الاستكشاف!</span>';
+                feedbackExpl.innerHTML = `<strong>لماذا؟ التوضيح العلمي:</strong> ${qData.explanation}`;
+            }
+
+            gameState.reviewHistory.push({
+                question: qData.question,
+                isCorrect: isCorrect,
+                explanation: qData.explanation
+            });
+
+            selectedMCQId = null;
+        }
+
+        function proceedToNext() {
+            playSound('tick');
+            document.getElementById('questionArea').classList.add('hidden');
+
+            gameState.questionNum++;
+            gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teams.length;
+
+            if (gameState.questionNum > gameState.maxQuestions || gameState.energy >= 100) {
+                finishGame();
+            } else {
+                document.getElementById('wheelAreaContainer').classList.remove('hidden');
+                document.getElementById('spinWheelBtn').disabled = false;
+                document.getElementById('spinWheelBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('challengeTitlePreview').innerText = 'أدر العجلة لاختيار التحدي القادم!';
+                updateGameHeader();
+                drawWheel(currentAngle);
+            }
+        }
+
+        function finishGame() {
+            playSound('win');
+            document.getElementById('screenGame').classList.add('hidden');
+            document.getElementById('screenFinished').classList.remove('hidden');
+
+            document.getElementById('finishedPlayerName').innerText = gameState.mode === 'team' ? `الفريق الفائز / المتصدر: ${gameState.teams[0].name}` : `الباحث المتألق: ${gameState.playerName}`;
+            document.getElementById('resScore').innerText = `${gameState.score} / 1000`;
+            document.getElementById('resCorrect').innerText = `${gameState.correctCount} / 10`;
+            document.getElementById('resStars').innerText = `⭐ ${gameState.correctCount}/10`;
+
+            const percentage = (gameState.correctCount / 10) * 100;
+            let rankTitle = '🌱 واصل الاستكشاف';
+            if (percentage >= 90) rankTitle = '🏆 عبقري الاستقصاء';
+            else if (percentage >= 80) rankTitle = '🥇 خبير علمي';
+            else if (percentage >= 70) rankTitle = '🥈 مستكشف متميز';
+            else if (percentage >= 60) rankTitle = '🥉 باحث واعد';
+
+            document.getElementById('rankTitleText').innerText = rankTitle;
+        }
+
+        function openReviewModal() {
+            playSound('correct');
+            const list = document.getElementById('reviewContentList');
+            list.innerHTML = '';
+
+            gameState.reviewHistory.forEach((item, idx) => {
+                list.innerHTML += `
+                    <div class="p-4 rounded-2xl bg-slate-900 border ${item.isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'}">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-sky-400">التحدي ${idx + 1}</span>
+                            <span class="text-xs ${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${item.isCorrect ? '✔ صحيحة' : '✖ تحتاج مراجعة'}</span>
+                        </div>
+                        <div class="text-sm font-bold text-white mb-2">${item.question}</div>
+                        <div class="text-xs text-slate-300 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700"><strong>التفسير العلمي:</strong> ${item.explanation}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        function restartGame() {
+            playSound('correct');
+            document.getElementById('screenFinished').classList.add('hidden');
+            document.getElementById('screenStart').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
