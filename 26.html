@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي كرة القدم العلمية – الوحدة الثالثة | الصف الخامس</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo & Amiri -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .amiri-font {
+            font-family: 'Amiri', serif;
+        }
+        /* Custom football field background pattern */
+        .football-field {
+            background: linear-gradient(135deg, #1b4d3e 0%, #2e7d32 50%, #1b4d3e 100%);
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.06) 40px, rgba(255,255,255,0.06) 80px),
+                radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 70%);
+        }
+        .field-border {
+            border: 3px solid rgba(255, 255, 255, 0.85);
+        }
+        .center-circle {
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+        }
+        .center-line {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+        .goal-net {
+            background-image: radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+        @keyframes fieldShake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-8px, 4px) rotate(-1deg); }
+            40% { transform: translate(8px, -4px) rotate(1deg); }
+            60% { transform: translate(-4px, -2px) rotate(0deg); }
+            80% { transform: translate(4px, 2px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .animate-shake {
+            animation: fieldShake 0.5s ease-in-out;
+        }
+        @keyframes shootToAwayGoal {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(0, -180px) scale(0.6) rotate(360deg); }
+            100% { transform: translate(0, -320px) scale(0.4) rotate(720deg); }
+        }
+        @keyframes shootToHomeGoal {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(0, 180px) scale(0.6) rotate(360deg); }
+            100% { transform: translate(0, 320px) scale(0.4) rotate(720deg); }
+        }
+        .animate-shoot-away {
+            animation: shootToAwayGoal 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .animate-shoot-home {
+            animation: shootToHomeGoal 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.6);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.9);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <div id="app" class="flex flex-col min-h-screen">
+        <!-- Main Container injected dynamically via JS -->
+    </div>
+
+    <script>
+        class SoundEngine {
+            constructor() {
+                this.muted = false;
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playWhistle() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(2400, now);
+                osc.frequency.setValueAtTime(2800, now + 0.1);
+                osc.frequency.setValueAtTime(2400, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playKick() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+
+            playGoal() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8 + idx * 0.05);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + 0.9 + idx * 0.05);
+                });
+            }
+
+            playError() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(120, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        const QUESTIONS_BANK = [
+            {
+                id: 1,
+                type: "mcq",
+                topic: "التبخر",
+                question: "ما التحول الذي يحدث في عملية التبخر؟",
+                options: [
+                    { text: "أ) من الغاز إلى السائل", correct: false, key: 'A' },
+                    { text: "ب) من السائل إلى الغاز", correct: true, key: 'B' },
+                    { text: "ج) من الصلب إلى السائل", correct: false, key: 'C' },
+                    { text: "د) من السائل إلى الصلب", correct: false, key: 'D' }
+                ],
+                explanation: "التبخر هو تحول المادة من الحالة السائلة إلى الحالة الغازية عندما تكتسب جزيئات السائل طاقة حرارية."
+            },
+            {
+                id: 2,
+                type: "tf",
+                topic: "استقصاء التبخر",
+                question: "يحدث التبخر عند أي درجة حرارة.",
+                correctAnswer: true,
+                explanation: "يوضح محتوى الوحدة أن التبخر يمكن أن يحدث عند درجات حرارة مختلفة، وليس عند درجة غليان محددة فقط."
+            },
+            {
+                id: 3,
+                type: "order",
+                topic: "آلية التبخر الجزيئية",
+                question: "رتب مراحل حدوث التبخر عند تعرض السائل لدرجة حرارة مرتفعة:",
+                items: [
+                    "تتحرك جزيئات الماء بسرعة أكبر وتتباعد.",
+                    "ترتفع درجة الحرارة.",
+                    "تكتسب جزيئات الماء طاقة حرارية.",
+                    "تنفصل جزيئات الماء من السائل متحولة إلى غاز."
+                ],
+                correctOrder: [
+                    "ترتفع درجة الحرارة.",
+                    "تكتسب جزيئات الماء طاقة حرارية.",
+                    "تتحرك جزيئات الماء بسرعة أكبر وتتباعد.",
+                    "تنفصل جزيئات الماء من السائل متحولة إلى غاز."
+                ],
+                explanation: "ترتفع درجة الحرارة فتكسب الجزيئات طاقة حرارية وتتحرك بسرعة أكبر وتتباعد لتنفصل متحولة إلى غاز."
+            },
+            {
+                id: 4,
+                type: "chart",
+                topic: "العلاقة بين الحرارة والتبخر",
+                question: "بالاعتماد على العلاقة العلمية بين درجة الحرارة وكمية التبخر، ما النمط الذي يظهره الرسم البياني؟",
+                chartType: "temp_evap",
+                options: [
+                    { text: "أ) كلما زادت درجة الحرارة زادت كمية التبخر.", correct: true, key: 'A' },
+                    { text: "ب) كلما زادت درجة الحرارة قلت كمية التبخر.", correct: false, key: 'B' },
+                    { text: "ج) لا توجد علاقة بين الحرارة والتبخر.", correct: false, key: 'C' },
+                    { text: "د) تتوقف عملية التبخر تمامًا عند ارتفاع الحرارة.", correct: false, key: 'D' }
+                ],
+                explanation: "ترتفع معدلات التبخر بزيادة درجة الحرارة لأن الجزيئات تكتسب طاقة أكبر للهرب إلى الحالة الغازية."
+            },
+            {
+                id: 5,
+                type: "experiment",
+                topic: "تأثير سرعة الهواء على التبخر",
+                question: "تم وضع وعاءين متماثلين يحتوي كل منهما على الكمية نفسها من الماء، ووضع أحدهما تحت تأثير حركة هواء مستمرة. أي وعاء سيتبخر منه الماء أكثر؟",
+                options: [
+                    { text: "أ) الوعاء بعيدًا عن حركة الهواء", correct: false, key: 'A' },
+                    { text: "ب) الوعاء الذي يتعرض لحركة الهواء", correct: true, key: 'B' },
+                    { text: "ج) كلاهما بنفس الكمية دائمًا", correct: false, key: 'C' },
+                    { text: "د) لا يمكن أن يحدث تبخر في الوعاء الثاني", correct: false, key: 'D' }
+                ],
+                explanation: "زيادة سرعة الهواء تساعد على زيادة سرعة وكمية التبخر عبر إبعاد جزيئات البخار عن سطح السائل."
+            },
+            {
+                id: 6,
+                type: "mcq",
+                topic: "عوامل التبخر (المساحة السطحية)",
+                question: "أي عامل من العوامل التالية يمكن أن يزيد من سرعة التبخر؟",
+                options: [
+                    { text: "أ) خفض درجة الحرارة", correct: false, key: 'A' },
+                    { text: "ب) تقليل حركة الهواء", correct: false, key: 'B' },
+                    { text: "ج) زيادة المساحة السطحية", correct: true, key: 'C' },
+                    { text: "د) إغلاق الوعاء بإحكام", correct: false, key: 'D' }
+                ],
+                explanation: "زيادة المساحة السطحية تعرض عددًا أكبر من جزيئات السائل للهواء، مما يسرع عملية التبخر."
+            },
+            {
+                id: 7,
+                type: "mcq",
+                topic: "تحليل جدول نتائج سرعة الهواء",
+                question: "تأمل جدول نتائج تأثير سرعة الهواء على كمية الماء المتبخر (سرعة 10 ← 5 مل | سرعة 20 ← 10 مل | سرعة 30 ← 15 مل | سرعة 40 ← 20 مل). ما النمط الملاحظ؟",
+                options: [
+                    { text: "أ) تقل كمية الماء المتبخر مع زيادة سرعة الهواء.", correct: false, key: 'A' },
+                    { text: "ب) تزيد كمية الماء المتبخر مع زيادة سرعة الهواء.", correct: true, key: 'B' },
+                    { text: "ج) لا تتغير كمية الماء المتبخر إطلاقًا.", correct: false, key: 'C' },
+                    { text: "د) يتوقف التبخر تمامًا عند سرعة الهواء العالية.", correct: false, key: 'D' }
+                ],
+                explanation: "تظهر البيانات اطرادًا طرديًا؛ كلما ازدادت سرعة الهواء ازدادت كمية الماء المتبخر."
+            },
+            {
+                id: 8,
+                type: "match",
+                topic: "المادة المذيبة والمذابة والمحلول",
+                question: "قم بتوصيل كل مصطلح بتعريفه العلمي الصحيح عبر النقر على المصطلح ثم تعريفه:",
+                listA: ["المادة المذابة", "المادة المذيبة", "المحلول"],
+                listB: [
+                    "السائل الذي تذوب فيه المادة المذابة.",
+                    "المادة الناتجة من ذوبان المادة في السائل.",
+                    "المادة التي تذوب."
+                ],
+                correctPairs: {
+                    "المادة المذابة": "المادة التي تذوب.",
+                    "المادة المذيبة": "السائل الذي تذوب فيه المادة المذابة.",
+                    "المحلول": "المادة الناتجة من ذوبان المادة في السائل."
+                },
+                explanation: "المذابة هي التي تذوب، والمذيبة هي السائل، والمحلول هو الناتج المتجانس."
+            },
+            {
+                id: 9,
+                type: "order",
+                topic: "عملية الذوبان والانتشار",
+                question: "رتب خطوات ذوبان ملعقة السكر في الماء علمياً:",
+                items: [
+                    "تتداخل جزيئات المذاب مع جزيئات المذيب.",
+                    "تضاف المادة المذابة إلى المذيب.",
+                    "تفسح جزيئات المذيب المكان لجزيئات المذاب.",
+                    "تنتشر جزيئات المذاب مع جزيئات المذيب بالتساوي."
+                ],
+                correctOrder: [
+                    "تضاف المادة المذابة إلى المذيب.",
+                    "تفسح جزيئات المذيب المكان لجزيئات المذاب.",
+                    "تتداخل جزيئات المذاب مع جزيئات المذيب.",
+                    "تنتشر جزيئات المذاب مع جزيئات المذيب بالتساوي."
+                ],
+                explanation: "تبدأ الإضافة ثم إفساح المكان لتتداخل الجزيئات وتنتشر بانتظام في المحلول."
+            },
+            {
+                id: 10,
+                type: "mcq",
+                topic: "التبخر من المحلول",
+                question: "وُضع محلول ملحي في وعاء بالخارج لمدة أسبوع تحت الشمس. ماذا يتبقى في الوعاء بعد تبخر الماء تماماً؟",
+                options: [
+                    { text: "أ) ماء نقي فقط", correct: false, key: 'A' },
+                    { text: "ب) هواء جوي", correct: false, key: 'B' },
+                    { text: "ج) الملح الصلب", correct: true, key: 'C' },
+                    { text: "د) لا يتبقى أي شيء تماماً", correct: false, key: 'D' }
+                ],
+                explanation: "يتبخر الماء وتحوله إلى بخار في الهواء بينما يتبقى الملح الصلب في الوعاء."
+            },
+            {
+                id: 11,
+                type: "mcq",
+                topic: "التكثيف",
+                question: "ما اسم العملية التي يتحول فيها بخار الماء (الغاز) إلى سائل عندما يلامس سطحاً بارداً؟",
+                options: [
+                    { text: "أ) الانصهار", correct: false, key: 'A' },
+                    { text: "ب) التبخر", correct: false, key: 'B' },
+                    { text: "ج) التكثيف", correct: true, key: 'C' },
+                    { text: "د) الغليان", correct: false, key: 'D' }
+                ],
+                explanation: "التكثيف هو تحول المادة من الحالة الغازية إلى الحالة السائلة بفعل برودة السطح."
+            },
+            {
+                id: 12,
+                type: "order",
+                topic: "خطوات التكثيف",
+                question: "رتب خطوات حدوث التكثيف على سطح بارد:",
+                items: [
+                    "تتغير جزيئات الغاز إلى الحالة السائلة مكونة القطرات.",
+                    "يكون بخار الماء دافئاً.",
+                    "يلامس البخار الدافئ سطحاً بارداً.",
+                    "تبرد جزيئات بخار الماء وتفقد طاقة فتقل حركتها وتقترب من بعضها."
+                ],
+                correctOrder: [
+                    "يكون بخار الماء دافئاً.",
+                    "يلامس البخار الدافئ سطحاً بارداً.",
+                    "تبرد جزيئات بخار الماء وتفقد طاقة فتقل حركتها وتقترب من بعضها.",
+                    "تتغير جزيئات الغاز إلى الحالة السائلة مكونة القطرات."
+                ],
+                explanation: "بخار دافئ يلامس سطحاً بارداً يفقد طاقته وتقترب جزيئاته لتتكثف إلى قطرات سائلة."
+            },
+            {
+                id: 13,
+                type: "visual",
+                topic: "مخطط التكثيف",
+                question: "عند ملاحظة قطرات الماء على السطح الداخلي لغطاء وعاء ساخن ومغلق، ما العملية المسؤولة عن ذلك؟",
+                options: [
+                    { text: "أ) التبخر وحدده الحرارة", correct: false, key: 'A' },
+                    { text: "ب) التكثيف على السطح البارد للغطاء", correct: true, key: 'B' },
+                    { text: "ج) الانصهار الداخلي", correct: false, key: 'C' },
+                    { text: "د) ذوبان الغطاء في البخار", correct: false, key: 'D' }
+                ],
+                explanation: "يتصاعد البخار الدافئ ويصطدم بغطاء الوعاء البارد نسبيًا فيتكثف محولاً إلى قطرات ماء."
+            },
+            {
+                id: 14,
+                type: "tf",
+                topic: "التبخر والتكثيف",
+                question: "التكثيف هو العملية العكسية تماماً لعملية التبخر.",
+                correctAnswer: true,
+                explanation: "صحيح؛ فالتبخر يحول السائل لغاز، بينما التكثيف يحول الغاز إلى سائل."
+            },
+            {
+                id: 15,
+                type: "mcq",
+                topic: "الغليان",
+                question: "ما درجة الحرارة التي يغلي فيها الماء النقي؟",
+                options: [
+                    { text: "أ) 0°س", correct: false, key: 'A' },
+                    { text: "ب) 50°س", correct: false, key: 'B' },
+                    { text: "ج) 100°س", correct: true, key: 'C' },
+                    { text: "د) 212°س", correct: false, key: 'D' }
+                ],
+                explanation: "يغلي الماء النقي عند درجة حرارة 100 درجة سيليزية (مئوية)."
+            },
+            {
+                id: 16,
+                type: "visual",
+                topic: "أدلة الغليان",
+                question: "أثناء تسخين كأس ماء، تظهر فقاعات كبيرة داخل الماء كله ويتصاعد البخار بكثافة. ما الدليل على حدوث الغليان؟",
+                options: [
+                    { text: "أ) وجود الفقاعات داخل الماء", correct: true, key: 'A' },
+                    { text: "ب) انخفاض درجة الحرارة", correct: false, key: 'B' },
+                    { text: "ج) اختفاء الماء دون تسخين", correct: false, key: 'C' },
+                    { text: "د) تجمد الماء", correct: false, key: 'D' }
+                ],
+                explanation: "تعتبر الفقاعات الغازية المتكونة داخل السائل بأكمله دليلًا قاطعًا على حدوث الغليان."
+            },
+            {
+                id: 17,
+                type: "chart",
+                topic: "منحنى التسخين والغليان",
+                question: "ما الذي تمثل المنطقة التي تثبت فيها درجة الحرارة أثناء التسخين في منحنى تسخين الماء؟",
+                options: [
+                    { text: "أ) توقف اكتساب الطاقة تماماً", correct: false, key: 'A' },
+                    { text: "ب) حدوث الغليان", correct: true, key: 'B' },
+                    { text: "ج) حدوث التجمد", correct: false, key: 'C' },
+                    { text: "د) حدوث التكثيف", correct: false, key: 'D' }
+                ],
+                explanation: "أثناء الغليان تستهلك الطاقة في تفكيك قوى التجاذب بين الجزيئات وتثبت درجة الحرارة."
+            },
+            {
+                id: 18,
+                type: "mcq",
+                topic: "الانصهار",
+                question: "ما درجة الحرارة التي ينصهر عندها الثلج؟",
+                options: [
+                    { text: "أ) -5°س", correct: false, key: 'A' },
+                    { text: "ب) 0°س", correct: true, key: 'B' },
+                    { text: "ج) 50°س", correct: false, key: 'C' },
+                    { text: "د) 100°س", correct: false, key: 'D' }
+                ],
+                explanation: "ينصهر الثلج النقي عند درجة حرارة صفر سيليزية (0°س)."
+            },
+            {
+                id: 19,
+                type: "experiment",
+                topic: "تأثير إضافة الملح إلى الثلج",
+                question: "إذا أضيف الملح إلى الثلج أثناء عملية الانصهار، فكيف تتغير درجة انصهاره مقارنة بالثلج النقي؟",
+                options: [
+                    { text: "أ) ترتفع درجة الانصهار.", correct: false, key: 'A' },
+                    { text: "ب) لا تتغير أبدًا.", correct: false, key: 'B' },
+                    { text: "ج) تنخفض درجة الانصهار.", correct: true, key: 'C' },
+                    { text: "د) تصبح 100°س.", correct: false, key: 'D' }
+                ],
+                explanation: "إضافة الملح للثلج تخفض درجة انصهاره، وهي ظاهرة تستخدم لإذابة الجليد على الطرق."
+            },
+            {
+                id: 20,
+                type: "mcq",
+                topic: "مقاييس درجات الحرارة",
+                question: "أي مجموعة من القيم تمثل درجات مرتبطة نقطتي تجمد وغليان الماء بصورة صحيحة؟",
+                options: [
+                    { text: "أ) 0°س و100°س", correct: false, key: 'A' },
+                    { text: "ب) 32°F و212°F", correct: false, key: 'B' },
+                    { text: "ج) 273K و373K", correct: false, key: 'C' },
+                    { text: "د) جميع ما سبق", correct: true, key: 'D' }
+                ],
+                explanation: "تجمد الماء: 0°س = 32°F = 273K، وغليان الماء: 100°س = 212°F = 373K."
+            }
+        ];
+
+        let gameState = {
+            screen: 'welcome', // welcome, mode_select, setup_teams, match_play, match_over, review_answers
+            mode: 'solo', // 'solo' or 'team'
+            subMode: 'challenge', // 'training' or 'challenge'
+            teamName: 'فريق الطالب',
+            awayName: 'الكمبيوتر',
+            teamsList: [],
+            currentTeamIndex: 0,
+            questionIndex: 0,
+            questionsOrder: [],
+            shuffledOptions: {}, // Stores shuffled options for each question index
+            scores: {},
+            stats: { correct: 0, incorrect: 0, unanswered: 0 },
+            history: [],
+            timerSeconds: 30,
+            timerInterval: null,
+            paused: false,
+            selectedOption: null,
+            tfAnswer: null,
+            orderItems: [],
+            matchingPairs: {},
+            activeMatchTerm: null,
+            isAnswerSubmitted: false,
+            lastGoalScored: 'none'
+        };
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initGame() {
+            gameState.questionsOrder = shuffle([...Array(QUESTIONS_BANK.length).keys()]);
+            gameState.questionIndex = 0;
+            gameState.stats = { correct: 0, incorrect: 0, unanswered: 0 };
+            gameState.history = [];
+            gameState.lastGoalScored = 'none';
+            gameState.isAnswerSubmitted = false;
+            
+            // Shuffle option positions for every question to avoid any fixed pattern (like clustering between B and C)
+            gameState.shuffledOptions = {};
+            QUESTIONS_BANK.forEach((q, idx) => {
+                if (q.options) {
+                    const keys = ['أ', 'ب', 'ج', 'د'];
+                    const clonedOpts = JSON.parse(JSON.stringify(q.options));
+                    shuffle(clonedOpts);
+                    // Re-assign display keys A, B, C, D
+                    clonedOpts.forEach((opt, oIdx) => {
+                        opt.key = keys[oIdx];
+                        // Also adjust text prefix to match new key letter if text starts with option letter
+                        opt.text = opt.text.replace(/^[أبجد]\)\s*/, keys[oIdx] + ') ');
+                    });
+                    gameState.shuffledOptions[idx] = clonedOpts;
+                }
+            });
+
+            if (gameState.mode === 'solo') {
+                gameState.scores = {
+                    [gameState.teamName]: 0,
+                    [gameState.awayName]: 0
+                };
+            } else {
+                gameState.scores = {};
+                gameState.teamsList.forEach(t => {
+                    gameState.scores[t] = 0;
+                });
+                gameState.scores['الكمبيوتر المنافس'] = 0;
+                gameState.currentTeamIndex = 0;
+            }
+            prepareCurrentQuestion();
+        }
+
+        function prepareCurrentQuestion() {
+            const q = getCurrentQuestion();
+            gameState.selectedOption = null;
+            gameState.tfAnswer = null;
+            gameState.isAnswerSubmitted = false;
+            gameState.lastGoalScored = 'none';
+            
+            if (q.type === 'order') {
+                gameState.orderItems = [...q.items].sort(() => Math.random() - 0.5);
+            } else if (q.type === 'match') {
+                gameState.matchingPairs = {};
+                gameState.activeMatchTerm = null;
+            }
+
+            if (gameState.subMode === 'challenge') {
+                gameState.timerSeconds = 30;
+                startTimer();
+            }
+        }
+
+        function getCurrentQuestion() {
+            const qIdx = gameState.questionsOrder[gameState.questionIndex];
+            return QUESTIONS_BANK[qIdx];
+        }
+
+        function startTimer() {
+            stopTimer();
+            if (gameState.subMode !== 'challenge' || gameState.isAnswerSubmitted) return;
+            gameState.timerInterval = setInterval(() => {
+                if (!gameState.paused && !gameState.isAnswerSubmitted) {
+                    gameState.timerSeconds--;
+                    if (gameState.timerSeconds <= 0) {
+                        stopTimer();
+                        handleTimeout();
+                    }
+                    render();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+
+        function handleTimeout() {
+            if (gameState.isAnswerSubmitted) return;
+            gameState.isAnswerSubmitted = true;
+            gameState.stats.unanswered++;
+            sound.playError();
+            
+            const currentTeam = getCurrentTeamName();
+            gameState.history.push({
+                questionNum: gameState.questionIndex + 1,
+                question: getCurrentQuestion().question,
+                topic: getCurrentQuestion().topic,
+                result: 'timeout',
+                team: currentTeam,
+                explanation: getCurrentQuestion().explanation
+            });
+            gameState.lastGoalScored = 'none';
+            render();
+        }
+
+        function getCurrentTeamName() {
+            if (gameState.mode === 'solo') return gameState.teamName;
+            return gameState.teamsList[gameState.currentTeamIndex];
+        }
+
+        function submitAnswer() {
+            if (gameState.isAnswerSubmitted) return;
+            stopTimer();
+            
+            const q = getCurrentQuestion();
+            const qIdx = gameState.questionsOrder[gameState.questionIndex];
+            let isCorrect = false;
+
+            if (q.type === 'mcq' || q.type === 'chart' || q.type === 'experiment' || q.type === 'visual') {
+                if (gameState.selectedOption === null) return;
+                const currentOpts = gameState.shuffledOptions[qIdx] || q.options;
+                const selected = currentOpts[gameState.selectedOption];
+                isCorrect = selected.correct;
+            } else if (q.type === 'tf') {
+                if (gameState.tfAnswer === null) return;
+                isCorrect = (gameState.tfAnswer === q.correctAnswer);
+            } else if (q.type === 'order') {
+                isCorrect = JSON.stringify(gameState.orderItems) === JSON.stringify(q.correctOrder);
+            } else if (q.type === 'match') {
+                if (Object.keys(gameState.matchingPairs).length < q.listA.length) return;
+                isCorrect = true;
+                for (let k in q.correctPairs) {
+                    if (gameState.matchingPairs[k] !== q.correctPairs[k]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            gameState.isAnswerSubmitted = true;
+            const currentTeam = getCurrentTeamName();
+            const awayTeam = gameState.mode === 'solo' ? gameState.awayName : 'الكمبيوتر المنافس';
+
+            if (isCorrect) {
+                gameState.stats.correct++;
+                gameState.scores[currentTeam] = (gameState.scores[currentTeam] || 0) + 1;
+                gameState.lastGoalScored = 'home';
+                sound.playGoal();
+            } else {
+                gameState.stats.incorrect++;
+                gameState.scores[awayTeam] = (gameState.scores[awayTeam] || 0) + 1;
+                gameState.lastGoalScored = 'away';
+                sound.playError();
+            }
+
+            gameState.history.push({
+                questionNum: gameState.questionIndex + 1,
+                question: q.question,
+                topic: q.topic,
+                result: isCorrect ? 'correct' : 'incorrect',
+                team: currentTeam,
+                explanation: q.explanation
+            });
+
+            render();
+        }
+
+        function nextQuestion() {
+            gameState.questionIndex++;
+            if (gameState.questionIndex >= 20) {
+                gameState.screen = 'match_over';
+                sound.playWhistle();
+            } else {
+                if (gameState.mode === 'team') {
+                    gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teamsList.length;
+                }
+                prepareCurrentQuestion();
+                gameState.screen = 'match_play';
+            }
+            render();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            if (gameState.screen === 'welcome') {
+                app.innerHTML = renderWelcomeScreen();
+            } else if (gameState.screen === 'mode_select') {
+                app.innerHTML = renderModeSelectScreen();
+            } else if (gameState.screen === 'setup_teams') {
+                app.innerHTML = renderSetupTeamsScreen();
+            } else if (gameState.screen === 'match_play') {
+                app.innerHTML = renderMatchPlayScreen();
+            } else if (gameState.screen === 'match_over') {
+                app.innerHTML = renderMatchOverScreen();
+            } else if (gameState.screen === 'review_answers') {
+                app.innerHTML = renderReviewScreen();
+            }
+        }
+
+        function renderWelcomeScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    
+                    <!-- Omani Official Header Identity (Emblem at top center, institutional data below) -->
+                    <div class="w-full max-w-3xl bg-slate-900/95 border border-emerald-500/30 rounded-2xl p-4 md:p-5 mb-6 shadow-2xl backdrop-blur-md text-center relative z-10 flex flex-col items-center">
+                        
+                        <!-- Emblem at top center in the middle -->
+                        <div class="mb-3">
+                            <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار سلطنة عمان" class="w-20 h-20 md:w-24 md:h-24 object-contain filter drop-shadow-lg mx-auto" onerror="this.src='https://placehold.co/90x90/10b981/ffffff?text=Oman'">
+                        </div>
+
+                        <!-- Institutional details below emblem (No extra label) -->
+                        <div class="space-y-1 mb-4 text-center">
+                            <div class="text-sm md:text-base font-bold tracking-wide text-amber-400">سلطنة عمان</div>
+                            <div class="text-xs md:text-sm font-semibold text-emerald-400">وزارة التعليم</div>
+                            <div class="text-xs md:text-sm text-slate-300">المديرية العامة للتعليم بمحافظة شمال الباطنة</div>
+                            <div class="text-xs md:text-sm font-bold text-slate-200">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</div>
+                        </div>
+                        
+                        <!-- Teacher Profile Section (Showing full face and head clearly) -->
+                        <div class="w-full border-t border-slate-800 pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <div class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-emerald-400 shadow-lg flex-shrink-0 bg-slate-700">
+                                <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="صورة المعلم أ. فيصل الشبلي" class="w-full h-full object-cover object-top" onerror="this.src='https://placehold.co/90x90/334155/ffffff?text=Teacher'">
+                            </div>
+                            <div class="text-center sm:text-right">
+                                <div class="text-base md:text-lg font-bold text-white">إعداد المعلم: أ. فيصل الشبلي</div>
+                                <div class="text-xs text-emerald-300 flex items-center justify-center sm:justify-start gap-3 mt-1">
+                                    <span><i class="fa-solid fa-phone"></i> 99812126</span>
+                                    <span><i class="fa-brands fa-instagram"></i> faalll8</span>
+                                </div>
+                                <div class="text-xs text-slate-400 mt-1">مدير المدرسة: أ. سعود الشيزاوي</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Game Hero Banner -->
+                    <div class="text-center z-10 max-w-2xl px-4">
+                        <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-sm font-bold mb-4 border border-emerald-500/40">
+                            <i class="fa-solid fa-graduation-cap"><span>منهج كامبردج – الصف الخامس</span></i>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight">
+                            ⚽🧪 تحدي كرة القدم العلمية
+                        </h1>
+                        <p class="text-base md:text-lg text-emerald-300 font-semibold mb-2">مراجعة الوحدة الثالثة: (الماء، التبخر، الذوبان، التكثيف، الغليان، والانصهار)</p>
+                        <p class="text-slate-300 text-xs md:text-sm mb-6 max-w-xl mx-auto">
+                            خض مباراة حقيقية بأسئلة علمية دقيقة. إجابتك الصحيحة هدف في مرمى الفريق المنافس، وخاطئتك هدف في مرمى فريقك!
+                        </p>
+
+                        <button onclick="sound.playWhistle(); gameState.screen='mode_select'; render();" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-xl px-10 py-4 rounded-2xl shadow-xl shadow-emerald-900/40 transform hover:scale-105 transition-all duration-200 border-2 border-emerald-300 flex items-center gap-3 mx-auto">
+                            <i class="fa-solid fa-play text-2xl"></i>
+                            <span>ابدأ التحدي الآن</span>
+                        </button>
+                    </div>
+
+                    <!-- Sound toggle footer -->
+                    <div class="absolute bottom-4 left-4 z-20">
+                        <button onclick="sound.muted = !sound.muted; render();" class="bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-xl border border-slate-700 shadow-md transition-all">
+                            <i class="fa-solid ${sound.muted ? 'fa-volume-xmark text-red-400' : 'fa-volume-high text-emerald-400'} text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModeSelectScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+                    <div class="w-full max-w-xl bg-slate-900/95 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md text-center">
+                        <h2 class="text-2xl md:text-3xl font-black mb-2 text-emerald-400">اختر نظام ومستوى المباراة</h2>
+                        <p class="text-slate-400 text-sm mb-6">حدد وضع اللعب ونظام الإجابة المناسب لك</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div onclick="gameState.mode='solo'; render();" class="cursor-pointer p-5 rounded-2xl border-2 transition-all ${gameState.mode==='solo' ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-700 bg-slate-800/50 hover:border-slate-500'} flex flex-col items-center text-center">
+                                <i class="fa-solid fa-user text-3xl text-emerald-400 mb-2"></i>
+                                <div class="font-bold text-lg">مباراة فردية</div>
+                                <div class="text-xs text-slate-400 mt-1">أنت ضد الكمبيوتر (20 سؤالاً)</div>
+                            </div>
+
+                            <div onclick="gameState.mode='team'; gameState.teamsList=['فريق الصقور', 'فريق النمور']; render();" class="cursor-pointer p-5 rounded-2xl border-2 transition-all ${gameState.mode==='team' ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-700 bg-slate-800/50 hover:border-slate-500'} flex flex-col items-center text-center">
+                                <i class="fa-solid fa-users text-3xl text-emerald-400 mb-2"></i>
+                                <div class="font-bold text-lg">مباراة جماعية (فرق)</div>
+                                <div class="text-xs text-slate-400 mt-1">تناوب بين فريقين إلى 4 فرق</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 mb-6 flex items-center justify-around">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="submode" value="challenge" ${gameState.subMode==='challenge'?'checked':''} onchange="gameState.subMode='challenge'; render();" class="w-4 h-4 text-emerald-500">
+                                <span class="font-bold text-sm">🏫 وضع التحدي (بمؤقت 30 ثانية)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="submode" value="training" ${gameState.subMode==='training'?'checked':''} onchange="gameState.subMode='training'; render();" class="w-4 h-4 text-emerald-500">
+                                <span class="font-bold text-sm">🏠 وضع التدريب (بدون مؤقت)</span>
+                            </label>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button onclick="gameState.screen='welcome'; render();" class="flex-1 bg-slate-800 hover:bg-slate-700 font-bold py-3.5 rounded-xl border border-slate-700 transition-all">
+                                <i class="fa-solid fa-arrow-right ml-2"></i> العودة
+                            </button>
+                            <button onclick="sound.playWhistle(); if(gameState.mode==='team') { gameState.screen='setup_teams'; } else { initGame(); gameState.screen='match_play'; } render();" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 rounded-xl shadow-lg transition-all">
+                                موافق وإدخال الأسماء <i class="fa-solid fa-arrow-left mr-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSetupTeamsScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+                    <div class="w-full max-w-xl bg-slate-900/95 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+                        <h2 class="text-2xl font-black mb-2 text-emerald-400 text-center">إعداد أسماء الفرق المتنافسة</h2>
+                        <p class="text-slate-400 text-sm mb-6 text-center">أدخل أسماء الفرق (من 2 إلى 4 فرق)</p>
+
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-slate-300 mb-2">عدد الفرق:</label>
+                            <select id="teamCountSelect" onchange="updateTeamsCount(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-emerald-500">
+                                <option value="2" ${gameState.teamsList.length===2?'selected':''}>فريقان (2)</option>
+                                <option value="3" ${gameState.teamsList.length===3?'selected':''}>ثلاثة فرق (3)</option>
+                                <option value="4" ${gameState.teamsList.length===4?'selected':''}>أربعة فرق (4)</option>
+                            </select>
+                        </div>
+
+                        <div id="teamInputsContainer" class="space-y-3 mb-6">
+                            ${gameState.teamsList.map((team, idx) => `
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">اسم الفريق رقم ${idx+1}:</label>
+                                    <input type="text" id="teamInput_${idx}" value="${team}" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-emerald-500" placeholder="أدخل اسم الفريق">
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button onclick="gameState.screen='mode_select'; render();" class="flex-1 bg-slate-800 hover:bg-slate-700 font-bold py-3.5 rounded-xl border border-slate-700 transition-all">
+                                العودة
+                            </button>
+                            <button onclick="saveTeamsAndStart();" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 rounded-xl shadow-lg transition-all">
+                                بدء المباراة ⚽
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateTeamsCount(count) {
+            const num = parseInt(count);
+            const defaults = ['فريق الصقور', 'فريق النمور', 'فريق الأسود', 'فريق الصواعق'];
+            gameState.teamsList = [];
+            for (let i = 0; i < num; i++) {
+                gameState.teamsList.push(defaults[i]);
+            }
+            render();
+        }
+
+        function saveTeamsAndStart() {
+            const inputs = document.querySelectorAll('[id^="teamInput_"]');
+            gameState.teamsList = Array.from(inputs).map(inp => inp.value.trim() || 'فريق');
+            initGame();
+            gameState.screen = 'match_play';
+            render();
+        }
+
+        function renderMatchPlayScreen() {
+            const q = getCurrentQuestion();
+            const currentTeam = getCurrentTeamName();
+            const awayTeam = gameState.mode === 'solo' ? gameState.awayName : 'الكمبيوتر المنافس';
+
+            return `
+                <div class="flex-1 flex flex-col bg-slate-950 text-white relative select-none">
+                    <header class="bg-slate-900 border-b border-slate-800 p-3 md:p-4 flex flex-wrap items-center justify-between gap-3 shadow-lg z-20">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-xl text-xs font-black border border-emerald-500/30">
+                                السؤال ${gameState.questionIndex + 1} / 20
+                            </div>
+                            <div class="text-xs text-slate-300 font-bold hidden sm:block">
+                                الوحدة الثالثة: ${q.topic}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 bg-slate-950/80 px-6 py-2 rounded-2xl border border-slate-800 shadow-inner">
+                            <div class="text-center">
+                                <div class="text-xs text-emerald-400 font-bold">${currentTeam}</div>
+                                <div class="text-2xl font-black text-white">${gameState.scores[currentTeam] || 0} ⚽</div>
+                            </div>
+                            <div class="text-slate-500 font-bold text-xl">VS</div>
+                            <div class="text-center">
+                                <div class="text-xs text-red-400 font-bold">${awayTeam}</div>
+                                <div class="text-2xl font-black text-white">${gameState.scores[awayTeam] || 0} ⚽</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            ${gameState.subMode === 'challenge' ? `
+                                <div class="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <span>${gameState.timerSeconds} ث</span>
+                                </div>
+                            ` : ''}
+                            <button onclick="gameState.paused=true; renderPauseModal();" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 px-3 rounded-xl text-xs font-bold border border-slate-700">
+                                <i class="fa-solid fa-pause"></i> إيقاف
+                            </button>
+                        </div>
+                    </header>
+
+                    <main class="flex-1 relative football-field p-4 md:p-6 flex flex-col items-center justify-center overflow-hidden">
+                        
+                        <div class="absolute inset-4 md:inset-8 field-border rounded-3xl pointer-events-none flex flex-col justify-between overflow-hidden opacity-40">
+                            <div class="w-40 h-10 mx-auto border-b-2 border-x-2 border-white/70 goal-net rounded-b-xl flex items-center justify-center">
+                                <span class="text-[10px] text-white/50">مرمى المنافس</span>
+                            </div>
+                            <div class="w-full h-0.5 center-line relative flex items-center justify-center">
+                                <div class="w-24 h-24 center-circle absolute"></div>
+                            </div>
+                            <div class="w-40 h-10 mx-auto border-t-2 border-x-2 border-white/70 goal-net rounded-t-xl flex items-center justify-center">
+                                <span class="text-[10px] text-white/50">مرمى فريقك</span>
+                            </div>
+                        </div>
+
+                        ${gameState.lastGoalScored === 'home' ? `
+                            <div class="absolute z-30 flex flex-col items-center animate-shoot-away">
+                                <div class="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center text-slate-950 text-xl font-bold border-2 border-slate-900">⚽</div>
+                                <div class="bg-emerald-600 text-white font-black text-lg px-4 py-1 rounded-full shadow-xl mt-2 animate-bounce">⚽ جوووووووووول! إجابة صحيحة</div>
+                            </div>
+                        ` : ''}
+                        ${gameState.lastGoalScored === 'away' ? `
+                            <div class="absolute z-30 flex flex-col items-center animate-shoot-home">
+                                <div class="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center text-slate-950 text-xl font-bold border-2 border-slate-900">⚽</div>
+                                <div class="bg-red-600 text-white font-black text-lg px-4 py-1 rounded-full shadow-xl mt-2 animate-bounce">❌ هدف للمنافس! إجابة خاطئة</div>
+                            </div>
+                        ` : ''}
+
+                        <div class="relative z-10 w-full max-w-3xl bg-slate-900/95 border-2 border-emerald-500/40 rounded-3xl p-5 md:p-8 shadow-2xl backdrop-blur-md my-auto">
+                            
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-emerald-500 text-slate-950 font-black px-2.5 py-0.5 rounded-lg text-xs">سؤال ${gameState.questionIndex + 1}</span>
+                                    <span class="text-xs text-emerald-400 font-bold">${q.topic}</span>
+                                </div>
+                                <div class="text-xs text-slate-400 font-semibold">الدور: <span class="text-white">${currentTeam}</span></div>
+                            </div>
+
+                            <h3 class="text-lg md:text-xl font-bold text-white mb-6 leading-relaxed">
+                                ${q.question}
+                            </h3>
+
+                            ${renderQuestionWidget(q)}
+
+                            <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
+                                <div class="text-xs text-slate-400">
+                                    ${gameState.isAnswerSubmitted ? '<span class="text-emerald-400 font-bold">تم تقييم الإجابة</span>' : 'اختر الإجابة ثم اضغط تأكيد'}
+                                </div>
+
+                                ${!gameState.isAnswerSubmitted ? `
+                                    <button onclick="submitAnswer();" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black px-6 py-3 rounded-xl shadow-lg transition-all transform hover:scale-105 border border-emerald-300">
+                                        تأكيد الإجابة ⚽
+                                    </button>
+                                ` : `
+                                    <button onclick="sound.playWhistle(); nextQuestion();" class="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black px-8 py-3 rounded-xl shadow-lg transition-all animate-pulse flex items-center gap-2">
+                                        <span>السؤال التالي</span>
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+                                `}
+                            </div>
+
+                            ${gameState.isAnswerSubmitted ? `
+                                <div class="mt-4 p-4 rounded-2xl bg-slate-800/90 border border-emerald-500/30 text-slate-200 text-sm animate-fade-in">
+                                    <div class="font-bold text-emerald-400 mb-1 flex items-center gap-2">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <span>💡 لماذا؟ (التفسير العلمي):</span>
+                                    </div>
+                                    <p class="leading-relaxed">${q.explanation}</p>
+                                </div>
+                            ` : ''}
+
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        function renderQuestionWidget(q) {
+            const qIdx = gameState.questionsOrder[gameState.questionIndex];
+            if (q.type === 'mcq' || q.type === 'chart' || q.type === 'experiment' || q.type === 'visual') {
+                const currentOpts = gameState.shuffledOptions[qIdx] || q.options;
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${currentOpts.map((opt, idx) => {
+                            let btnStyle = "bg-slate-800/80 border-slate-700 hover:border-emerald-500/60 text-slate-200";
+                            if (gameState.selectedOption === idx) {
+                                btnStyle = "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md";
+                            }
+                            if (gameState.isAnswerSubmitted) {
+                                if (opt.correct) {
+                                    btnStyle = "bg-green-600/30 border-green-500 text-green-300 font-bold";
+                                } else if (gameState.selectedOption === idx && !opt.correct) {
+                                    btnStyle = "bg-red-600/30 border-red-500 text-red-300";
+                                }
+                            }
+                            return `
+                                <button ${gameState.isAnswerSubmitted ? 'disabled' : ''} onclick="gameState.selectedOption=${idx}; render();" class="p-4 rounded-2xl border-2 text-right transition-all flex items-center justify-between ${btnStyle}">
+                                    <span class="font-semibold text-sm md:text-base">${opt.text}</span>
+                                    <span class="w-6 h-6 rounded-full border border-slate-600 flex items-center justify-center text-xs font-bold ${gameState.selectedOption===idx ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'text-slate-400'}">${opt.key}</span>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'tf') {
+                return `
+                    <div class="flex gap-4 justify-center py-4">
+                        <button ${gameState.isAnswerSubmitted ? 'disabled' : ''} onclick="gameState.tfAnswer=true; render();" class="flex-1 p-6 rounded-2xl border-2 font-black text-xl flex flex-col items-center gap-2 transition-all ${gameState.tfAnswer===true ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500'}">
+                            <i class="fa-solid fa-circle-check text-3xl text-green-400"></i>
+                            <span>صح</span>
+                        </button>
+                        <button ${gameState.isAnswerSubmitted ? 'disabled' : ''} onclick="gameState.tfAnswer=false; render();" class="flex-1 p-6 rounded-2xl border-2 font-black text-xl flex flex-col items-center gap-2 transition-all ${gameState.tfAnswer===false ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500'}">
+                            <i class="fa-solid fa-circle-xmark text-3xl text-red-400"></i>
+                            <span>خطأ</span>
+                        </button>
+                    </div>
+                `;
+            } else if (q.type === 'order') {
+                return `
+                    <div class="space-y-2">
+                        <div class="text-xs text-amber-400 mb-2"><i class="fa-solid fa-arrows-up-down"></i> رتب الخطوات بالشكل الصحيح باستخدام أزرار الترتيب:</div>
+                        ${gameState.orderItems.map((item, idx) => `
+                            <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-sm">
+                                <span class="font-semibold text-slate-200"><span class="text-emerald-400 font-bold ml-2">${idx+1}.</span> ${item}</span>
+                                ${!gameState.isAnswerSubmitted ? `
+                                    <div class="flex gap-1">
+                                        <button onclick="moveOrderItem(${idx}, -1)" ${idx===0?'disabled':''} class="p-1.5 px-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 rounded-lg text-xs"><i class="fa-solid fa-chevron-up"></i></button>
+                                        <button onclick="moveOrderItem(${idx}, 1)" ${idx===gameState.orderItems.length-1?'disabled':''} class="p-1.5 px-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 rounded-lg text-xs"><i class="fa-solid fa-chevron-down"></i></button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'match') {
+                return `
+                    <div>
+                        <div class="text-xs text-amber-400 mb-3"><i class="fa-solid fa-hand-pointer"></i> اضغط على المصطلح من القائمة أ ثم اضغط على تعريفه المناسب في القائمة ب:</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div class="text-xs font-bold text-emerald-400">القائمة أ (المصطلحات):</div>
+                                ${q.listA.map(term => {
+                                    const isSelected = gameState.activeMatchTerm === term;
+                                    const isMatched = gameState.matchingPairs[term];
+                                    return `
+                                        <button ${gameState.isAnswerSubmitted ? 'disabled' : ''} onclick="gameState.activeMatchTerm='${term}'; render();" class="w-full text-right p-3 rounded-xl border transition-all text-sm font-bold flex items-center justify-between ${isSelected ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' : isMatched ? 'border-green-600/50 bg-green-950/20 text-green-300' : 'border-slate-700 bg-slate-800 text-slate-200'}">
+                                            <span>${term}</span>
+                                            ${isMatched ? `<span class="text-xs text-emerald-400">✓ (${isMatched})</span>` : ''}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="space-y-2">
+                                <div class="text-xs font-bold text-emerald-400">القائمة ب (التعاريف):</div>
+                                ${q.listB.map(def => {
+                                    return `
+                                        <button ${gameState.isAnswerSubmitted || !gameState.activeMatchTerm ? 'disabled' : ''} onclick="matchTermWithDef('${def}');" class="w-full text-right p-3 rounded-xl border border-slate-700 bg-slate-800 hover:border-emerald-400 text-xs text-slate-200 transition-all">
+                                            ${def}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ${Object.keys(gameState.matchingPairs).length > 0 && !gameState.isAnswerSubmitted ? `
+                            <div class="mt-3">
+                                <button onclick="gameState.matchingPairs={}; gameState.activeMatchTerm=null; render();" class="text-xs text-red-400 hover:text-red-300 underline font-semibold">
+                                    <i class="fa-solid fa-rotate-left"></i> ↩️ إلغاء التوصيل وإعادة المحاولة
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function moveOrderItem(index, direction) {
+            const target = index + direction;
+            if (target < 0 || target >= gameState.orderItems.length) return;
+            const temp = gameState.orderItems[index];
+            gameState.orderItems[index] = gameState.orderItems[target];
+            gameState.orderItems[target] = temp;
+            render();
+        }
+
+        function matchTermWithDef(def) {
+            if (!gameState.activeMatchTerm) return;
+            gameState.matchingPairs[gameState.activeMatchTerm] = def;
+            gameState.activeMatchTerm = null;
+            render();
+        }
+
+        function renderPauseModal() {
+            if (!gameState.paused) return;
+            const div = document.createElement('div');
+            div.id = 'pauseModal';
+            div.className = 'fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4';
+            div.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+                    <h3 class="text-xl font-black text-white mb-2">المباراة متوقفة مؤقتاً</h3>
+                    <p class="text-xs text-slate-400 mb-6">خذ استراحة قصيرة، يمكنك استئناف المباراة في أي وقت.</p>
+                    <div class="space-y-3">
+                        <button onclick="gameState.paused=false; document.getElementById('pauseModal').remove(); startTimer();" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl shadow-lg">
+                            استئناف المباراة
+                        </button>
+                        <button onclick="gameState.screen='welcome'; document.getElementById('pauseModal').remove(); render();" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl border border-slate-700">
+                            الانسحاب للرئيسية
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(div);
+        }
+
+        function renderMatchOverScreen() {
+            const currentTeam = gameState.mode === 'solo' ? gameState.teamName : gameState.teamsList[0];
+            const myScore = gameState.scores[currentTeam] || 0;
+            const awayScore = gameState.scores[gameState.mode === 'solo' ? gameState.awayName : 'الكمبيوتر المنافس'] || 0;
+
+            let resultMsg = "";
+            let resultColor = "text-emerald-400";
+            if (myScore > awayScore) {
+                resultMsg = "🏆 فوز رائع! لقد أصبحت بطل التحدي العلمي!";
+            } else if (myScore === awayScore) {
+                resultMsg = "🤝 مباراة قوية! تعادل رائع بين الفريقين!";
+                resultColor = "text-amber-400";
+            } else {
+                resultMsg = "💪 مباراة رائعة! حاول مرة أخرى وحقق الفوز!";
+                resultColor = "text-red-400";
+            }
+
+            const totalAnswered = gameState.stats.correct + gameState.stats.incorrect;
+            const percentage = totalAnswered > 0 ? Math.round((gameState.stats.correct / 20) * 100) : 0;
+
+            let levelTitle = "";
+            let levelBadge = "";
+            if (percentage >= 90) { levelTitle = "بطل العلوم"; levelBadge = "🏆"; }
+            else if (percentage >= 80) { levelTitle = "نجم العلوم"; levelBadge = "⚽"; }
+            else if (percentage >= 70) { levelTitle = "لاعب علمي متميز"; levelBadge = "🥇"; }
+            else if (percentage >= 60) { levelTitle = "مستكشف العلوم"; levelBadge = "🔬"; }
+            else { levelTitle = "متدرب العلوم"; levelBadge = "🌱"; }
+
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white overflow-y-auto py-10">
+                    <div class="w-full max-w-2xl bg-slate-900/95 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md text-center">
+                        <div class="text-4xl mb-2">${levelBadge}</div>
+                        <h2 class="text-2xl md:text-3xl font-black mb-2 ${resultColor}">${resultMsg}</h2>
+                        <p class="text-xs text-slate-400 mb-6">نتائج وتقييم أداء الوحدة الثالثة - منهج كامبردج</p>
+
+                        <div class="bg-slate-950/80 p-6 rounded-2xl border border-slate-800 mb-6 flex items-center justify-around">
+                            <div class="text-center">
+                                <div class="text-xs text-emerald-400 font-bold mb-1">${currentTeam}</div>
+                                <div class="text-4xl font-black text-white">${myScore} ⚽</div>
+                            </div>
+                            <div class="text-2xl text-slate-600 font-bold">VS</div>
+                            <div class="text-center">
+                                <div class="text-xs text-red-400 font-bold">المنافس</div>
+                                <div class="text-4xl font-black text-white">${awayScore} ⚽</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                                <div class="text-xs text-slate-400">إجابات صحيحة</div>
+                                <div class="text-xl font-black text-green-400 mt-1">${gameState.stats.correct}</div>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                                <div class="text-xs text-slate-400">إجابات خاطئة</div>
+                                <div class="text-xl font-black text-red-400 mt-1">${gameState.stats.incorrect}</div>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                                <div class="text-xs text-slate-400">نسبة الإتقان</div>
+                                <div class="text-xl font-black text-emerald-400 mt-1">${percentage}%</div>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                                <div class="text-xs text-slate-400">مستوى اللاعب</div>
+                                <div class="text-sm font-black text-amber-400 mt-1 truncate">${levelTitle}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 justify-center">
+                            <button onclick="initGame(); gameState.screen='match_play'; render();" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-6 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                <span>إعادة المباراة</span>
+                            </button>
+                            <button onclick="gameState.screen='review_answers'; render();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-6 py-3.5 rounded-xl border border-slate-700 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                                <span>مراجعة الإجابات</span>
+                            </button>
+                            <button onclick="gameState.screen='welcome'; render();" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-6 py-3.5 rounded-xl border border-slate-700 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-house"></i>
+                                <span>الرئيسية</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviewScreen() {
+            return `
+                <div class="flex-1 flex flex-col p-4 md:p-8 bg-slate-950 text-white overflow-y-auto">
+                    <div class="max-w-4xl mx-auto w-full">
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                            <div>
+                                <h2 class="text-2xl font-black text-emerald-400">📋 سجل مراجعة إجابات المباراة</h2>
+                                <p class="text-xs text-slate-400 mt-1">تتبع إجاباتك السابقة والتفسيرات العلمية الدقيقة للوحدة الثالثة</p>
+                            </div>
+                            <button onclick="gameState.screen='match_over'; render();" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold border border-slate-700">
+                                العودة لنتيجة المباراة
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${gameState.history.map(item => `
+                                <div class="bg-slate-900 border ${item.result==='correct' ? 'border-green-500/40' : 'border-red-500/40'} p-5 rounded-2xl shadow-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded text-xs font-bold">سؤال ${item.questionNum}</span>
+                                            <span class="text-xs text-emerald-400 font-semibold">${item.topic}</span>
+                                        </div>
+                                        <div>
+                                            ${item.result==='correct' ? '<span class="text-xs bg-green-500/20 text-green-400 px-2.5 py-1 rounded-full font-bold">✓ إجابة صحيحة (هدف)</span>' : '<span class="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-bold">✗ إجابة خاطئة (هدف للمنافس)</span>'}
+                                        </div>
+                                    </div>
+                                    <h4 class="text-base font-bold text-white mb-3">${item.question}</h4>
+                                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 text-xs text-slate-300">
+                                        <span class="font-bold text-emerald-400 ml-1">💡 التفسير العلمي:</span> ${item.explanation}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>

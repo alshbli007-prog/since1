@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي كرة القدم العلمي - مراجعة الوحدة الثانية للصف الخامس</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 50%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #022c22;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 4px;
+        }
+        .football-pitch {
+            background: linear-gradient(to bottom, #15803d 0%, #16a34a 50%, #15803d 100%);
+            background-image: 
+                radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, transparent 75%),
+                linear-gradient(to right, rgba(255,255,255,0.06) 50%, transparent 50%);
+            background-size: 100% 100%, 70px 70px;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+        }
+        .center-circle {
+            border: 3px solid rgba(255, 255, 255, 0.75);
+        }
+        .goal-box {
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-bottom: none;
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite ease-in-out;
+        }
+        @keyframes ballShootHome {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(250px, -120px) scale(1.3) rotate(360deg); }
+            100% { transform: translate(450px, -220px) scale(0.6); opacity: 0; }
+        }
+        @keyframes ballShootAway {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-250px, 120px) scale(1.3) rotate(-360deg); }
+            100% { transform: translate(-450px, 220px) scale(0.6); opacity: 0; }
+        }
+        .shooting-home {
+            animation: ballShootHome 0.9s forwards ease-out;
+        }
+        .shooting-away {
+            animation: ballShootAway 0.9s forwards ease-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-full">
+
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-emerald-500/35 sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <!-- الهوية الرسمية (سلطنة عمان وتحتها وزارة التعليم) -->
+            <div class="flex items-center gap-3">
+                <img src="https://www2.0zz0.com/2025/12/02/12/984978442.png" alt="شعار سلطنة عمان" class="w-14 h-14 object-contain filter drop-shadow(0 0 10px rgba(255,255,255,0.35)) flex-shrink-0" onerror="this.src='https://placehold.co/56x56/10b981/ffffff?text=OMN'">
+                <div class="flex flex-col justify-center">
+                    <span class="text-sm font-black text-emerald-300 tracking-wide">سلطنة عمان</span>
+                    <span class="text-xs font-bold text-slate-200">وزارة التعليم</span>
+                    <span class="text-[11px] text-emerald-400/90">المديرية العامة للتعليم بمحافظة شمال الباطنة</span>
+                    <span class="text-[11px] text-slate-400">مدرسة محمد بن محبوب الرحيلي للتعليم الأساسي (5-10)</span>
+                </div>
+            </div>
+
+            <!-- معلومات المعلم وصورته الأساسية -->
+            <div class="flex items-center gap-3 bg-emerald-950/70 px-4 py-2.5 rounded-2xl border border-emerald-500/40 shadow-inner">
+                <div class="w-14 h-16 rounded-xl overflow-hidden border-2 border-emerald-400 shadow-lg bg-slate-800 flex-shrink-0 flex items-center justify-center">
+                    <img src="https://i.ibb.co/nNsB6p4G/IY4B8215.jpg" alt="أ. فيصل الشبلي" class="w-full h-full object-cover object-top scale-105" onerror="this.src='https://placehold.co/56x56/10b981/ffffff?text=TF'">
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-black text-emerald-300">معلم المادة: أ. فيصل الشبلي</div>
+                    <div class="text-[11px] text-slate-200 font-semibold">📞 99812126 | IG: faalll8</div>
+                    <div class="text-[11px] text-slate-400">مدير المدرسة: أ. سعود الشيزاوي</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 flex flex-col justify-center items-center my-auto">
+
+        <div id="welcome-screen" class="w-full max-w-3xl bg-slate-900/95 backdrop-blur-xl border border-emerald-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl text-center relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="inline-flex items-center justify-center p-3 bg-emerald-500/20 rounded-2xl mb-4 border border-emerald-500/30">
+                <i class="fa-solid fa-futbol text-4xl text-emerald-400 animate-bounce-slow"></i>
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl font-black text-white mb-2 tracking-tight">
+                ⚽🏆 تحدي كرة القدم العلمي
+            </h1>
+            <p class="text-emerald-300 font-semibold text-lg mb-6">
+                مراجعة الوحدة الثانية – الصف الخامس (نشر البذور، التلقيح، ودورة حياة النبات 🌱)
+            </p>
+
+            <div class="bg-slate-800/80 rounded-2xl p-5 mb-6 text-right border border-slate-700 shadow-inner">
+                <h3 class="text-emerald-400 font-bold mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-info-circle"></i> تعليمات المباراة الحماسية:
+                </h3>
+                <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside">
+                    <li><strong class="text-white">السؤال = هجمة</strong>، والتفكير السليم هو صناعة اللعب!</li>
+                    <li><strong class="text-emerald-400">الإجابة الصحيحة</strong> = تسديدة ناجحة و<strong class="text-emerald-400">هدف لصالحك</strong> ⚽</li>
+                    <li><strong class="text-rose-400">الإجابة الخاطئة</strong> = هجمة مرتدة و<strong class="text-rose-400">هدف للمنافس</strong> 🤖</li>
+                    <li>المباراة تتكون من <strong class="text-amber-400">20 سؤالًا</strong> شاملة لجميع موضوعات الوحدة الثانية.</li>
+                    <li>في حال التعادل، يتم اللجوء إلى <strong class="text-purple-400">ركلات الترجيح العلمية</strong> لحسم البطولة!</li>
+                </ul>
+            </div>
+
+            <!-- إعدادات اللعبة وأوضعها -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-right">
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">وضع اللعب:</label>
+                    <select id="game-mode-select" onchange="toggleTeamInputs()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                        <option value="single">👤 الوضع الفردي (ضد الحاسوب)</option>
+                        <option value="multi">👥 الوضع الجماعي (عدة فرق)</option>
+                    </select>
+                </div>
+                <div id="single-name-box">
+                    <label class="block text-sm font-bold text-slate-300 mb-2">اسم اللاعب / الفريق:</label>
+                    <input type="text" id="player-name-input" value="أبطال الخامس" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                </div>
+                <div id="multi-teams-box" class="hidden">
+                    <label class="block text-sm font-bold text-slate-300 mb-2">أسماء الفرق (مفصولة بفاصلة):</label>
+                    <input type="text" id="multi-teams-input" value="فريق النسور, فريق الأبطال, فريق النمور" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">نظام الوقت:</label>
+                    <select id="timer-mode-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                        <option value="timer">⏱️ مباراة مؤقتة (مع التحدي الزمني)</option>
+                        <option value="notimer">🧘 مباراة بدون مؤقت</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xl rounded-2xl shadow-lg shadow-emerald-600/30 transform hover:-translate-y-0.5 transition duration-200 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-play"></i> انطلاق صفارة البداية! ⚽
+            </button>
+        </div>
+
+        <div id="game-screen" class="w-full max-w-4xl hidden flex flex-col gap-4">
+            
+            <!-- لوحة النتائج العلوي -->
+            <div class="bg-slate-900/90 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-lg shadow">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <div id="display-player-name" class="font-bold text-white text-lg">أبطال الخامس</div>
+                        <div id="display-turn-info" class="text-xs text-emerald-400">الفريق المضيف</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 bg-slate-950/80 px-6 py-2 rounded-xl border border-emerald-500/20">
+                    <div class="text-center">
+                        <span id="player-score" class="text-3xl font-black text-emerald-400">0</span>
+                        <span class="text-xl text-emerald-400"> ⚽</span>
+                    </div>
+                    <div class="text-slate-500 font-bold text-xl">VS</div>
+                    <div class="text-center">
+                        <span id="ai-score" class="text-3xl font-black text-rose-400">0</span>
+                        <span class="text-xl text-rose-400"> ⚽</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-amber-300" id="question-counter">السؤال 1 من 20</div>
+                        <div class="text-xs text-slate-400" id="timer-display">الوقت: --</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center text-white font-black text-lg shadow">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ملعب كرة القدم البصري الواقعي -->
+            <div class="w-full h-48 sm:h-56 football-pitch rounded-2xl relative overflow-hidden flex items-center justify-center border-2 border-emerald-500/50 shadow-2xl">
+                <div class="absolute inset-x-0 top-0 bottom-0 m-auto w-32 h-32 rounded-full center-circle pointer-events-none opacity-40"></div>
+                <div class="absolute inset-y-0 w-0.5 bg-white/40 left-1/2 pointer-events-none"></div>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-24 goal-box rounded-l-xl pointer-events-none opacity-70"></div>
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-24 goal-box rounded-r-xl pointer-events-none opacity-70"></div>
+                
+                <div id="football-element" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-slate-900 transition-all duration-700 z-20">
+                    <i class="fa-solid fa-futbol text-slate-900 text-2xl animate-spin" style="animation-duration: 6s;"></i>
+                </div>
+
+                <div id="match-announcement" class="absolute top-3 bg-slate-950/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-emerald-500/40 text-xs font-bold text-emerald-300 shadow-lg transition-all duration-300 z-30">
+                    🔥 هجمة جديدة تبدأ من منتصف الملعب!
+                </div>
+            </div>
+
+            <!-- بطاقة السؤال التفاعلية -->
+            <div class="bg-slate-900/95 backdrop-blur-xl border border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6 relative">
+                
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <span id="question-type-badge" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-300 text-xs font-bold">
+                        اختيار من متعدد
+                    </span>
+                    <span class="text-xs text-slate-400 font-semibold">
+                        مراجعة الوحدة الثانية – الصف الخامس (كامبردج)
+                    </span>
+                </div>
+
+                <div>
+                    <h2 id="question-text" class="text-lg sm:text-xl font-bold text-white mb-4 leading-relaxed"></h2>
+                    <div id="question-extra-content" class="mb-4"></div>
+                </div>
+
+                <div id="answers-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800">
+                    <button id="cancel-selection-btn" onclick="clearCurrentSelection()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition border border-slate-700 hidden">
+                        ↩️ إلغاء التوصيل / إعادة الاختيار
+                    </button>
+                    <div class="ms-auto flex items-center gap-3">
+                        <button id="confirm-answer-btn" onclick="confirmAnswer()" disabled class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                            <span>✅ تأكيد الإجابة</span>
+                        </button>
+                        <button id="next-question-btn" onclick="nextQuestion()" class="px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-lg transition hidden flex items-center gap-2">
+                            <span>➡️ السؤال التالي</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="feedback-box" class="hidden rounded-2xl p-5 border transition-all duration-300">
+                    <div id="feedback-title" class="font-extrabold text-lg mb-2 flex items-center gap-2"></div>
+                    <div id="feedback-explanation" class="text-sm text-slate-200 leading-relaxed"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="penalty-shootout-screen" class="w-full max-w-3xl bg-slate-900/95 backdrop-blur-xl border border-amber-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl text-center hidden">
+            <div class="inline-flex items-center justify-center p-3 bg-amber-500/20 rounded-2xl mb-4 border border-amber-500/30">
+                <i class="fa-solid fa-futbol text-4xl text-amber-400 animate-bounce-slow"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-amber-300 mb-2">🏆 ركلات الترجيح العلمية!</h2>
+            <p class="text-slate-300 mb-6">انتهت المباراة الأصلية بالتعادل! حان وقت ركلات الترجيح الحاسمة لتحديد بطل الملعب العلمي.</p>
+            <div id="penalty-content" class="text-right"></div>
+        </div>
+
+        <div id="game-over-screen" class="w-full max-w-3xl bg-slate-900/95 backdrop-blur-xl border border-emerald-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl text-center hidden">
+            <div class="inline-flex items-center justify-center p-4 bg-emerald-500/20 rounded-2xl mb-4 border border-emerald-500/30">
+                <i id="game-over-icon" class="fa-solid fa-trophy text-5xl text-amber-400 animate-bounce-slow"></i>
+            </div>
+            
+            <h2 id="game-over-title" class="text-3xl font-black text-white mb-2">🏆 صافرة النهاية!</h2>
+            <p id="game-over-subtitle" class="text-emerald-300 font-semibold text-lg mb-6"></p>
+
+            <div class="bg-slate-950/80 rounded-2xl p-6 mb-6 border border-slate-800 flex items-center justify-around">
+                <div class="text-center">
+                    <div id="final-player-name" class="text-sm font-bold text-slate-400 mb-1">أبطال الخامس</div>
+                    <div id="final-player-score" class="text-4xl font-black text-emerald-400">0 ⚽</div>
+                </div>
+                <div class="text-2xl font-bold text-slate-600">VS</div>
+                <div class="text-center">
+                    <div class="text-sm font-bold text-slate-400 mb-1">المنافس الآلي / المنافسين</div>
+                    <div id="final-ai-score" class="text-4xl font-black text-rose-400">0 ⚽</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="restartGame()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> إعادة المباراة
+                </button>
+                <button onclick="goToWelcome()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl shadow-lg transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-house"></i> الرئيسية
+                </button>
+                <button onclick="openReviewModal()" class="px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> مراجعة الإجابات
+                </button>
+            </div>
+        </div>
+
+        <div id="review-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-slate-900 border border-emerald-500/40 w-full max-w-4xl max-h-[90vh] rounded-3xl p-6 shadow-2xl flex flex-col">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-emerald-400"></i> مراجعة إجابات المباراة
+                    </h3>
+                    <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <div id="review-list-container" class="overflow-y-auto space-y-4 pr-2 flex-grow"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const masterQuestions = [
+            {
+                id: 1,
+                type: "mcq",
+                topic: "أهمية الأزهار",
+                text: "ما الوظيفة الأساسية للأزهار في دورة حياة النبات وفق محتوى الوحدة؟",
+                options: [
+                    { id: 'a', text: "أ) صنع الغذاء فقط" },
+                    { id: 'b', text: "ب) المساعدة في تكوين الثمار والبذور" },
+                    { id: 'c', text: "ج) امتصاص الماء من التربة" },
+                    { id: 'd', text: "د) نشر الماء داخل النبات" }
+                ],
+                correct: 'b',
+                explanation: "الوظيفة الأساسية للأزهار هي التكاثر وتكوين الثمار والبذور لضمان استمرار نوع النبات."
+            },
+            {
+                id: 2,
+                type: "tf",
+                topic: "أهمية الأزهار",
+                text: "تختلف الأزهار في اللون والرائحة والحجم، بينما وظيفة الأزهار مرتبطة بالتكاثر وتكوين الثمار والبذور.",
+                options: [
+                    { id: 'true', text: "صح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correct: 'true',
+                explanation: "عبارة صحيحة؛ تتنوع الأزهار في أشكالها وألوانها، لكنها تتفق في دورها الأساسي في عملية التكاثر وإنتاج الثمار والبذور."
+            },
+            {
+                id: 3,
+                type: "ordering",
+                topic: "دورة حياة النبات",
+                text: "رتب مراحل دورة حياة نبات زهري بالترتيب الصحيح:",
+                items: [
+                    { id: 'step1', text: "إنبات البذور" },
+                    { id: 'step2', text: "نمو النبات" },
+                    { id: 'step3', text: "تكوين الأزهار" },
+                    { id: 'step4', text: "حدوث التلقيح والإخصاب" },
+                    { id: 'step5', text: "تكوين الثمار والبذور" },
+                    { id: 'step6', text: "انتشار البذور" }
+                ],
+                correctOrder: ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'],
+                explanation: "المراحل تبدأ بإنبات البذرة، ثم نمو النبات، تكوين الأزهار، التلقيح والإخصاب، تكوين الثمار والبذور، وأخيراً انتشار البذور."
+            },
+            {
+                id: 4,
+                type: "matching",
+                topic: "نشر البذور",
+                text: "صل طريقة انتشار البذور بالصفة التي تساعد عليها:",
+                pairs: [
+                    { leftId: '1', leftText: "الرياح", rightId: 'c', rightText: "أجنحة رفيعة وخفيفة وجافة" },
+                    { leftId: '2', leftText: "الحيوانات", rightId: 'b', rightText: "أشواك أو خطافات تلتصق بالفراء" },
+                    { leftId: '3', leftText: "الماء", rightId: 'a', rightText: "طبقة إسفنجية تساعد على الطفو" },
+                    { leftId: '4', leftText: "الانفجار", rightId: 'd', rightText: "تنفجر القرون مطلقة البذور بعيدًا" }
+                ],
+                correctMatches: { '1': 'c', '2': 'b', '3': 'a', '4': 'd' },
+                explanation: "لكل طريقة انتشار خصائص وتكيفات تتناسب مع العامل المسؤول عن نشرها (رياح، حيوانات، ماء، انفجار)."
+            },
+            {
+                id: 5,
+                type: "mcq",
+                topic: "نشر البذور",
+                text: "بذرة خفيفة وجافة وتحمل أجنحة رفيعة وجافة. ما الطريقة الأكثر مناسبة لانتشارها؟",
+                options: [
+                    { id: 'a', text: "أ) الماء" },
+                    { id: 'b', text: "ب) الحيوانات" },
+                    { id: 'c', text: "ج) الرياح" },
+                    { id: 'd', text: "د) الانفجار" }
+                ],
+                correct: 'c',
+                explanation: "الأجنحة الخفيفة والجافة تساعد البذرة على التقاط الهواء والانتقال لمسافات طويلة بواسطة الرياح."
+            },
+            {
+                id: 6,
+                type: "mcq",
+                topic: "نشر البذور",
+                text: "أي عبارة صحيحة عن بذور الهندباء وفق المعلومات الموجودة في الوحدة؟",
+                options: [
+                    { id: 'a', text: "أ) تمتلك مظلة من الشعر تساعدها على الانتشار بالرياح" },
+                    { id: 'b', text: "ب) تمتلك طبقة إسفنجية تساعدها على الطفو في الماء" },
+                    { id: 'c', text: "ج) تنتشر فقط عن طريق الحيوانات" },
+                    { id: 'd', text: "د) تنتشر عن طريق الانفجار" }
+                ],
+                correct: 'a',
+                explanation: "تنتشر بذور الهندباء بواسطة الرياح بفضل امتلاكها مظلة دقيقة من الشعيرات تعمل عمل المظلة الهوائية."
+            },
+            {
+                id: 7,
+                type: "mcq",
+                topic: "استقصاء أجنحة البذور",
+                text: "وفق بيانات تجربة أجنحة البذور، أي نوع من الأجنحة قطع أكبر مسافة في الهواء عندما كان طوله 11 سم؟",
+                options: [
+                    { id: 'a', text: "أ) الجناح المستقيم" },
+                    { id: 'b', text: "ب) الجناح البيضاوي" },
+                    { id: 'c', text: "ج) الجناح المنحني" },
+                    { id: 'd', text: "د) جميعها قطعت المسافة نفسها" }
+                ],
+                correct: 'a',
+                explanation: "من خلال البيانات التجريبية، قطع الجناح المستقيم بطول 11 سم مسافة أكبر (21 سم) مقارنة بالأنواع الأخرى."
+            },
+            {
+                id: 8,
+                type: "mcq",
+                topic: "تحليل بيانات أجنحة البذور",
+                extraHtml: `
+                    <div class="overflow-x-auto mb-3">
+                        <table class="w-full text-xs text-right text-slate-300 border border-slate-700 rounded-lg">
+                            <thead class="bg-slate-800 text-emerald-400">
+                                <tr><th class="p-2 border border-slate-700">شكل الجناح</th><th class="p-2 border border-slate-700">طول الجناح</th><th class="p-2 border border-slate-700">المسافة في الهواء</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="p-2 border border-slate-700">مستقيم</td><td class="p-2 border border-slate-700">5 سم</td><td class="p-2 border border-slate-700">11 سم</td></tr>
+                                <tr class="bg-slate-800/50"><td class="p-2 border border-slate-700">مستقيم</td><td class="p-2 border border-slate-700">11 سم</td><td class="p-2 border border-slate-700">21 سم</td></tr>
+                                <tr><td class="p-2 border border-slate-700">بيضاوي</td><td class="p-2 border border-slate-700">5 سم</td><td class="p-2 border border-slate-700">5 سم</td></tr>
+                                <tr class="bg-slate-800/50"><td class="p-2 border border-slate-700">بيضاوي</td><td class="p-2 border border-slate-700">11 سم</td><td class="p-2 border border-slate-700">11 سم</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `,
+                text: "بالاعتماد على جدول بيانات أجنحة البذور أعلاه، أي استنتاج تدعمه البيانات بشكل أفضل؟",
+                options: [
+                    { id: 'a', text: "أ) الجناح المنحني هو الأفضل دائمًا" },
+                    { id: 'b', text: "ب) جميع الأجنحة تحمل البذور المسافة نفسها" },
+                    { id: 'c', text: "ج) الجناح البيضاوي يقطع أطول مسافة دائمًا" },
+                    { id: 'd', text: "د) في هذه البيانات، الجناح المستقيم قطع أكبر مسافة من الأنواع الأخرى" }
+                ],
+                correct: 'd',
+                explanation: "تظهر الأرقام بوضوح أن الجناح المستقيم سجل أكبر مسافة طيران (21 سم)."
+            },
+            {
+                id: 9,
+                type: "mcq",
+                topic: "أجزاء الزهرة",
+                text: "أي جزء من الزهرة ينتج حبوب اللقاح؟",
+                options: [
+                    { id: 'a', text: "أ) السبالت" },
+                    { id: 'b', text: "ب) البتلات" },
+                    { id: 'c', text: "ج) السداة (المتك)" },
+                    { id: 'd', text: "د) الكربلة" }
+                ],
+                correct: 'c',
+                explanation: "السداة هي عضو التذكير في الزهرة، ويتكون المتك فيها من جيوب تنتج حبوب اللقاح."
+            },
+            {
+                id: 10,
+                type: "matching",
+                topic: "أجزاء الزهرة",
+                text: "صل جزء الزهرة بوظيفته الصحيحة:",
+                pairs: [
+                    { leftId: '1', leftText: "السبالت", rightId: 'b', rightText: "حماية برعم الزهرة قبل تفتحها" },
+                    { leftId: '2', leftText: "البتلات", rightId: 'c', rightText: "جذب الحشرات بألوانها الزاهية" },
+                    { leftId: '3', leftText: "السداة", rightId: 'd', rightText: "إنتاج حبوب اللقاح" },
+                    { leftId: '4', leftText: "الكربلة", rightId: 'a', rightText: "تحتوي على المبيض والبويضات" }
+                ],
+                correctMatches: { '1': 'b', '2': 'c', '3': 'd', '4': 'a' },
+                explanation: "كل جزء من أجزاء الزهرة يؤدي دوراً تخصصياً دقيقاً في عملية حماية الزهرة والتكاثر."
+            },
+            {
+                id: 11,
+                type: "mcq",
+                topic: "التلقيح",
+                text: "أي عبارة تصف انتقال حبوب اللقاح في عملية التلقيح بشكل صحيح؟",
+                options: [
+                    { id: 'a', text: "أ) تنتقل حبوب اللقاح من الميسم إلى السداة" },
+                    { id: 'b', text: "ب) تنتقل حبوب اللقاح من السداة إلى الميسم" },
+                    { id: 'c', text: "ج) تنتقل البويضات إلى البتلات" },
+                    { id: 'd', text: "د) تنتقل البذور إلى الميسم" }
+                ],
+                correct: 'b',
+                explanation: "التلقيح هو عملية انتقال حبوب اللقاح من المتك (السداة) إلى الميسم (الكربلة)."
+            },
+            {
+                id: 12,
+                type: "mcq",
+                topic: "تلقيح الأزهار",
+                text: "أي صفات تساعد على جذب الحشرات لتلقيح الزهرة؟",
+                options: [
+                    { id: 'a', text: "أ) لون زاهٍ وبتلات ملونة ورائحة زكية" },
+                    { id: 'b', text: "ب) عدم وجود بتلات وحبوب لقاح قليلة" },
+                    { id: 'c', text: "ج) طبقة إسفنجية تساعد على الطفو" },
+                    { id: 'd', text: "د) أجنحة رفيعة وجافة" }
+                ],
+                correct: 'a',
+                explanation: "تعتمد الأزهار التي تلقحها الحشرات على الألوان الجذابة للبتلات والروائح العطرية وتقديم الرحيق لاستقطاب الحشرات."
+            },
+            {
+                id: 13,
+                type: "ordering",
+                topic: "التلقيح والإخصاب",
+                text: "رتب مراحل التلقيح والإخصاب التالية بالترتيب الصحيح:",
+                items: [
+                    { id: 't1', text: "تنتقل حبة اللقاح من السداة إلى الميسم" },
+                    { id: 't2', text: "تنمو حبة اللقاح مكونة أنبوبًا يصل إلى المبيض" },
+                    { id: 't3', text: "تتحد حبة اللقاح مع البويضة مكونة البذرة (الإخصاب)" },
+                    { id: 't4', text: "تموت بتلات وأسدية الزهرة وينتفخ المبيض مكونًا الثمرة" }
+                ],
+                correctOrder: ['t1', 't2', 't3', 't4'],
+                explanation: "يبدأ التلقيح بالانتقال، ثم نمو أنبوب اللقاح، ثم اتحاد اللقاح بالبويضة (الإخصاب)، وأخيراً تحول المبيض إلى ثمرة."
+            },
+            {
+                id: 14,
+                type: "mcq",
+                topic: "الإخصاب",
+                text: "ماذا يسمى اتحاد حبة اللقاح مع البويضة داخل المبيض؟",
+                options: [
+                    { id: 'a', text: "أ) التلقيح" },
+                    { id: 'b', text: "ب) الانتشار" },
+                    { id: 'c', text: "ج) الإنبات" },
+                    { id: 'd', text: "د) الإخصاب" }
+                ],
+                correct: 'd',
+                explanation: "اتحاد نواة حبة اللقاح مع البويضة هو عملية 'الإخصاب' والتي تنتج عنها البذرة."
+            },
+            {
+                id: 15,
+                type: "mcq",
+                topic: "تكوين الثمار",
+                text: "أي جزء من الزهرة يتحول إلى ثمرة بعد حدوث الإخصاب؟",
+                options: [
+                    { id: 'a', text: "أ) المبيض" },
+                    { id: 'b', text: "ب) الميسم" },
+                    { id: 'c', text: "ج) البتلات" },
+                    { id: 'd', text: "د) السداة" }
+                ],
+                correct: 'a',
+                explanation: "بعد الإخصاب، تذبل أجزاء الزهرة بينما ينمو المبيض وينتفخ ليتحول إلى ثمرة تحمي بداخلها البذور."
+            },
+            {
+                id: 16,
+                type: "tf",
+                topic: "التلقيح بالرياح",
+                text: "الأزهار عديمة البتلات أو ذات البتلات الصغيرة جدًا يمكن أن يتم تلقيحها بواسطة الرياح.",
+                options: [
+                    { id: 'true', text: "صح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correct: 'true',
+                explanation: "نعم، النباتات التي تعتمد على الرياح لا تحتاج لبتلات ملونة لجذب الحشرات، بل تنتج كميات هائلة من حبوب اللقاح الخفيفة."
+            },
+            {
+                id: 17,
+                type: "mcq",
+                topic: "ملقحات الأزهار",
+                text: "أي زهرة هي الأنسب للتلقيح بواسطة الحشرات؟",
+                options: [
+                    { id: 'a', text: "أ) زهرة بلا بتلات وحبوب لقاح خفيفة في مهب الريح" },
+                    { id: 'b', text: "ب) زهرة زاهية اللون، لها بتلات كبيرة ورائحة زكية" },
+                    { id: 'c', text: "ج) زهرة ذات طبقة إسفنجية تساعدها على الطفو" },
+                    { id: 'd', text: "د) زهرة تنفجر لتطلق بذورها بعيدًا" }
+                ],
+                correct: 'b',
+                explanation: "الأزهار زاهية الألوان وذات العطر الفواح مخصصة لجذب الحشرات الملقحة كالنحل والفراشات."
+            },
+            {
+                id: 18,
+                type: "mcq",
+                topic: "استقصاء الملقحات",
+                text: "زهرة تمتلك رائحة تشبه رائحة اللحم المتعفن كما ورد في محتوى الوحدة. أي ملقح يُعد مناسبًا بصورة أكبر لها؟",
+                options: [
+                    { id: 'a', text: "أ) النحل" },
+                    { id: 'b', text: "ب) الطيور الطنانة" },
+                    { id: 'c', text: "ج) الذباب" },
+                    { id: 'd', text: "د) الماء الجاري" }
+                ],
+                correct: 'c',
+                explanation: "تنجذب بعض الحشرات كالذباب إلى الأزهار ذات روائح اللحم المتعفن لتلقيحها."
+            },
+            {
+                id: 19,
+                type: "tf",
+                topic: "دورة حياة النبات",
+                text: "النباتات الحولية هي النباتات التي تكمل دورة حياتها في عام واحد، بينما النباتات المعمرة تعيش لعدة أعوام وتزهر وتثمر سنوياً.",
+                options: [
+                    { id: 'true', text: "صح" },
+                    { id: 'false', text: "خطأ" }
+                ],
+                correct: 'true',
+                explanation: "عبارة صحيحة تماماً وفق تصنيف النباتات في منهج كامبردج (الحولية والمعمرة)."
+            },
+            {
+                id: 20,
+                type: "matching",
+                topic: "دورة حياة النبات",
+                text: "صل مرحلة دورة حياة النبات بما يناسبها من أحداث:",
+                pairs: [
+                    { leftId: '1', leftText: "البذرة", rightId: 'c', rightText: "تبدأ بالإنبات في توفر الماء والحرارة" },
+                    { leftId: '2', leftText: "النبات الصغير", rightId: 'd', rightText: "ينمو وتتطور أوراقه وساقه وجذوره" },
+                    { leftId: '3', leftText: "الزهرة", rightId: 'a', rightText: "تتم فيها عمليتا التلقيح والإخصاب" },
+                    { leftId: '4', leftText: "الثمرة وبداخلها بذور", rightId: 'b', rightText: "تنتشر البذور لتبدأ دورة جديدة" }
+                ],
+                correctMatches: { '1': 'c', '2': 'd', '3': 'a', '4': 'b' },
+                explanation: "دورة حياة النبات حلقة مستمرة تتكامل فيها مراحل البذرة، النمو، الإزهار، والإثمار والانتشار."
+            }
+        ];
+
+        let gameState = {
+            gameMode: "single",
+            playerName: "أبطال الخامس",
+            teamsList: [],
+            currentTeamIndex: 0,
+            teamScores: {},
+            currentQuestionIndex: 0,
+            playerScore: 0,
+            aiScore: 0,
+            questions: [],
+            userAnswers: {},
+            timerInterval: null,
+            timeLeft: 30,
+            isAnswerConfirmed: false,
+            matchingState: {}, 
+            orderingState: {}
+        };
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function toggleTeamInputs() {
+            const mode = document.getElementById('game-mode-select').value;
+            if (mode === 'multi') {
+                document.getElementById('single-name-box').classList.add('hidden');
+                document.getElementById('multi-teams-box').classList.remove('hidden');
+            } else {
+                document.getElementById('single-name-box').classList.remove('hidden');
+                document.getElementById('multi-teams-box').classList.add('hidden');
+            }
+        }
+
+        function startGame() {
+            gameState.gameMode = document.getElementById('game-mode-select').value;
+            
+            if (gameState.gameMode === 'multi') {
+                const teamsInput = document.getElementById('multi-teams-input').value.trim();
+                gameState.teamsList = teamsInput ? teamsInput.split(',').map(t => t.trim()).filter(t => t.length > 0) : ["فريق أ", "فريق ب"];
+                gameState.currentTeamIndex = 0;
+                gameState.teamScores = {};
+                gameState.teamsList.forEach(t => gameState.teamScores[t] = 0);
+                gameState.playerName = gameState.teamsList[0];
+            } else {
+                const nameInput = document.getElementById('player-name-input').value.trim();
+                if (nameInput) {
+                    gameState.playerName = nameInput;
+                }
+                gameState.teamsList = [];
+                gameState.teamScores = {};
+            }
+
+            document.getElementById('display-player-name').textContent = gameState.playerName;
+            document.getElementById('final-player-name').textContent = gameState.playerName;
+            
+            gameState.currentQuestionIndex = 0;
+            gameState.playerScore = 0;
+            gameState.aiScore = 0;
+            gameState.userAnswers = {};
+            gameState.matchingState = {};
+            gameState.orderingState = {};
+
+            gameState.questions = JSON.parse(JSON.stringify(masterQuestions));
+            
+            gameState.questions.forEach(q => {
+                if (q.type === 'mcq') {
+                    shuffleArray(q.options);
+                }
+            });
+
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentQuestionIndex >= gameState.questions.length) {
+                endGame();
+                return;
+            }
+
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            gameState.isAnswerConfirmed = false;
+
+            document.getElementById('question-counter').textContent = `السؤال ${gameState.currentQuestionIndex + 1} من 20`;
+            
+            if (gameState.gameMode === 'multi') {
+                const currentTeam = gameState.teamsList[gameState.currentTeamIndex];
+                gameState.playerName = currentTeam;
+                document.getElementById('display-player-name').textContent = currentTeam;
+                document.getElementById('display-turn-info').textContent = `دور الفريق: ${currentTeam}`;
+                document.getElementById('player-score').textContent = gameState.teamScores[currentTeam];
+                document.getElementById('ai-score').textContent = "-";
+            } else {
+                document.getElementById('display-player-name').textContent = gameState.playerName;
+                document.getElementById('display-turn-info').textContent = "الفريق المضيف";
+                document.getElementById('player-score').textContent = gameState.playerScore;
+                document.getElementById('ai-score').textContent = gameState.aiScore;
+            }
+
+            let typeBadgeText = "اختيار من متعدد";
+            if (q.type === 'tf') typeBadgeText = "صح أو خطأ";
+            else if (q.type === 'ordering') typeBadgeText = "ترتيب مراحل";
+            else if (q.type === 'matching') typeBadgeText = "توصيل علمي";
+            document.getElementById('question-type-badge').textContent = typeBadgeText;
+
+            document.getElementById('question-text').textContent = q.text;
+
+            const extraContainer = document.getElementById('question-extra-content');
+            extraContainer.innerHTML = q.extraHtml ? q.extraHtml : '';
+
+            const answersContainer = document.getElementById('answers-container');
+            answersContainer.innerHTML = '';
+
+            if (q.type === 'mcq' || q.type === 'tf') {
+                answersContainer.className = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "answer-option p-4 rounded-xl bg-slate-800/90 border border-slate-700 text-right text-slate-200 font-semibold hover:border-emerald-500 hover:bg-slate-800 transition flex items-center justify-between group";
+                    btn.innerHTML = `<span>${opt.text}</span> <i class="fa-regular fa-circle text-slate-500 group-hover:text-emerald-400"></i>`;
+                    btn.onclick = () => selectMcqOption(opt.id, btn);
+                    answersContainer.appendChild(btn);
+                });
+            } 
+            else if (q.type === 'ordering') {
+                answersContainer.className = "flex flex-col gap-2";
+                if (!gameState.orderingState[q.id]) {
+                    let shuffledItems = [...q.items];
+                    shuffleArray(shuffledItems);
+                    gameState.orderingState[q.id] = shuffledItems.map(item => item.id);
+                }
+                const currentOrderIds = gameState.orderingState[q.id];
+                
+                currentOrderIds.forEach((itemId, idx) => {
+                    const itemObj = q.items.find(i => i.id === itemId);
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between p-3 bg-slate-800 border border-slate-700 rounded-xl";
+                    div.innerHTML = `
+                        <span class="font-bold text-emerald-400">#${idx + 1}</span>
+                        <span class="text-slate-200 flex-grow mx-4">${itemObj.text}</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="moveOrderingItem('${q.id}', ${idx}, -1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center transition" ${idx === 0 ? 'disabled opacity-40' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                            <button onclick="moveOrderingItem('${q.id}', ${idx}, 1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center transition" ${idx === currentOrderIds.length - 1 ? 'disabled opacity-40' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                        </div>
+                    `;
+                    answersContainer.appendChild(div);
+                });
+            }
+            else if (q.type === 'matching') {
+                answersContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-4";
+                
+                if (!gameState.matchingState[q.id]) {
+                    let shuffledRight = [...q.pairs];
+                    shuffleArray(shuffledRight);
+                    gameState.matchingState[q.id] = {
+                        userPairs: {},
+                        selectedLeft: null,
+                        shuffledRight: shuffledRight
+                    };
+                }
+                const mState = gameState.matchingState[q.id];
+
+                const leftBox = document.createElement('div');
+                leftBox.className = "space-y-2 bg-slate-950/40 p-4 rounded-xl border border-slate-800";
+                leftBox.innerHTML = `<h4 class="text-xs font-bold text-emerald-400 mb-2">اختر العنصر:</h4>`;
+                
+                q.pairs.forEach(pair => {
+                    const isSelected = mState.selectedLeft === pair.leftId;
+                    const matchedRightId = mState.userPairs[pair.leftId];
+                    const btn = document.createElement('button');
+                    btn.className = `w-full p-3 rounded-xl border text-right transition flex items-center justify-between ${isSelected ? 'bg-emerald-600/30 border-emerald-500 text-white' : matchedRightId ? 'bg-teal-950/40 border-teal-600 text-teal-300' : 'bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-500'}`;
+                    btn.innerHTML = `<span>${pair.leftText}</span> ${matchedRightId ? '<span class="text-xs bg-teal-600 px-2 py-0.5 rounded text-white font-bold">تم التوصيل</span>' : ''}`;
+                    btn.onclick = () => selectMatchingLeft(q.id, pair.leftId);
+                    leftBox.appendChild(btn);
+                });
+
+                const rightBox = document.createElement('div');
+                rightBox.className = "space-y-2 bg-slate-950/40 p-4 rounded-xl border border-slate-800";
+                rightBox.innerHTML = `<h4 class="text-xs font-bold text-teal-400 mb-2">صل بالوصف المناسب:</h4>`;
+
+                mState.shuffledRight.forEach(pair => {
+                    let isMatchedKey = Object.keys(mState.userPairs).find(k => mState.userPairs[k] === pair.rightId);
+                    const btn = document.createElement('button');
+                    btn.className = `w-full p-3 rounded-xl border text-right transition flex items-center justify-between ${isMatchedKey ? 'bg-teal-950/40 border-teal-600 text-teal-300' : 'bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-500'}`;
+                    btn.innerHTML = `<span>${pair.rightText}</span> ${isMatchedKey ? '<span class="text-xs bg-emerald-600 px-2 py-0.5 rounded text-white font-bold">✓</span>' : ''}`;
+                    btn.onclick = () => selectMatchingRight(q.id, pair.rightId);
+                    rightBox.appendChild(btn);
+                });
+
+                answersContainer.appendChild(leftBox);
+                answersContainer.appendChild(rightBox);
+            }
+
+            document.getElementById('confirm-answer-btn').disabled = false;
+            document.getElementById('confirm-answer-btn').classList.remove('hidden');
+            document.getElementById('next-question-btn').classList.add('hidden');
+            document.getElementById('cancel-selection-btn').classList.remove('hidden');
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            document.getElementById('match-announcement').textContent = "⚽ الهجمة قائمة.. اختر الإجابة بدقة!";
+            document.getElementById('football-element').className = "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-slate-900 transition-all duration-700 z-20";
+
+            const timerMode = document.getElementById('timer-mode-select').value;
+            if (timerMode === 'timer') {
+                startTimer();
+            } else {
+                document.getElementById('timer-display').textContent = "مباراة بدون مؤقت";
+            }
+        }
+
+        let selectedOptionId = null;
+        function selectMcqOption(optId, btnElement) {
+            if (gameState.isAnswerConfirmed) return;
+            selectedOptionId = optId;
+
+            const allBtns = document.querySelectorAll('#answers-container button');
+            allBtns.forEach(b => {
+                b.classList.remove('border-emerald-500', 'bg-emerald-950/30');
+                b.classList.add('border-slate-700', 'bg-slate-800/90');
+                const icon = b.querySelector('i');
+                if (icon) {
+                    icon.className = "fa-regular fa-circle text-slate-500";
+                }
+            });
+
+            btnElement.classList.remove('border-slate-700', 'bg-slate-800/90');
+            btnElement.classList.add('border-emerald-500', 'bg-emerald-950/30');
+            const icon = btnElement.querySelector('i');
+            if (icon) {
+                icon.className = "fa-solid fa-circle-check text-emerald-400";
+            }
+        }
+
+        function moveOrderingItem(qId, index, direction) {
+            if (gameState.isAnswerConfirmed) return;
+            const orderList = gameState.orderingState[qId];
+            const targetIndex = index + direction;
+            if (targetIndex >= 0 && targetIndex < orderList.length) {
+                const temp = orderList[index];
+                orderList[index] = orderList[targetIndex];
+                orderList[targetIndex] = temp;
+                loadQuestion();
+            }
+        }
+
+        function selectMatchingLeft(qId, leftId) {
+            if (gameState.isAnswerConfirmed) return;
+            gameState.matchingState[qId].selectedLeft = leftId;
+            loadQuestion();
+        }
+
+        function selectMatchingRight(qId, rightId) {
+            if (gameState.isAnswerConfirmed) return;
+            const mState = gameState.matchingState[qId];
+            if (mState.selectedLeft) {
+                mState.userPairs[mState.selectedLeft] = rightId;
+                mState.selectedLeft = null;
+                loadQuestion();
+            }
+        }
+
+        function clearCurrentSelection() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            if (q.type === 'matching') {
+                const mState = gameState.matchingState[q.id];
+                const keys = Object.keys(mState.userPairs);
+                if (keys.length > 0) {
+                    delete mState.userPairs[keys[keys.length - 1]];
+                }
+                mState.selectedLeft = null;
+                loadQuestion();
+            } else if (q.type === 'mcq' || q.type === 'tf') {
+                selectedOptionId = null;
+                loadQuestion();
+            }
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timeLeft = 30;
+            document.getElementById('timer-display').textContent = `الوقت: ${gameState.timeLeft}ث`;
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('timer-display').textContent = `الوقت: ${gameState.timeLeft}ث`;
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    if (!gameState.isAnswerConfirmed) {
+                        autoFailOnTimeout();
+                    }
+                }
+            }, 1000);
+        }
+
+        function autoFailOnTimeout() {
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            processAnswerResult(false, "⚪ انتهى الوقت المخصص للهجمة! احتسبت كفرصة ضائعة وسجل المنافس هدفًا.");
+        }
+
+        function confirmAnswer() {
+            if (gameState.isAnswerConfirmed) return;
+            clearInterval(gameState.timerInterval);
+
+            const q = gameState.questions[gameState.currentQuestionIndex];
+            let isCorrect = false;
+
+            if (q.type === 'mcq' || q.type === 'tf') {
+                if (!selectedOptionId) {
+                    document.getElementById('match-announcement').textContent = "⚠️ الرجاء اختيار إجابة أولاً قبل التأكيد!";
+                    return;
+                }
+                isCorrect = (selectedOptionId === q.correct);
+            } 
+            else if (q.type === 'ordering') {
+                const currentOrder = gameState.orderingState[q.id];
+                isCorrect = JSON.stringify(currentOrder) === JSON.stringify(q.correctOrder);
+            }
+            else if (q.type === 'matching') {
+                const userPairs = gameState.matchingState[q.id].userPairs;
+                const correctPairs = q.correctMatches;
+                let totalPairs = Object.keys(correctPairs).length;
+                let allMatch = true;
+                
+                for (let k in correctPairs) {
+                    if (userPairs[k] !== correctPairs[k]) {
+                        allMatch = false;
+                    }
+                }
+                isCorrect = allMatch && (Object.keys(userPairs).length === totalPairs);
+            }
+
+            processAnswerResult(isCorrect, q.explanation);
+        }
+
+        function processAnswerResult(isCorrect, explanationText) {
+            gameState.isAnswerConfirmed = true;
+            selectedOptionId = null;
+
+            const ball = document.getElementById('football-element');
+            const announcement = document.getElementById('match-announcement');
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExplanation = document.getElementById('feedback-explanation');
+
+            if (isCorrect) {
+                if (gameState.gameMode === 'multi') {
+                    gameState.teamScores[gameState.playerName]++;
+                } else {
+                    gameState.playerScore++;
+                }
+                ball.classList.add('shooting-home');
+                announcement.textContent = "⚽ تسديدة متقنة.. هــــــــــــــــدف لصالحك!";
+                
+                feedbackBox.className = "rounded-2xl p-5 border bg-emerald-950/60 border-emerald-500/50 block";
+                feedbackTitle.className = "font-extrabold text-lg mb-2 flex items-center gap-2 text-emerald-400";
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> ⚽ هــــــــــــدف! إجابة علمية دقيقة!`;
+            } else {
+                if (gameState.gameMode === 'single') {
+                    gameState.aiScore++;
+                }
+                ball.classList.add('shooting-away');
+                announcement.textContent = "❌ خطأ علمي.. هجمة مرتدة وهدف للمنافس!";
+                
+                feedbackBox.className = "rounded-2xl p-5 border bg-rose-950/60 border-rose-500/50 block";
+                feedbackTitle.className = "font-extrabold text-lg mb-2 flex items-center gap-2 text-rose-400";
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ❌ لم تسجل الهدف! استفاد المنافس من الخطأ.`;
+            }
+
+            feedbackExplanation.textContent = explanationText;
+
+            if (gameState.gameMode === 'multi') {
+                document.getElementById('player-score').textContent = gameState.teamScores[gameState.playerName];
+            } else {
+                document.getElementById('player-score').textContent = gameState.playerScore;
+                document.getElementById('ai-score').textContent = gameState.aiScore;
+            }
+
+            document.getElementById('confirm-answer-btn').classList.add('hidden');
+            document.getElementById('cancel-selection-btn').classList.add('hidden');
+            document.getElementById('next-question-btn').classList.remove('hidden');
+
+            gameState.userAnswers[gameState.currentQuestionIndex] = {
+                question: gameState.questions[gameState.currentQuestionIndex].text,
+                isCorrect: isCorrect,
+                explanation: explanationText
+            };
+        }
+
+        function nextQuestion() {
+            if (gameState.gameMode === 'multi') {
+                gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teamsList.length;
+            }
+            gameState.currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').classList.add('hidden');
+            if (gameState.gameMode === 'single' && gameState.playerScore === gameState.aiScore) {
+                triggerPenaltyShootout();
+                return;
+            }
+            showGameOverScreen();
+        }
+
+        function triggerPenaltyShootout() {
+            const shootoutScreen = document.getElementById('penalty-shootout-screen');
+            const penaltyContent = document.getElementById('penalty-content');
+            shootoutScreen.classList.remove('hidden');
+
+            penaltyContent.innerHTML = `
+                <div class="bg-slate-800/80 p-6 rounded-2xl border border-amber-500/30 mb-4">
+                    <h3 class="font-bold text-white text-lg mb-2">ركلة ترجيح حاسمة:</h3>
+                    <p class="text-slate-200 mb-4">ما هو الجزء في الزهرة الذي ينتج حبوب اللقاح؟</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="penalty-options">
+                        <button onclick="checkPenalty('a')" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-right hover:border-amber-400 transition">أ) السبالت</button>
+                        <button onclick="checkPenalty('b')" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-right hover:border-amber-400 transition">ب) السداة (المتك)</button>
+                        <button onclick="checkPenalty('c')" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-right hover:border-amber-400 transition">ج) الميسم</button>
+                        <button onclick="checkPenalty('d')" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-right hover:border-amber-400 transition">د) البتلات</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkPenalty(choice) {
+            document.getElementById('penalty-shootout-screen').classList.add('hidden');
+            if (choice === 'b') {
+                gameState.playerScore++;
+            } else {
+                gameState.aiScore++;
+            }
+            showGameOverScreen();
+        }
+
+        function showGameOverScreen() {
+            const gameOverScreen = document.getElementById('game-over-screen');
+            gameOverScreen.classList.remove('hidden');
+
+            if (gameState.gameMode === 'multi') {
+                let bestTeam = "";
+                let maxGoals = -1;
+                for (let team in gameState.teamScores) {
+                    if (gameState.teamScores[team] > maxGoals) {
+                        maxGoals = gameState.teamScores[team];
+                        bestTeam = team;
+                    }
+                }
+                document.getElementById('final-player-name').textContent = `الفريق الفائز: ${bestTeam}`;
+                document.getElementById('final-player-score').textContent = maxGoals + " ⚽";
+                document.getElementById('final-ai-score').textContent = "منافسة جماعية";
+            } else {
+                document.getElementById('final-player-score').textContent = gameState.playerScore + " ⚽";
+                document.getElementById('final-ai-score').textContent = gameState.aiScore + " ⚽";
+            }
+
+            const titleEl = document.getElementById('game-over-title');
+            const subtitleEl = document.getElementById('game-over-subtitle');
+            const iconEl = document.getElementById('game-over-icon');
+
+            if (gameState.gameMode === 'multi' || gameState.playerScore > gameState.aiScore) {
+                titleEl.textContent = "🏆 بطل الملعب العلمي!";
+                subtitleEl.textContent = `تهانينا يا ${gameState.playerName}! لقد أتقنت مراجعة الوحدة الثانية بامتياز وتسجيل فوز مذهل!`;
+                iconEl.className = "fa-solid fa-trophy text-5xl text-amber-400 animate-bounce-slow";
+            } else if (gameState.playerScore === gameState.aiScore) {
+                titleEl.textContent = "🤝 مباراة متكافئة للغاية!";
+                subtitleEl.textContent = "أداء رائع ومتقارب بين الفريقين في مراجعة العلوم.";
+                iconEl.className = "fa-solid fa-handshake text-5xl text-teal-400 animate-bounce-slow";
+            } else {
+                titleEl.textContent = "💪 مباراة قوية!";
+                subtitleEl.textContent = "أداء طيب! يمكنك إعادة المباراة ومراجعة أسئلة الوحدة الثانية لتسجيل أهداف أكثر.";
+                iconEl.className = "fa-solid fa-medal text-5xl text-emerald-400 animate-bounce-slow";
+            }
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function goToWelcome() {
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+        }
+
+        function openReviewModal() {
+            const container = document.getElementById('review-list-container');
+            container.innerHTML = '';
+
+            gameState.questions.forEach((q, idx) => {
+                const userAns = gameState.userAnswers[idx];
+                const isCorrect = userAns ? userAns.isCorrect : false;
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-2xl border ${isCorrect ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-rose-950/20 border-rose-500/30'}`;
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-emerald-400">السؤال ${idx + 1} (${q.topic})</span>
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold ${isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
+                            ${isCorrect ? '✓ إجابة صحيحة (هدف)' : '✗ إجابة غير صائبة'}
+                        </span>
+                    </div>
+                    <p class="text-sm font-bold text-white mb-2">${q.text}</p>
+                    <p class="text-xs text-slate-300 bg-slate-950/40 p-3 rounded-xl border border-slate-800 leading-relaxed">
+                        <strong class="text-emerald-400">التفسير العلمي:</strong> ${q.explanation}
+                    </p>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('review-modal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
